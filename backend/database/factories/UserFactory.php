@@ -1,45 +1,64 @@
 <?php
+// database/factories/UserFactory.php
 
 namespace Database\Factories;
 
 use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Str;
 
-/**
- * @extends Factory<User>
- */
 class UserFactory extends Factory
 {
-    /**
-     * The current password being used by the factory.
-     */
-    protected static ?string $password;
+    protected $model = User::class;
 
-    /**
-     * Define the model's default state.
-     *
-     * @return array<string, mixed>
-     */
     public function definition(): array
     {
         return [
-            'name' => fake()->name(),
-            'email' => fake()->unique()->safeEmail(),
-            'email_verified_at' => now(),
-            'password' => static::$password ??= Hash::make('password'),
-            'remember_token' => Str::random(10),
+            'nombre' => $this->faker->firstName(),
+            'apellido' => $this->faker->lastName(),
+            'email' => $this->faker->unique()->safeEmail(),
+            'passwordHash' => Hash::make('password123'),
+            'telefono' => $this->faker->phoneNumber(),
+            'rol' => $this->faker->randomElement(['administrador', 'recepcionista', 'groomer', 'cliente']),
+            'activo' => true,
+            'creadoEn' => now(),
+            'created_at' => now(),
+            'updated_at' => now(),
         ];
     }
 
-    /**
-     * Indicate that the model's email address should be unverified.
-     */
-    public function unverified(): static
+    public function administrador(): static
     {
         return $this->state(fn (array $attributes) => [
-            'email_verified_at' => null,
+            'rol' => 'administrador',
+        ]);
+    }
+
+    public function recepcionista(): static
+    {
+        return $this->state(fn (array $attributes) => [
+            'rol' => 'recepcionista',
+        ]);
+    }
+
+    public function groomer(): static
+    {
+        return $this->state(fn (array $attributes) => [
+            'rol' => 'groomer',
+        ]);
+    }
+
+    public function cliente(): static
+    {
+        return $this->state(fn (array $attributes) => [
+            'rol' => 'cliente',
+        ]);
+    }
+
+    public function inactivo(): static
+    {
+        return $this->state(fn (array $attributes) => [
+            'activo' => false,
         ]);
     }
 }

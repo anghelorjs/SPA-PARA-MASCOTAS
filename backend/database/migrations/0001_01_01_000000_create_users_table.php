@@ -6,18 +6,18 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
-    /**
-     * Run the migrations.
-     */
     public function up(): void
     {
         Schema::create('users', function (Blueprint $table) {
-            $table->id();
-            $table->string('name');
+            $table->id('idUsuario');
+            $table->string('nombre');
+            $table->string('apellido');
             $table->string('email')->unique();
-            $table->timestamp('email_verified_at')->nullable();
-            $table->string('password');
-            $table->rememberToken();
+            $table->string('passwordHash');
+            $table->string('telefono')->nullable();
+            $table->enum('rol', ['administrador', 'recepcionista', 'groomer', 'cliente']);
+            $table->boolean('activo')->default(true);
+            $table->timestamp('creadoEn')->useCurrent();
             $table->timestamps();
         });
 
@@ -37,9 +37,6 @@ return new class extends Migration
         });
     }
 
-    /**
-     * Reverse the migrations.
-     */
     public function down(): void
     {
         Schema::dropIfExists('users');

@@ -88,9 +88,5 @@ class ProductoSeeder extends Seeder
             'stock' => 40
         ]);
 
-        // Generar más productos aleatorios
-        Producto::factory(10)->create()->each(function ($producto) {
-            VarianteProducto::factory(rand(1, 3))->create(['idProducto' => $producto->idProducto]);
-        });
     }
 }

@@ -57,7 +57,5 @@ class ReporteSeeder extends Seeder
             ]);
         }
         
-        // Generar reportes adicionales
-        Reporte::factory(10)->create();
     }
 }

@@ -15,13 +15,15 @@ class FichaGroomingFactory extends Factory
 
     public function definition(): array
     {
-        $fechaApertura = $this->faker->dateTimeBetween('-1 month', 'now');
+        $cita = Cita::inRandomOrder()->first() ?? Cita::factory(); // ✅ reutiliza existente
+        
+        $fechaApertura = $cita->fechaHoraInicio ?? $this->faker->dateTimeBetween('-1 month', 'now');
         $fechaCierre = $this->faker->optional(0.7)->dateTimeBetween($fechaApertura, '+2 hours');
         
         return [
-            'idCita' => Cita::factory(),
-            'idGroomer' => Groomer::factory(),
-            'idMascota' => Mascota::factory(),
+            'idCita' => $cita->idCita,
+            'idGroomer' => $cita->idGroomer, // ✅ usa el groomer de la cita
+            'idMascota' => $cita->idMascota, // ✅ usa la mascota de la cita
             'estadoIngreso' => $this->faker->optional()->sentence(),
             'nudos' => $this->faker->boolean(30),
             'tienePulgas' => $this->faker->boolean(20),

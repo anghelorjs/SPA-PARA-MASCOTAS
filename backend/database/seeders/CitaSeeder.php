@@ -29,7 +29,5 @@ class CitaSeeder extends Seeder
             }
         }
 
-        // Crear 50 citas de prueba
-        Cita::factory(50)->create();
     }
 }

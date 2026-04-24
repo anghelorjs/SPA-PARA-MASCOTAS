@@ -8,6 +8,7 @@ use App\Models\DetalleVenta;
 use App\Models\Factura;
 use App\Models\Pago;
 use App\Models\Cliente;
+use App\Models\Recepcionista;
 use App\Models\VarianteProducto;
 use Illuminate\Database\Seeder;
 
@@ -15,17 +16,32 @@ class VentaSeeder extends Seeder
 {
     public function run(): void
     {
-        // Crear ventas para clientes existentes
+        // Obtener IDs reales de recepcionistas
+        $recepcionistaIds = Recepcionista::pluck('idRecepcionista')->toArray();
+        
+        // Si no hay recepcionistas, mostrar error
+        if (empty($recepcionistaIds)) {
+            $this->command->error('No hay recepcionistas en la base de datos. Ejecuta UserSeeder primero.');
+            return;
+        }
+        
+        // Obtener clientes y variantes
         $clientes = Cliente::all();
         $variantes = VarianteProducto::all();
+        
+        if ($clientes->isEmpty() || $variantes->isEmpty()) {
+            $this->command->error('No hay clientes o variantes de productos.');
+            return;
+        }
         
         foreach ($clientes as $cliente) {
             // 2-5 ventas por cliente
             for ($i = 0; $i < rand(2, 5); $i++) {
                 $total = 0;
+                
                 $venta = Venta::create([
                     'idCliente' => $cliente->idCliente,
-                    'idRecepcionista' => rand(1, 2),
+                    'idRecepcionista' => $recepcionistaIds[array_rand($recepcionistaIds)], // ✅ usar ID real
                     'fecha' => now()->subDays(rand(1, 90)),
                     'total' => 0,
                     'medioPago' => ['efectivo', 'qr', 'transferencia'][rand(0, 2)],
@@ -75,26 +91,5 @@ class VentaSeeder extends Seeder
             }
         }
         
-        // Generar ventas adicionales con factory
-        Venta::factory(30)->create()->each(function ($venta) {
-            $variantes = VarianteProducto::inRandomOrder()->limit(rand(1, 4))->get();
-            $total = 0;
-            
-            foreach ($variantes as $variante) {
-                $cantidad = rand(1, 3);
-                $subtotal = $cantidad * $variante->precio;
-                $total += $subtotal;
-                
-                DetalleVenta::create([
-                    'idVenta' => $venta->idVenta,
-                    'idVariante' => $variante->idVariante,
-                    'cantidad' => $cantidad,
-                    'precioUnitario' => $variante->precio,
-                    'subtotal' => $subtotal,
-                ]);
-            }
-            
-            $venta->update(['total' => $total]);
-        });
     }
 }

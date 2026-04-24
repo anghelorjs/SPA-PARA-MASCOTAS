@@ -48,25 +48,5 @@ class PedidoWhatsappSeeder extends Seeder
             }
         }
         
-        // Generar pedidos adicionales
-        PedidoWhatsapp::factory(20)->create()->each(function ($pedido) {
-            $variantes = VarianteProducto::inRandomOrder()->limit(rand(1, 4))->get();
-            $subtotal = 0;
-            
-            foreach ($variantes as $variante) {
-                $cantidad = rand(1, 3);
-                $subtotal += $cantidad * $variante->precio;
-                
-                ItemPedido::create([
-                    'idPedido' => $pedido->idPedido,
-                    'idVariante' => $variante->idVariante,
-                    'cantidad' => $cantidad,
-                    'precioUnitario' => $variante->precio,
-                ]);
-            }
-            
-            $pedido->update(['subtotal' => $subtotal]);
-            $pedido->generarMensajeWhatsapp();
-        });
     }
 }

@@ -51,7 +51,5 @@ class NotificacionSeeder extends Seeder
             ]);
         }
         
-        // Generar notificaciones adicionales
-        Notificacion::factory(50)->create();
     }
 }

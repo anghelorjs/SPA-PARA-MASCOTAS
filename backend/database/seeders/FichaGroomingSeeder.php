@@ -5,7 +5,6 @@ namespace Database\Seeders;
 
 use App\Models\FichaGrooming;
 use App\Models\ChecklistItem;
-use App\Models\DetalleInsumo;
 use App\Models\Foto;
 use App\Models\Cita;
 use Illuminate\Database\Seeder;
@@ -14,10 +13,20 @@ class FichaGroomingSeeder extends Seeder
 {
     public function run(): void
     {
-        // Crear fichas solo para citas completadas
+        // Crear fichas SOLO para citas completadas (no usar factory)
         $citasCompletadas = Cita::where('estado', 'completada')->get();
         
+        if ($citasCompletadas->count() === 0) {
+            // Si no hay citas completadas, tomar algunas citas programadas
+            $citasCompletadas = Cita::take(10)->get();
+        }
+        
         foreach ($citasCompletadas as $cita) {
+            // Verificar si ya existe una ficha para esta cita
+            if (FichaGrooming::where('idCita', $cita->idCita)->exists()) {
+                continue;
+            }
+            
             $ficha = FichaGrooming::create([
                 'idCita' => $cita->idCita,
                 'idGroomer' => $cita->idGroomer,
@@ -43,29 +52,26 @@ class FichaGroomingSeeder extends Seeder
                 ]);
             }
             
-            // Crear fotos
-            Foto::create([
-                'idMascota' => $cita->idMascota,
-                'idFicha' => $ficha->idFicha,
-                'urlFoto' => 'https://example.com/photos/antes.jpg',
-                'tipo' => 'antes',
-                'fechaCarga' => $cita->fechaHoraInicio,
-            ]);
+            // Crear fotos (opcional)
+            if (rand(0, 1)) {
+                Foto::create([
+                    'idMascota' => $cita->idMascota,
+                    'idFicha' => $ficha->idFicha,
+                    'urlFoto' => 'https://example.com/photos/antes.jpg',
+                    'tipo' => 'antes',
+                    'fechaCarga' => $cita->fechaHoraInicio,
+                ]);
+            }
             
-            Foto::create([
-                'idMascota' => $cita->idMascota,
-                'idFicha' => $ficha->idFicha,
-                'urlFoto' => 'https://example.com/photos/despues.jpg',
-                'tipo' => 'despues',
-                'fechaCarga' => $cita->fechaHoraFin,
-            ]);
+            if (rand(0, 1)) {
+                Foto::create([
+                    'idMascota' => $cita->idMascota,
+                    'idFicha' => $ficha->idFicha,
+                    'urlFoto' => 'https://example.com/photos/despues.jpg',
+                    'tipo' => 'despues',
+                    'fechaCarga' => $cita->fechaHoraFin,
+                ]);
+            }
         }
-        
-        // Generar fichas adicionales con factory
-        FichaGrooming::factory(20)->create()->each(function ($ficha) {
-            ChecklistItem::factory(rand(3, 6))->create(['idFicha' => $ficha->idFicha]);
-            DetalleInsumo::factory(rand(1, 3))->create(['idFicha' => $ficha->idFicha]);
-            Foto::factory(rand(1, 3))->create(['idFicha' => $ficha->idFicha]);
-        });
     }
 }

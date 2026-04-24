@@ -15,8 +15,8 @@ class VentaFactory extends Factory
     public function definition(): array
     {
         return [
-            'idCliente' => Cliente::factory(),
-            'idRecepcionista' => Recepcionista::factory(),
+            'idCliente' => Cliente::inRandomOrder()->first() ?? Cliente::factory(), // ✅ reutiliza existente
+            'idRecepcionista' => Recepcionista::inRandomOrder()->first() ?? Recepcionista::factory(), // ✅ reutiliza existente
             'fecha' => $this->faker->dateTimeBetween('-3 months', 'now'),
             'total' => $this->faker->randomFloat(2, 50, 1000),
             'medioPago' => $this->faker->randomElement(['efectivo', 'qr', 'transferencia']),

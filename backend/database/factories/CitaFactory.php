@@ -21,10 +21,10 @@ class CitaFactory extends Factory
         $fechaFin = (clone $fechaInicio)->modify("+{$duracion} minutes");
         
         return [
-            'idMascota' => Mascota::factory(),
-            'idGroomer' => Groomer::factory(),
-            'idServicio' => Servicio::factory(),
-            'idRecepcionista' => Recepcionista::factory(),
+            'idMascota' => Mascota::inRandomOrder()->first() ?? Mascota::factory(), // ✅ reutiliza existente
+            'idGroomer' => Groomer::inRandomOrder()->first() ?? Groomer::factory(), // ✅ reutiliza existente
+            'idServicio' => Servicio::inRandomOrder()->first() ?? Servicio::factory(), // ✅ reutiliza existente
+            'idRecepcionista' => Recepcionista::inRandomOrder()->first() ?? Recepcionista::factory(), // ✅ reutiliza existente
             'fechaHoraInicio' => $fechaInicio,
             'fechaHoraFin' => $fechaFin,
             'duracionCalculadaMin' => $duracion,

@@ -1,5 +1,5 @@
 <?php
-// database/seeders/UserSeeder.php
+// database/seeders/UserSeeder.php - VERSIÓN OPTIMIZADA
 
 namespace Database\Seeders;
 
@@ -16,7 +16,7 @@ class UserSeeder extends Seeder
 {
     public function run(): void
     {
-        // Usuario Administrador
+        // 1. Usuario Administrador
         $adminUser = User::create([
             'nombre' => 'Admin',
             'apellido' => 'Sistema',
@@ -28,7 +28,7 @@ class UserSeeder extends Seeder
         ]);
         Administrador::create(['idUsuario' => $adminUser->idUsuario]);
 
-        // Usuario Recepcionista
+        // 2. Usuario Recepcionista
         $recepcionistaUser = User::create([
             'nombre' => 'Ana',
             'apellido' => 'García',
@@ -43,23 +43,39 @@ class UserSeeder extends Seeder
             'turno' => 'matutino'
         ]);
 
-        // Usuario Groomer
-        $groomerUser = User::create([
+        // 3. Usuario Groomer 1
+        $groomerUser1 = User::create([
             'nombre' => 'Carlos',
             'apellido' => 'López',
-            'email' => 'groomer@spamascotas.com',
+            'email' => 'groomer1@spamascotas.com',
             'passwordHash' => Hash::make('groomer123'),
             'telefono' => '555123456',
             'rol' => 'groomer',
             'activo' => true,
         ]);
         Groomer::create([
-            'idUsuario' => $groomerUser->idUsuario,
-            'especialidad' => 'Perros y gatos',
+            'idUsuario' => $groomerUser1->idUsuario,
+            'especialidad' => 'Perros',
             'maxServiciosSimultaneos' => 2
         ]);
 
-        // Usuario Cliente 1
+        // 4. Usuario Groomer 2
+        $groomerUser2 = User::create([
+            'nombre' => 'María',
+            'apellido' => 'Fernández',
+            'email' => 'groomer2@spamascotas.com',
+            'passwordHash' => Hash::make('groomer123'),
+            'telefono' => '555789012',
+            'rol' => 'groomer',
+            'activo' => true,
+        ]);
+        Groomer::create([
+            'idUsuario' => $groomerUser2->idUsuario,
+            'especialidad' => 'Gatos y perros pequeños',
+            'maxServiciosSimultaneos' => 1
+        ]);
+
+        // 5. Usuario Cliente 1
         $clienteUser1 = User::create([
             'nombre' => 'María',
             'apellido' => 'Rodríguez',
@@ -76,7 +92,6 @@ class UserSeeder extends Seeder
             'canalContacto' => 'whatsapp'
         ]);
 
-        // Mascotas para Cliente 1
         Mascota::create([
             'idCliente' => $cliente1->idCliente,
             'nombre' => 'Luna',
@@ -86,26 +101,10 @@ class UserSeeder extends Seeder
             'pesoKg' => 28.5,
             'fechaNacimiento' => '2020-05-15',
             'temperamento' => 'Juguetón',
-            'alergias' => null,
-            'restricciones' => null,
             'vacunas' => json_encode(['Rabia', 'Parvovirus'])
         ]);
 
-        Mascota::create([
-            'idCliente' => $cliente1->idCliente,
-            'nombre' => 'Simba',
-            'especie' => 'gato',
-            'raza' => 'Siamés',
-            'tamanio' => 'mediano',
-            'pesoKg' => 4.2,
-            'fechaNacimiento' => '2021-08-22',
-            'temperamento' => 'Tranquilo',
-            'alergias' => 'Polen',
-            'restricciones' => null,
-            'vacunas' => json_encode(['Rabia', 'Leucemia felina'])
-        ]);
-
-        // Usuario Cliente 2
+        // 6. Usuario Cliente 2
         $clienteUser2 = User::create([
             'nombre' => 'Pedro',
             'apellido' => 'Martínez',
@@ -131,14 +130,8 @@ class UserSeeder extends Seeder
             'pesoKg' => 12.3,
             'fechaNacimiento' => '2019-11-10',
             'temperamento' => 'Travieso',
-            'alergias' => 'Alimentos',
-            'restricciones' => 'No dar huesos',
-            'vacunas' => json_encode(['Rabia', 'Moquillo', 'Hepatitis'])
+            'vacunas' => json_encode(['Rabia', 'Moquillo'])
         ]);
 
-        // Generar 20 clientes adicionales con Factories
-        Cliente::factory(20)->create()->each(function ($cliente) {
-            Mascota::factory(rand(1, 3))->create(['idCliente' => $cliente->idCliente]);
-        });
     }
 }

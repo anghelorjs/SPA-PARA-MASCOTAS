@@ -21,6 +21,7 @@ class DatabaseSeeder extends Seeder
             PedidoWhatsappSeeder::class,
             NotificacionSeeder::class,
             ReporteSeeder::class,
+            InsumoSeeder::class, 
         ]);
     }
 }

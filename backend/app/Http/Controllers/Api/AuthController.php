@@ -114,9 +114,22 @@ class AuthController extends ApiController
      */
     public function logout(Request $request)
     {
-        $request->user()->currentAccessToken()->delete();
-
-        return $this->successResponse(null, 'Sesión cerrada exitosamente');
+        try {
+            // Verificar que el usuario está autenticado
+            $user = $request->user();
+            
+            if (!$user) {
+                return $this->errorResponse('No autenticado', 401);
+            }
+            
+            // Eliminar el token actual
+            $user->currentAccessToken()->delete();
+            
+            return $this->successResponse(null, 'Sesión cerrada exitosamente');
+            
+        } catch (\Exception $e) {
+            return $this->errorResponse('Error al cerrar sesión: ' . $e->getMessage(), 500);
+        }
     }
 
     /**

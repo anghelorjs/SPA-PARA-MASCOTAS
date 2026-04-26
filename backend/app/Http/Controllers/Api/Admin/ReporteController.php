@@ -76,8 +76,8 @@ class ReporteController extends ApiController
             ];
         })->values();
         
-        // Guardar reporte
-        $this->guardarReporte('agenda', $request->fecha_desde, $request->fecha_hasta, $request->groomer_id);
+        // Guardar reporte - Pasar el usuario autenticado
+        $this->guardarReporte('agenda', $request->fecha_desde, $request->fecha_hasta, $request->user(), $request->groomer_id);
         
         return $this->successResponse([
             'citas' => $citas,
@@ -156,8 +156,8 @@ class ReporteController extends ApiController
             ];
         });
         
-        // Guardar reporte
-        $this->guardarReporte('ingresos', $request->fecha_desde, $request->fecha_hasta);
+        // Guardar reporte - Pasar el usuario autenticado
+        $this->guardarReporte('ingresos', $request->fecha_desde, $request->fecha_hasta, $request->user());
         
         return $this->successResponse([
             'resumen' => [
@@ -187,7 +187,7 @@ class ReporteController extends ApiController
         // Productos y su stock
         $productos = Producto::with('variantes')->get()->map(function($producto) {
             $stockTotal = $producto->variantes->sum('stock');
-            $stockMinimo = 5; // Configurable
+            $stockMinimo = 5;
             return [
                 'idProducto' => $producto->idProducto,
                 'nombre' => $producto->nombre,
@@ -235,8 +235,8 @@ class ReporteController extends ApiController
                 ->get();
         }
         
-        // Guardar reporte
-        $this->guardarReporte('inventario', $request->fecha_desde, $request->fecha_hasta);
+        // Guardar reporte - Pasar el usuario autenticado
+        $this->guardarReporte('inventario', $request->fecha_desde, $request->fecha_hasta, $request->user());
         
         return $this->successResponse([
             'productos' => $productos,
@@ -318,8 +318,8 @@ class ReporteController extends ApiController
                 ];
             });
         
-        // Guardar reporte
-        $this->guardarReporte('clientes', $request->fecha_desde, $request->fecha_hasta);
+        // Guardar reporte - Pasar el usuario autenticado
+        $this->guardarReporte('clientes', $request->fecha_desde, $request->fecha_hasta, $request->user());
         
         return $this->successResponse([
             'top_clientes' => $topClientes,
@@ -333,22 +333,31 @@ class ReporteController extends ApiController
     /**
      * Guardar reporte generado
      */
-    private function guardarReporte($tipo, $fechaDesde, $fechaHasta, $groomerId = null)
+    private function guardarReporte($tipo, $fechaDesde, $fechaHasta, $user, $groomerId = null)
     {
-        $user = auth()->guard('api')->user();
-        
-        if (!$user || !$user->administrador) {
-            return;
+        try {
+            // Validar que el usuario existe y es administrador
+            if (!$user) {
+                return;
+            }
+            
+            if (!$user->administrador) {
+                return;
+            }
+            
+            Reporte::create([
+                'idAdministrador' => $user->administrador->idAdministrador,
+                'tipoReporte' => $tipo,
+                'fechaDesde' => $fechaDesde,
+                'fechaHasta' => $fechaHasta,
+                'idGroomerFiltro' => $groomerId,
+                'generadoEn' => now(),
+                'resultadoJson' => null
+            ]);
+            
+        } catch (\Exception $e) {
+            // No detener la ejecución si falla el guardado del reporte
+            
         }
-        
-        Reporte::create([
-            'idAdministrador' => $user->administrador->idAdministrador,
-            'tipoReporte' => $tipo,
-            'fechaDesde' => $fechaDesde,
-            'fechaHasta' => $fechaHasta,
-            'idGroomerFiltro' => $groomerId,
-            'generadoEn' => now(),
-            'resultadoJson' => null
-        ]);
     }
 }

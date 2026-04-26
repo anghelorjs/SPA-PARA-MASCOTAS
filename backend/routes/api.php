@@ -1,5 +1,4 @@
 <?php
-// routes/api.php - Agregar después de las rutas existentes
 
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\AuthController;
@@ -13,12 +12,17 @@ use App\Http\Controllers\Api\Admin\ReporteController;
 use App\Http\Controllers\Api\Admin\ConfiguracionController;
 use App\Http\Controllers\Api\Admin\PerfilController;
 
-// Rutas públicas
+// ==================== RUTAS PÚBLICAS ====================
 Route::post('login', [AuthController::class, 'login']);
 Route::post('register', [AuthController::class, 'register']);
 
-// Rutas protegidas (requieren autenticación)
+// ==================== RUTAS PROTEGIDAS (requieren autenticación) ====================
 Route::middleware('auth:sanctum')->group(function () {
+    
+    // ==================== AUTENTICACIÓN ====================
+    Route::post('logout', [AuthController::class, 'logout']);
+    Route::get('me', [AuthController::class, 'me']);
+    Route::post('change-password', [AuthController::class, 'changePassword']);
     
     // ==================== ADMINISTRADOR ====================
     Route::prefix('admin')->middleware('role:administrador')->group(function () {

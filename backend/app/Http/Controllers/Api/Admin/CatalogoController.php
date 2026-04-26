@@ -505,6 +505,7 @@ class CatalogoController extends ApiController
             'idProducto' => 'required|exists:productos,idProducto',
             'tipoMovimiento' => 'required|in:entrada,salida,ajuste',
             'cantidad' => 'required|integer|min:1',
+            'variante_id' => 'required|exists:variante_productos,idVariante', // ← Agregar: especificar qué variante
             'motivo' => 'required|string'
         ]);
 
@@ -517,14 +518,21 @@ class CatalogoController extends ApiController
                 'motivo' => $request->motivo
             ]);
             
-            // Actualizar stock del producto
-            $producto = Producto::find($request->idProducto);
+            // Actualizar stock de la VARIANTE, no del producto
+            $variante = VarianteProducto::find($request->variante_id);
+            
             if ($request->tipoMovimiento === 'entrada') {
-                $producto->stock += $request->cantidad;
+                $variante->stock += $request->cantidad;
             } else {
-                $producto->stock -= $request->cantidad;
+                $variante->stock -= $request->cantidad;
             }
-            $producto->save();
+            
+            // Validar que no quede negativo
+            if ($variante->stock < 0) {
+                return $this->errorResponse('No se puede tener stock negativo', 400);
+            }
+            
+            $variante->save();
             
             return $this->successResponse($movimiento, 'Movimiento registrado correctamente', 201);
             

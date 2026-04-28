@@ -22,7 +22,6 @@ Route::middleware('auth:sanctum')->group(function () {
     // ==================== AUTENTICACIÓN ====================
     Route::post('logout', [AuthController::class, 'logout']);
     Route::get('me', [AuthController::class, 'me']);
-    Route::post('change-password', [AuthController::class, 'changePassword']);
     
     // ==================== ADMINISTRADOR ====================
     Route::prefix('admin')->middleware('role:administrador')->group(function () {

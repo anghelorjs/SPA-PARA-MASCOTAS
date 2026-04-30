@@ -158,4 +158,25 @@ class AuthController extends ApiController
         return $this->successResponse($user, 'Usuario obtenido correctamente');
     }
 
+    /**
+     * Cambiar contraseña
+     */
+    public function changePassword(Request $request)
+    {
+        $request->validate([
+            'current_password' => 'required|string',
+            'new_password' => 'required|string|min:6',
+        ]);
+
+        $user = $request->user();
+
+        if (!Hash::check($request->current_password, $user->passwordHash)) {
+            return $this->errorResponse('Contraseña actual incorrecta', 401);
+        }
+
+        $user->passwordHash = Hash::make($request->new_password);
+        $user->save();
+
+        return $this->successResponse(null, 'Contraseña actualizada correctamente');
+    }
 }

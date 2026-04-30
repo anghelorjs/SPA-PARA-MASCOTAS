@@ -44,17 +44,39 @@ class Servicio extends Model
         return $this->hasMany(Cita::class, 'idServicio', 'idServicio');
     }
 
-    // Obtener precio ajustado por rango de peso
+    /**
+     * Obtener precio ajustado por rango de peso
+     */
     public function getPrecioForRango($idRango)
     {
-        $servicioRango = $this->rangosPeso()->where('idRango', $idRango)->first();
+        // Si no hay rango, devolver precio base
+        if (!$idRango) {
+            return $this->precioBase;
+        }
+        
+        // Especificar la tabla para evitar ambigüedad
+        $servicioRango = $this->rangosPeso()
+            ->where('servicio_rango.idRango', $idRango)  // ← Especificar tabla
+            ->first();
+            
         return $servicioRango ? $servicioRango->pivot->precioAjustado : $this->precioBase;
     }
 
-    // Obtener duración ajustada por rango de peso
+    /**
+     * Obtener duración ajustada por rango de peso
+     */
     public function getDuracionForRango($idRango)
     {
-        $servicioRango = $this->rangosPeso()->where('idRango', $idRango)->first();
+        // Si no hay rango, devolver duración base
+        if (!$idRango) {
+            return $this->duracionMinutos;
+        }
+        
+        // Especificar la tabla para evitar ambigüedad
+        $servicioRango = $this->rangosPeso()
+            ->where('servicio_rango.idRango', $idRango)  // ← Especificar tabla
+            ->first();
+            
         return $servicioRango ? $servicioRango->pivot->duracionAjustadaMin : $this->duracionMinutos;
     }
 }

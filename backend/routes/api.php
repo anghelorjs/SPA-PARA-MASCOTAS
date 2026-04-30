@@ -3,6 +3,8 @@
 
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\AuthController;
+
+// ==================== ADMINISTRADOR ====================
 use App\Http\Controllers\Api\Admin\DashboardController;
 use App\Http\Controllers\Api\Admin\AgendaController;
 use App\Http\Controllers\Api\Admin\GestionClientesController;
@@ -20,6 +22,12 @@ use App\Http\Controllers\Api\Recepcionista\ClienteController as RecepcionistaCli
 use App\Http\Controllers\Api\Recepcionista\VentaController as RecepcionistaVentaController;
 use App\Http\Controllers\Api\Recepcionista\NotificacionController as RecepcionistaNotificacionController;
 use App\Http\Controllers\Api\Recepcionista\PerfilController as RecepcionistaPerfilController;
+
+// ==================== GROOMER ====================
+use App\Http\Controllers\Api\Groomer\DashboardController as GroomerDashboardController;
+use App\Http\Controllers\Api\Groomer\AgendaController as GroomerAgendaController;
+use App\Http\Controllers\Api\Groomer\FichaController as GroomerFichaController;
+use App\Http\Controllers\Api\Groomer\PerfilController as GroomerPerfilController;
 
 // ==================== RUTAS PÚBLICAS ====================
 Route::post('login', [AuthController::class, 'login']);
@@ -200,7 +208,49 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::put('perfil', [RecepcionistaPerfilController::class, 'update']);
         Route::post('perfil/password', [RecepcionistaPerfilController::class, 'updatePassword']);
         Route::get('perfil/resumen-dia', [RecepcionistaPerfilController::class, 'resumenDia']);
-
+    });
+    
+    // ==================== GROOMER ====================
+    Route::prefix('groomer')->middleware('role:groomer')->group(function () {
         
+        // Dashboard
+        Route::get('dashboard', [GroomerDashboardController::class, 'index']);
+        
+        // Mi Agenda
+        Route::get('agenda', [GroomerAgendaController::class, 'index']);
+        Route::post('agenda/{id}/iniciar', [GroomerAgendaController::class, 'iniciarServicio']);
+        Route::get('mascotas/{id}/historial', [GroomerAgendaController::class, 'historialMascota']);
+        
+        // Fichas
+        Route::get('fichas/hoy', [GroomerFichaController::class, 'hoy']);
+        Route::get('fichas/todas', [GroomerFichaController::class, 'todas']);
+        Route::get('fichas/{id}', [GroomerFichaController::class, 'show']);
+        
+        // Fichas - Estado de Ingreso
+        Route::put('fichas/{id}/estado-ingreso', [GroomerFichaController::class, 'updateEstadoIngreso']);
+        
+        // Fichas - Checklist
+        Route::get('checklist/predefinido', [GroomerFichaController::class, 'getChecklistPredefinido']);
+        Route::put('fichas/{id}/checklist', [GroomerFichaController::class, 'updateChecklist']);
+        
+        // Fichas - Insumos
+        Route::get('insumos/buscar', [GroomerFichaController::class, 'buscarInsumos']);
+        Route::post('fichas/{id}/insumos', [GroomerFichaController::class, 'agregarInsumo']);
+        Route::delete('fichas/{fichaId}/insumos/{detalleId}', [GroomerFichaController::class, 'eliminarInsumo']);
+        
+        // Fichas - Observaciones
+        Route::put('fichas/{id}/observaciones', [GroomerFichaController::class, 'updateObservaciones']);
+        
+        // Fichas - Fotos
+        Route::post('fichas/{id}/fotos', [GroomerFichaController::class, 'uploadFoto']);
+        Route::delete('fichas/{fichaId}/fotos/{fotoId}', [GroomerFichaController::class, 'deleteFoto']);
+        
+        // Fichas - Cerrar
+        Route::post('fichas/{id}/cerrar', [GroomerFichaController::class, 'cerrarFicha']);
+        
+        // Perfil
+        Route::get('perfil', [GroomerPerfilController::class, 'me']);
+        Route::put('perfil', [GroomerPerfilController::class, 'update']);
+        Route::post('perfil/password', [GroomerPerfilController::class, 'updatePassword']);
     });
 });

@@ -29,6 +29,14 @@ use App\Http\Controllers\Api\Groomer\AgendaController as GroomerAgendaController
 use App\Http\Controllers\Api\Groomer\FichaController as GroomerFichaController;
 use App\Http\Controllers\Api\Groomer\PerfilController as GroomerPerfilController;
 
+// ==================== CLIENTE ====================
+use App\Http\Controllers\Api\Cliente\DashboardController as ClienteDashboardController;
+use App\Http\Controllers\Api\Cliente\MascotaController as ClienteMascotaController;
+use App\Http\Controllers\Api\Cliente\CitaController as ClienteCitaController;
+use App\Http\Controllers\Api\Cliente\CatalogoController as ClienteCatalogoController;
+use App\Http\Controllers\Api\Cliente\HistorialController as ClienteHistorialController;
+use App\Http\Controllers\Api\Cliente\PerfilController as ClientePerfilController;
+
 // ==================== RUTAS PÚBLICAS ====================
 Route::post('login', [AuthController::class, 'login']);
 Route::post('register', [AuthController::class, 'register']);
@@ -252,5 +260,47 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::get('perfil', [GroomerPerfilController::class, 'me']);
         Route::put('perfil', [GroomerPerfilController::class, 'update']);
         Route::post('perfil/password', [GroomerPerfilController::class, 'updatePassword']);
+    });
+
+    // ==================== CLIENTE ====================
+    Route::prefix('cliente')->middleware('role:cliente')->group(function () {
+        
+        // Dashboard
+        Route::get('dashboard', [ClienteDashboardController::class, 'index']);
+        
+        // Mis Mascotas
+        Route::get('mascotas', [ClienteMascotaController::class, 'index']);
+        Route::get('mascotas/{id}', [ClienteMascotaController::class, 'show']);
+        Route::post('mascotas', [ClienteMascotaController::class, 'store']);
+        Route::put('mascotas/{id}', [ClienteMascotaController::class, 'update']);
+        Route::post('mascotas/{id}/foto', [ClienteMascotaController::class, 'uploadFoto']);
+        Route::get('fichas/{fichaId}/fotos', [ClienteMascotaController::class, 'fotosSesion']);
+        
+        // Mis Citas
+        Route::get('citas', [ClienteCitaController::class, 'index']);
+        Route::get('citas/{id}', [ClienteCitaController::class, 'show']);
+        Route::post('citas', [ClienteCitaController::class, 'store']);
+        Route::post('citas/{id}/cancelar', [ClienteCitaController::class, 'cancel']);
+        
+        // Agendado de citas (pasos)
+        Route::get('agendado/mascotas', [ClienteCitaController::class, 'getMascotas']);
+        Route::post('agendado/servicios', [ClienteCitaController::class, 'getServicios']);
+        Route::post('agendado/slots', [ClienteCitaController::class, 'getSlots']);
+        
+        // Catálogo
+        Route::get('catalogo/productos', [ClienteCatalogoController::class, 'index']);
+        Route::get('catalogo/categorias', [ClienteCatalogoController::class, 'getCategorias']);
+        Route::post('catalogo/pedido', [ClienteCatalogoController::class, 'crearPedido']);
+        
+        // Mi Historial
+        Route::get('historial/servicios', [ClienteHistorialController::class, 'servicios']);
+        Route::get('historial/compras', [ClienteHistorialController::class, 'compras']);
+        Route::get('historial/servicios/{id}', [ClienteHistorialController::class, 'servicioDetalle']);
+        
+        // Perfil
+        Route::get('perfil', [ClientePerfilController::class, 'me']);
+        Route::put('perfil', [ClientePerfilController::class, 'update']);
+        Route::post('perfil/password', [ClientePerfilController::class, 'updatePassword']);
+        Route::post('perfil/notificaciones/{id}/leer', [ClientePerfilController::class, 'marcarNotificacion']);
     });
 });

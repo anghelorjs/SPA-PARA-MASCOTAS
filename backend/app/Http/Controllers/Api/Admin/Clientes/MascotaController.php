@@ -1,7 +1,7 @@
 <?php
-// app/Http/Controllers/Api/Admin/GestionMascotasController.php
+// app/Http/Controllers/Api/Admin/Clientes/MascotaController.php
 
-namespace App\Http\Controllers\Api\Admin;
+namespace App\Http\Controllers\Api\Admin\Clientes;
 
 use App\Http\Controllers\Api\ApiController;
 use App\Models\Mascota;
@@ -9,7 +9,7 @@ use App\Models\RangoPeso;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
-class GestionMascotasController extends ApiController
+class MascotaController extends ApiController
 {
     /**
      * Listar mascotas

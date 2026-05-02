@@ -1,19 +1,43 @@
 <?php
-// routes/api.php
 
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\AuthController;
 
 // ==================== ADMINISTRADOR ====================
+// Dashboard y Perfil
 use App\Http\Controllers\Api\Admin\DashboardController;
-use App\Http\Controllers\Api\Admin\AgendaController;
-use App\Http\Controllers\Api\Admin\GestionClientesController;
-use App\Http\Controllers\Api\Admin\GestionMascotasController;
-use App\Http\Controllers\Api\Admin\CatalogoController;
-use App\Http\Controllers\Api\Admin\GroomingController;
-use App\Http\Controllers\Api\Admin\ReporteController;
-use App\Http\Controllers\Api\Admin\ConfiguracionController;
 use App\Http\Controllers\Api\Admin\PerfilController;
+
+// Clientes
+use App\Http\Controllers\Api\Admin\Clientes\ClienteController;
+use App\Http\Controllers\Api\Admin\Clientes\MascotaController;
+
+// Catálogo
+use App\Http\Controllers\Api\Admin\Catalogo\ProductoController;
+use App\Http\Controllers\Api\Admin\Catalogo\InsumoController;
+use App\Http\Controllers\Api\Admin\Catalogo\CategoriaController;
+use App\Http\Controllers\Api\Admin\Catalogo\MovimientoController;
+
+// Agenda
+use App\Http\Controllers\Api\Admin\Agenda\CalendarioController;
+use App\Http\Controllers\Api\Admin\Agenda\DisponibilidadController;
+use App\Http\Controllers\Api\Admin\Agenda\ServicioController;
+use App\Http\Controllers\Api\Admin\Agenda\RangoPesoController;
+
+// Grooming
+use App\Http\Controllers\Api\Admin\Grooming\FichaController;
+use App\Http\Controllers\Api\Admin\Grooming\GaleriaController;
+
+// Reportes
+use App\Http\Controllers\Api\Admin\Reportes\AgendaReporteController;
+use App\Http\Controllers\Api\Admin\Reportes\IngresoReporteController;
+use App\Http\Controllers\Api\Admin\Reportes\InventarioReporteController;
+use App\Http\Controllers\Api\Admin\Reportes\ClienteReporteController;
+
+// Configuración
+use App\Http\Controllers\Api\Admin\Configuracion\NegocioController;
+use App\Http\Controllers\Api\Admin\Configuracion\UsuarioController;
+use App\Http\Controllers\Api\Admin\Configuracion\NotificacionController;
 
 // ==================== RECEPCIONISTA ====================
 use App\Http\Controllers\Api\Recepcionista\DashboardController as RecepcionistaDashboardController;
@@ -55,106 +79,135 @@ Route::middleware('auth:sanctum')->group(function () {
         // Dashboard
         Route::get('dashboard', [DashboardController::class, 'index']);
         
-        // Agenda - Calendario
-        Route::get('agenda/citas', [AgendaController::class, 'citas']);
-        Route::put('agenda/citas/{id}/reprogramar', [AgendaController::class, 'reprogramar']);
-        Route::post('agenda/citas/{id}/confirmar', [AgendaController::class, 'confirmarCita']);
+        // ========== AGENDA ==========
+        // Calendario de Citas
+        Route::get('agenda/citas', [CalendarioController::class, 'citas']);
+        Route::get('agenda/citas/{id}', [CalendarioController::class, 'detalleCita']);
+        Route::post('agenda/citas/{id}/confirmar', [CalendarioController::class, 'confirmar']);
+        Route::post('agenda/citas/{id}/cancelar', [CalendarioController::class, 'cancelar']);
+        Route::put('agenda/citas/{id}/reprogramar', [CalendarioController::class, 'reprogramar']);
+        Route::post('agenda/slots-disponibles', [CalendarioController::class, 'slotsDisponibles']);
         
-        // Agenda - Disponibilidad de Groomers
-        Route::get('agenda/disponibilidad', [AgendaController::class, 'disponibilidadGroomers']);
-        Route::put('agenda/disponibilidad/{id}', [AgendaController::class, 'setDisponibilidadGroomer']);
-        Route::post('agenda/bloqueos', [AgendaController::class, 'registrarBloqueo']);
-        Route::delete('agenda/bloqueos/{id}', [AgendaController::class, 'eliminarBloqueo']);
+        // Disponibilidad de Groomers
+        Route::get('agenda/disponibilidad', [DisponibilidadController::class, 'index']);
+        Route::get('agenda/disponibilidad/{id}', [DisponibilidadController::class, 'show']);
+        Route::put('agenda/disponibilidad/{id}', [DisponibilidadController::class, 'store']);
+        Route::put('agenda/disponibilidad/{id}/horario/{horarioId}', [DisponibilidadController::class, 'update']);
+        Route::delete('agenda/disponibilidad/{id}', [DisponibilidadController::class, 'destroy']);
+        Route::post('agenda/bloqueos', [DisponibilidadController::class, 'registrarBloqueo']);
+        Route::delete('agenda/bloqueos/{id}', [DisponibilidadController::class, 'eliminarBloqueo']);
+        Route::get('agenda/dias-semana', [DisponibilidadController::class, 'diasSemana']);
         
-        // Agenda - Gestión de Servicios
-        Route::get('agenda/servicios', [AgendaController::class, 'servicios']);
-        Route::post('agenda/servicios', [AgendaController::class, 'guardarServicio']);
-        Route::put('agenda/servicios/{id}', [AgendaController::class, 'guardarServicio']);
-        Route::post('agenda/servicios/{id}/toggle', [AgendaController::class, 'toggleServicio']);
+        // Gestión de Servicios
+        Route::get('agenda/servicios', [ServicioController::class, 'index']);
+        Route::get('agenda/servicios/{id}', [ServicioController::class, 'show']);
+        Route::post('agenda/servicios', [ServicioController::class, 'store']);
+        Route::put('agenda/servicios/{id}', [ServicioController::class, 'update']);
+        Route::post('agenda/servicios/{id}/toggle', [ServicioController::class, 'toggle']);
+        Route::delete('agenda/servicios/{id}', [ServicioController::class, 'destroy']);
         
-        // Agenda - Rangos de Peso
-        Route::get('agenda/rangos-peso', [AgendaController::class, 'rangosPeso']);
-        Route::post('agenda/rangos-peso', [AgendaController::class, 'guardarRangoPeso']);
-        Route::put('agenda/rangos-peso/{id}', [AgendaController::class, 'guardarRangoPeso']);
-        Route::delete('agenda/rangos-peso/{id}', [AgendaController::class, 'eliminarRangoPeso']);
+        // Rangos de Peso
+        Route::get('agenda/rangos-peso', [RangoPesoController::class, 'index']);
+        Route::get('agenda/rangos-peso/{id}', [RangoPesoController::class, 'show']);
+        Route::post('agenda/rangos-peso', [RangoPesoController::class, 'store']);
+        Route::put('agenda/rangos-peso/{id}', [RangoPesoController::class, 'update']);
+        Route::delete('agenda/rangos-peso/{id}', [RangoPesoController::class, 'destroy']);
         
+        // ========== CLIENTES ==========
         // Clientes
-        Route::get('clientes', [GestionClientesController::class, 'index']);
-        Route::get('clientes/{id}', [GestionClientesController::class, 'show']);
-        Route::post('clientes', [GestionClientesController::class, 'store']);
-        Route::put('clientes/{id}', [GestionClientesController::class, 'update']);
-        Route::get('clientes/{id}/citas', [GestionClientesController::class, 'historialCitas']);
+        Route::get('clientes', [ClienteController::class, 'index']);
+        Route::get('clientes/{id}', [ClienteController::class, 'show']);
+        Route::post('clientes', [ClienteController::class, 'store']);
+        Route::put('clientes/{id}', [ClienteController::class, 'update']);
+        Route::delete('clientes/{id}', [ClienteController::class, 'destroy']);
+        Route::get('clientes/{id}/citas', [ClienteController::class, 'historialCitas']);
         
         // Mascotas
-        Route::get('mascotas', [GestionMascotasController::class, 'index']);
-        Route::get('mascotas/{id}', [GestionMascotasController::class, 'show']);
-        Route::post('mascotas', [GestionMascotasController::class, 'store']);
-        Route::put('mascotas/{id}', [GestionMascotasController::class, 'update']);
-        Route::get('mascotas/{id}/historial-grooming', [GestionMascotasController::class, 'historialGrooming']);
+        Route::get('mascotas', [MascotaController::class, 'index']);
+        Route::get('mascotas/{id}', [MascotaController::class, 'show']);
+        Route::post('mascotas', [MascotaController::class, 'store']);
+        Route::put('mascotas/{id}', [MascotaController::class, 'update']);
+        Route::delete('mascotas/{id}', [MascotaController::class, 'destroy']);
+        Route::get('mascotas/{id}/historial-grooming', [MascotaController::class, 'historialGrooming']);
         
-        // Catálogo - Productos
-        Route::get('catalogo/productos', [CatalogoController::class, 'productos']);
-        Route::get('catalogo/productos/{id}', [CatalogoController::class, 'productoShow']);
-        Route::post('catalogo/productos', [CatalogoController::class, 'productoStore']);
-        Route::put('catalogo/productos/{id}', [CatalogoController::class, 'productoUpdate']);
-        Route::post('catalogo/productos/{id}/toggle', [CatalogoController::class, 'productoToggle']);
+        // ========== CATÁLOGO ==========
+        // Productos
+        Route::get('catalogo/productos', [ProductoController::class, 'index']);
+        Route::get('catalogo/productos/{id}', [ProductoController::class, 'show']);
+        Route::post('catalogo/productos', [ProductoController::class, 'store']);
+        Route::put('catalogo/productos/{id}', [ProductoController::class, 'update']);
+        Route::post('catalogo/productos/{id}/toggle', [ProductoController::class, 'toggle']);
+        Route::delete('catalogo/productos/{id}', [ProductoController::class, 'destroy']);
         
-        // Catálogo - Variantes
-        Route::post('catalogo/productos/{productoId}/variantes', [CatalogoController::class, 'varianteStore']);
-        Route::put('catalogo/variantes/{id}', [CatalogoController::class, 'varianteUpdate']);
-        Route::delete('catalogo/variantes/{id}', [CatalogoController::class, 'varianteDestroy']);
+        // Variantes
+        Route::post('catalogo/productos/{productoId}/variantes', [ProductoController::class, 'varianteStore']);
+        Route::put('catalogo/variantes/{id}', [ProductoController::class, 'varianteUpdate']);
+        Route::delete('catalogo/variantes/{id}', [ProductoController::class, 'varianteDestroy']);
         
-        // Catálogo - Insumos
-        Route::get('catalogo/insumos', [CatalogoController::class, 'insumos']);
-        Route::get('catalogo/insumos/{id}', [CatalogoController::class, 'insumoShow']);
-        Route::post('catalogo/insumos', [CatalogoController::class, 'insumoStore']);
-        Route::put('catalogo/insumos/{id}', [CatalogoController::class, 'insumoUpdate']);
-        Route::post('catalogo/insumos/{id}/stock', [CatalogoController::class, 'insumoAjustarStock']);
+        // Insumos
+        Route::get('catalogo/insumos', [InsumoController::class, 'index']);
+        Route::get('catalogo/insumos/{id}', [InsumoController::class, 'show']);
+        Route::post('catalogo/insumos', [InsumoController::class, 'store']);
+        Route::put('catalogo/insumos/{id}', [InsumoController::class, 'update']);
+        Route::post('catalogo/insumos/{id}/stock', [InsumoController::class, 'ajustarStock']);
+        Route::delete('catalogo/insumos/{id}', [InsumoController::class, 'destroy']);
         
-        // Catálogo - Categorías
-        Route::get('catalogo/categorias', [CatalogoController::class, 'categorias']);
-        Route::post('catalogo/categorias', [CatalogoController::class, 'categoriaStore']);
-        Route::put('catalogo/categorias/{id}', [CatalogoController::class, 'categoriaUpdate']);
-        Route::delete('catalogo/categorias/{id}', [CatalogoController::class, 'categoriaDestroy']);
+        // Categorías
+        Route::get('catalogo/categorias', [CategoriaController::class, 'index']);
+        Route::get('catalogo/categorias/{id}', [CategoriaController::class, 'show']);
+        Route::post('catalogo/categorias', [CategoriaController::class, 'store']);
+        Route::put('catalogo/categorias/{id}', [CategoriaController::class, 'update']);
+        Route::delete('catalogo/categorias/{id}', [CategoriaController::class, 'destroy']);
         
-        // Catálogo - Movimientos de Inventario
-        Route::get('catalogo/movimientos', [CatalogoController::class, 'movimientos']);
-        Route::post('catalogo/movimientos', [CatalogoController::class, 'movimientoStore']);
+        // Movimientos de Inventario
+        Route::get('catalogo/movimientos', [MovimientoController::class, 'index']);
+        Route::get('catalogo/movimientos/{id}', [MovimientoController::class, 'show']);
+        Route::post('catalogo/movimientos', [MovimientoController::class, 'store']);
+        Route::get('catalogo/productos-lista', [MovimientoController::class, 'productosList']);
         
-        // Grooming - Fichas
-        Route::get('grooming/fichas', [GroomingController::class, 'fichas']);
-        Route::get('grooming/fichas/{id}', [GroomingController::class, 'fichaShow']);
-        Route::post('grooming/citas/{citaId}/abrir', [GroomingController::class, 'abrirFicha']);
-        Route::put('grooming/fichas/{id}/checklist', [GroomingController::class, 'updateChecklist']);
-        Route::post('grooming/fichas/{id}/insumos', [GroomingController::class, 'registrarInsumos']);
-        Route::post('grooming/fichas/{id}/cerrar', [GroomingController::class, 'cerrarFicha']);
+        // ========== GROOMING ==========
+        // Fichas
+        Route::get('grooming/fichas/hoy', [FichaController::class, 'hoy']);
+        Route::get('grooming/fichas/todas', [FichaController::class, 'todas']);
+        Route::get('grooming/fichas/{id}', [FichaController::class, 'show']);
         
-        // Grooming - Galería de Fotos
-        Route::get('grooming/fotos', [GroomingController::class, 'fotos']);
-        Route::post('grooming/fotos', [GroomingController::class, 'uploadFoto']);
-        Route::delete('grooming/fotos/{id}', [GroomingController::class, 'deleteFoto']);
-        Route::get('grooming/mascotas/{mascotaId}/galeria', [GroomingController::class, 'galeriaPorMascota']);
+        // Galería
+        Route::get('grooming/fotos', [GaleriaController::class, 'index']);
+        Route::delete('grooming/fotos/{id}', [GaleriaController::class, 'destroy']);
+        Route::get('grooming/mascotas/{mascotaId}/fotos', [GaleriaController::class, 'porMascota']);
+        Route::get('grooming/tipos-foto', [GaleriaController::class, 'tipos']);
         
-        // Reportes
-        Route::get('reportes/citas', [ReporteController::class, 'citas']);
-        Route::get('reportes/ingresos', [ReporteController::class, 'ingresos']);
-        Route::get('reportes/inventario', [ReporteController::class, 'inventario']);
-        Route::get('reportes/clientes', [ReporteController::class, 'clientes']);
+        // ========== REPORTES ==========
+        Route::get('reportes/agenda', [AgendaReporteController::class, 'generar']);
+        Route::get('reportes/ingresos', [IngresoReporteController::class, 'generar']);
+        Route::get('reportes/inventario', [InventarioReporteController::class, 'generar']);
+        Route::get('reportes/clientes', [ClienteReporteController::class, 'generar']);
         
-        // Configuración - Datos del Negocio
-        Route::get('configuracion/negocio', [ConfiguracionController::class, 'datosNegocio']);
-        Route::put('configuracion/negocio', [ConfiguracionController::class, 'updateDatosNegocio']);
-        Route::post('configuracion/logo', [ConfiguracionController::class, 'uploadLogo']);
+        // ========== CONFIGURACIÓN ==========
+        // Datos del Negocio
+        Route::get('configuracion/negocio', [NegocioController::class, 'datosNegocio']);
+        Route::put('configuracion/negocio', [NegocioController::class, 'updateDatosNegocio']);
+        Route::post('configuracion/logo', [NegocioController::class, 'uploadLogo']);
         
-        // Configuración - Gestión de Usuarios
-        Route::get('configuracion/usuarios', [ConfiguracionController::class, 'usuarios']);
-        Route::get('configuracion/usuarios/{id}', [ConfiguracionController::class, 'usuarioShow']);
-        Route::post('configuracion/usuarios', [ConfiguracionController::class, 'usuarioStore']);
-        Route::put('configuracion/usuarios/{id}', [ConfiguracionController::class, 'usuarioUpdate']);
-        Route::post('configuracion/usuarios/{id}/reset-password', [ConfiguracionController::class, 'usuarioResetPassword']);
-        Route::delete('configuracion/usuarios/{id}', [ConfiguracionController::class, 'usuarioDestroy']);
+        // Gestión de Usuarios
+        Route::get('configuracion/usuarios', [UsuarioController::class, 'index']);
+        Route::get('configuracion/usuarios/{id}', [UsuarioController::class, 'show']);
+        Route::post('configuracion/usuarios', [UsuarioController::class, 'store']);
+        Route::put('configuracion/usuarios/{id}', [UsuarioController::class, 'update']);
+        Route::post('configuracion/usuarios/{id}/reset-password', [UsuarioController::class, 'resetPassword']);
+        Route::delete('configuracion/usuarios/{id}', [UsuarioController::class, 'destroy']);
+        Route::get('configuracion/roles', [UsuarioController::class, 'roles']);
         
-        // Perfil del Administrador
+        // Notificaciones del Sistema
+        Route::get('configuracion/notificaciones', [NotificacionController::class, 'index']);
+        Route::get('configuracion/notificaciones/{id}', [NotificacionController::class, 'show']);
+        Route::post('configuracion/notificaciones/{id}/reenviar', [NotificacionController::class, 'reenviar']);
+        Route::post('configuracion/notificaciones/enviar', [NotificacionController::class, 'enviarManual']);
+        Route::get('configuracion/notificaciones/clientes', [NotificacionController::class, 'clientesList']);
+        Route::get('configuracion/notificaciones/citas', [NotificacionController::class, 'citasList']);
+        Route::post('configuracion/notificaciones/vista-previa', [NotificacionController::class, 'vistaPrevia']);
+        
+        // ========== PERFIL DEL ADMINISTRADOR ==========
         Route::get('perfil', [PerfilController::class, 'me']);
         Route::put('perfil', [PerfilController::class, 'update']);
         Route::post('perfil/password', [PerfilController::class, 'updatePassword']);

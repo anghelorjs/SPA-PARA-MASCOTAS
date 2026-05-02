@@ -1,112 +1,46 @@
 <?php
-// app/Http/Controllers/Api/Admin/ConfiguracionController.php
+// app/Http/Controllers/Api/Admin/Configuracion/UsuarioController.php
 
-namespace App\Http\Controllers\Api\Admin;
+namespace App\Http\Controllers\Api\Admin\Configuracion;
 
 use App\Http\Controllers\Api\ApiController;
 use App\Models\User;
 use App\Models\Administrador;
 use App\Models\Recepcionista;
 use App\Models\Groomer;
+use App\Models\Cliente;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 
-class ConfiguracionController extends ApiController
+class UsuarioController extends ApiController
 {
-    // ==================== DATOS DEL NEGOCIO ====================
-    
-    /**
-     * Obtener datos del negocio
-     */
-    public function datosNegocio()
-    {
-        // Estos datos podrían venir de una tabla 'configuraciones' o de archivo
-        $datosNegocio = [
-            'nombre_negocio' => config('app.name', 'SPA para Mascotas'),
-            'logo' => config('app.logo', null),
-            'telefono' => config('app.phone', '+591 12345678'),
-            'direccion' => config('app.address', 'Av. Principal 123, La Paz'),
-            'email_contacto' => config('app.email', 'contacto@spamascotas.com'),
-            'redes_sociales' => [
-                'facebook' => config('app.facebook', 'https://facebook.com/spamascotas'),
-                'instagram' => config('app.instagram', 'https://instagram.com/spamascotas'),
-                'whatsapp' => config('app.whatsapp', 'https://wa.me/59171234567')
-            ],
-            'horario_atencion' => [
-                'lunes_viernes' => '09:00 - 18:00',
-                'sabado' => '09:00 - 13:00',
-                'domingo' => 'Cerrado'
-            ]
-        ];
-        
-        return $this->successResponse($datosNegocio, 'Datos del negocio obtenidos correctamente');
-    }
-    
-    /**
-     * Actualizar datos del negocio
-     */
-    public function updateDatosNegocio(Request $request)
-    {
-        $request->validate([
-            'nombre_negocio' => 'required|string|max:100',
-            'telefono' => 'nullable|string|max:20',
-            'direccion' => 'nullable|string',
-            'email_contacto' => 'nullable|email',
-            'facebook' => 'nullable|url',
-            'instagram' => 'nullable|url',
-            'whatsapp' => 'nullable|url',
-            'horario_apertura' => 'nullable|string',
-            'horario_cierre' => 'nullable|string'
-        ]);
-        
-        // Aquí guardarías en una tabla de configuraciones o archivo .env
-        // Por ahora simulamos la actualización
-        
-        return $this->successResponse($request->all(), 'Datos del negocio actualizados correctamente');
-    }
-    
-    /**
-     * Subir logo del negocio
-     */
-    public function uploadLogo(Request $request)
-    {
-        $request->validate([
-            'logo' => 'required|image|mimes:jpeg,png,jpg|max:2048'
-        ]);
-        
-        if ($request->hasFile('logo')) {
-            $path = $request->file('logo')->store('logos', 'public');
-            return $this->successResponse(['logo_url' => asset('storage/' . $path)], 'Logo subido correctamente');
-        }
-        
-        return $this->errorResponse('No se recibió ningún archivo', 400);
-    }
-
-    // ==================== GESTIÓN DE USUARIOS ====================
-    
     /**
      * Listar usuarios del sistema
      */
-    public function usuarios(Request $request)
+    public function index(Request $request)
     {
         $query = User::with(['administrador', 'recepcionista', 'groomer', 'cliente']);
         
+        // Filtro por rol
         if ($request->has('rol')) {
             $query->where('rol', $request->rol);
         }
         
+        // Filtro por estado activo/inactivo
         if ($request->has('activo')) {
             $query->where('activo', $request->activo);
         }
         
+        // Búsqueda por nombre, email o teléfono
         if ($request->has('search')) {
             $search = $request->search;
             $query->where(function($q) use ($search) {
                 $q->where('nombre', 'like', "%{$search}%")
                   ->orWhere('apellido', 'like', "%{$search}%")
-                  ->orWhere('email', 'like', "%{$search}%");
+                  ->orWhere('email', 'like', "%{$search}%")
+                  ->orWhere('telefono', 'like', "%{$search}%");
             });
         }
         
@@ -141,7 +75,7 @@ class ConfiguracionController extends ApiController
     /**
      * Ver detalle de usuario
      */
-    public function usuarioShow($id)
+    public function show($id)
     {
         $user = User::with(['administrador', 'recepcionista', 'groomer', 'cliente'])->find($id);
         
@@ -155,7 +89,7 @@ class ConfiguracionController extends ApiController
     /**
      * Crear usuario
      */
-    public function usuarioStore(Request $request)
+    public function store(Request $request)
     {
         $request->validate([
             'nombre' => 'required|string|max:100',
@@ -198,7 +132,12 @@ class ConfiguracionController extends ApiController
                     ]);
                     break;
                 case 'cliente':
-                    // Los clientes ya tienen otro endpoint específico
+                    Cliente::create([
+                        'idUsuario' => $user->idUsuario,
+                        'direccion' => $request->direccion ?? null,
+                        'preferencias' => null,
+                        'canalContacto' => $request->canalContacto ?? 'whatsapp'
+                    ]);
                     break;
             }
             
@@ -215,7 +154,7 @@ class ConfiguracionController extends ApiController
     /**
      * Actualizar usuario
      */
-    public function usuarioUpdate(Request $request, $id)
+    public function update(Request $request, $id)
     {
         $user = User::find($id);
         
@@ -231,7 +170,9 @@ class ConfiguracionController extends ApiController
             'rol' => 'sometimes|in:administrador,recepcionista,groomer,cliente',
             'especialidad' => 'nullable|string', // para groomer
             'maxServiciosSimultaneos' => 'nullable|integer|min:1|max:5', // para groomer
-            'turno' => 'nullable|in:matutino,vespertino,completo' // para recepcionista
+            'turno' => 'nullable|in:matutino,vespertino,completo', // para recepcionista
+            'direccion' => 'nullable|string', // para cliente
+            'canalContacto' => 'nullable|in:whatsapp,telegram,email,sms' // para cliente
         ]);
         
         DB::beginTransaction();
@@ -256,6 +197,12 @@ class ConfiguracionController extends ApiController
                 $user->recepcionista->save();
             }
             
+            if ($user->rol === 'cliente' && $user->cliente) {
+                if ($request->has('direccion')) $user->cliente->direccion = $request->direccion;
+                if ($request->has('canalContacto')) $user->cliente->canalContacto = $request->canalContacto;
+                $user->cliente->save();
+            }
+            
             DB::commit();
             
             return $this->successResponse($user, 'Usuario actualizado correctamente');
@@ -269,7 +216,7 @@ class ConfiguracionController extends ApiController
     /**
      * Resetear contraseña de usuario
      */
-    public function usuarioResetPassword(Request $request, $id)
+    public function resetPassword(Request $request, $id)
     {
         $user = User::find($id);
         
@@ -290,7 +237,7 @@ class ConfiguracionController extends ApiController
     /**
      * Eliminar usuario (desactivar)
      */
-    public function usuarioDestroy($id)
+    public function destroy($id)
     {
         $user = User::find($id);
         
@@ -298,7 +245,7 @@ class ConfiguracionController extends ApiController
             return $this->errorResponse('Usuario no encontrado', 404);
         }
         
-        // No permitir eliminar el propio usuario
+        // No permitir desactivar el propio usuario
         if (Auth::user()->idUsuario === $user->idUsuario) {
             return $this->errorResponse('No puedes desactivar tu propio usuario', 400);
         }
@@ -307,5 +254,20 @@ class ConfiguracionController extends ApiController
         $user->save();
         
         return $this->successResponse(null, 'Usuario desactivado correctamente');
+    }
+    
+    /**
+     * Obtener roles disponibles para selector
+     */
+    public function roles()
+    {
+        $roles = [
+            ['id' => 'administrador', 'nombre' => 'Administrador'],
+            ['id' => 'recepcionista', 'nombre' => 'Recepcionista'],
+            ['id' => 'groomer', 'nombre' => 'Groomer'],
+            ['id' => 'cliente', 'nombre' => 'Cliente']
+        ];
+        
+        return $this->successResponse($roles, 'Roles obtenidos correctamente');
     }
 }

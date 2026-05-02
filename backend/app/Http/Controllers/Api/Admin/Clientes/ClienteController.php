@@ -1,7 +1,7 @@
 <?php
-// app/Http/Controllers/Api/Admin/GestionClientesController.php
+// app/Http/Controllers/Api/Admin/Clientes/ClienteController.php
 
-namespace App\Http\Controllers\Api\Admin;
+namespace App\Http\Controllers\Api\Admin\Clientes;
 
 use App\Http\Controllers\Api\ApiController;
 use App\Models\Cliente;
@@ -12,7 +12,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 
-class GestionClientesController extends ApiController
+class ClienteController extends ApiController
 {
     /**
      * Listar clientes con filtros

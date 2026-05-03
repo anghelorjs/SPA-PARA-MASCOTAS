@@ -2,452 +2,156 @@
 import { useState, useRef } from "react";
 import { NavLink, useNavigate } from "react-router-dom";
 import {
-  FiChevronDown,
-  FiChevronUp,
-  FiHome,
-  FiUsers,
-  FiBox,
-  FiFileText,
-  FiSettings,
-  FiLogOut,
-  FiUser,
-  FiBriefcase,
-  FiPackage,
-  FiBarChart2,
-  FiShoppingBag,
-  FiCalendar,
-  FiScissors,
-  FiBell,
-  FiDollarSign,
-  FiGrid,
-  FiClock,
-  FiHeart,
+  FiChevronDown, FiChevronUp, FiHome, FiUsers, FiBox,
+  FiFileText, FiSettings, FiLogOut, FiUser, FiBriefcase,
+  FiPackage, FiBarChart2, FiShoppingBag, FiCalendar,
+  FiScissors, FiBell, FiGrid, FiClock, FiHeart,
+  FiDollarSign, FiChevronLeft, FiChevronRight,
 } from "react-icons/fi";
-
 import { useAuth } from "../../hooks/useAuth";
 import type { UserRole } from "../../services/types/auth";
 
-interface SidebarProps {
-  collapsed: boolean;
-}
-
-interface SidebarItemProps {
-  icon: React.ReactNode;
-  label: string;
-  to: string;
-}
-
+interface SidebarProps { collapsed: boolean; onToggle: () => void; }
 interface MenuItem {
-  id: string;
-  label: string;
-  icon: React.ReactNode;
-  to?: string;
-  children?: Array<{
-    label: string;
-    to: string;
-    icon?: React.ReactNode;
-  }>;
+  id: string; label: string; icon: React.ReactNode; to?: string;
+  children?: Array<{ label: string; to: string; icon?: React.ReactNode }>;
 }
 
-interface SidebarDropdownProps {
-  icon: React.ReactNode;
-  label: string;
-  open: boolean;
-  onClick: () => void;
-  items: Array<{
-    label: string;
-    to: string;
-    icon?: React.ReactNode;
-  }>;
-}
-
-interface DropdownItemProps {
-  item: {
-    label: string;
-    to: string;
-    icon?: React.ReactNode;
-  };
-}
-
-// -------------------- Items para sidebar expandido --------------------
-
-function DropdownItem({ item }: DropdownItemProps) {
+// Ícono de patita
+function PawIcon({ size = 20 }: { size?: number }) {
   return (
-    <NavLink
-      to={item.to}
-      className={({ isActive }) => {
-        const baseClasses =
-          "flex items-center gap-3 px-3 py-2 rounded-lg text-sm transition-all duration-200 group";
-        const activeClasses =
-          "bg-white/20 text-white shadow-md border border-white/10";
-        const inactiveClasses =
-          "hover:bg-white/10 text-white/80 hover:text-white border border-transparent";
-
-        return `${baseClasses} ${isActive ? activeClasses : inactiveClasses}`;
-      }}
-    >
-      {({ isActive }) => (
-        <>
-          {item.icon && (
-            <span
-              className={`transition-transform duration-200 ${
-                isActive ? "scale-110" : "group-hover:scale-105"
-              }`}
-            >
-              {item.icon}
-            </span>
-          )}
-          <span>{item.label}</span>
-        </>
-      )}
-    </NavLink>
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="currentColor">
+      <ellipse cx="6" cy="5" rx="1.8" ry="2.5" />
+      <ellipse cx="10.5" cy="3.5" rx="1.8" ry="2.5" />
+      <ellipse cx="15" cy="3.5" rx="1.8" ry="2.5" />
+      <ellipse cx="19" cy="5" rx="1.8" ry="2.5" />
+      <path d="M12 8c-4 0-7.5 2.5-7.5 6.5 0 2.5 2 4.5 4.5 4.5h6c2.5 0 4.5-2 4.5-4.5C19.5 10.5 16 8 12 8z" />
+    </svg>
   );
 }
 
-function SidebarItem({ icon, label, to }: SidebarItemProps) {
+// ─── SidebarItem ──────────────────────────────────────────────────────────────
+function SidebarItem({ icon, label, to }: { icon: React.ReactNode; label: string; to: string }) {
   return (
     <NavLink
       to={to}
-      className={({ isActive }) => {
-        const baseClasses =
-          "flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 group";
-        const activeClasses =
-          "bg-white/20 text-white shadow-lg shadow-black/10 border border-white/10";
-        const inactiveClasses =
-          "hover:bg-white/10 text-white/90 hover:text-white border border-transparent";
-
-        return `${baseClasses} ${isActive ? activeClasses : inactiveClasses}`;
-      }}
+      className={({ isActive }) => `
+        flex items-center gap-2.5 px-3.5 py-2 rounded-lg mx-2 my-0.5
+        text-sm font-medium no-underline transition-all duration-150
+        ${isActive 
+          ? 'bg-blue-600 text-white opacity-100' 
+          : 'text-white/80 hover:bg-white/10 hover:text-white'
+        }
+      `}
     >
       {({ isActive }) => (
         <>
-          <span
-            className={`transition-transform duration-200 ${
-              isActive ? "scale-110" : "group-hover:scale-105"
-            }`}
-          >
+          <span className={`text-[17px] flex-shrink-0 transition-opacity ${isActive ? 'opacity-100' : 'opacity-70'}`}>
             {icon}
           </span>
-          <span className="font-medium">{label}</span>
+          <span>{label}</span>
         </>
       )}
     </NavLink>
   );
 }
 
-function SidebarDropdown({
-  icon,
-  label,
-  open,
-  onClick,
-  items,
-}: SidebarDropdownProps) {
+// ─── SidebarDropdown ──────────────────────────────────────────────────────────
+function SidebarDropdown({ 
+  icon, label, open, onClick, items 
+}: { 
+  icon: React.ReactNode; label: string; open: boolean;
+  onClick: () => void;
+  items: Array<{ label: string; to: string; icon?: React.ReactNode }>;
+}) {
   return (
-    <div className="space-y-1">
+    <div className="mx-2 my-0.5">
       <button
         onClick={onClick}
-        className="flex items-center justify-between w-full px-4 py-3 rounded-xl hover:bg-white/10 transition-all duration-200 text-white/90 hover:text-white border border-transparent hover:border-white/5 group"
+        className={`
+          flex items-center justify-between w-full px-3.5 py-2 rounded-lg
+          text-sm font-medium transition-all duration-150
+          ${open ? 'bg-white/10 text-white opacity-100' : 'text-white/80 hover:bg-white/10 hover:text-white'}
+        `}
       >
-        <div className="flex items-center gap-3">
-          <span className="transition-transform duration-200 group-hover:scale-105">
-            {icon}
-          </span>
-          <span className="font-medium">{label}</span>
-        </div>
-        {open ? (
-          <FiChevronUp className="transition-transform duration-200" />
-        ) : (
-          <FiChevronDown className="transition-transform duration-200" />
-        )}
+        <span className="flex items-center gap-2.5">
+          <span className="text-[17px] opacity-70 flex-shrink-0">{icon}</span>
+          <span>{label}</span>
+        </span>
+        <span className="opacity-40 text-xs">
+          {open ? <FiChevronUp /> : <FiChevronDown />}
+        </span>
       </button>
-
-      {open && (
-        <div className="ml-4 space-y-1 border-l-2 border-white/20 pl-3 py-1">
-          {items.map((item, index) => (
-            <DropdownItem key={index} item={item} />
+      
+      <div
+        className={`
+          overflow-hidden transition-all duration-300 ease-in-out
+          ${open ? 'max-h-96 opacity-100' : 'max-h-0 opacity-0'}
+        `}
+      >
+        <div className="ml-4 pl-3 py-1 border-l-2 border-white/10">
+          {items.map((item, idx) => (
+            <NavLink
+              key={idx}
+              to={item.to}
+              className={({ isActive }) => `
+                flex items-center gap-2 px-2.5 py-1.5 rounded-md mb-0.5
+                text-xs font-medium no-underline transition-all duration-150
+                ${isActive 
+                  ? 'bg-blue-600 text-white opacity-100' 
+                  : 'text-white/70 hover:bg-white/10 hover:text-white'
+                }
+              `}
+            >
+              {({ isActive }) => (
+                <>
+                  {item.icon && (
+                    <span className={`flex-shrink-0 ${isActive ? 'opacity-100' : 'opacity-60'}`}>
+                      {item.icon}
+                    </span>
+                  )}
+                  <span>{item.label}</span>
+                </>
+              )}
+            </NavLink>
           ))}
         </div>
-      )}
+      </div>
     </div>
   );
 }
 
-// -------------------- Menús por rol --------------------
-
-// ==================== ADMINISTRADOR ====================
-const administradorMenu: MenuItem[] = [
-  {
-    id: "admin-dashboard",
-    label: "Dashboard",
-    icon: <FiHome className="text-lg" />,
-    to: "/admin/dashboard",
-  },
-  {
-    id: "admin-agenda",
-    label: "Agenda",
-    icon: <FiCalendar className="text-lg" />,
-    to: "/admin/agenda",
-  },
-  {
-    id: "admin-grooming",
-    label: "Grooming",
-    icon: <FiScissors className="text-lg" />,
-    to: "/admin/grooming",
-  },
-  {
-    id: "admin-clientes",
-    label: "Clientes",
-    icon: <FiUsers className="text-lg" />,
-    children: [
-      {
-        label: "Clientes",
-        to: "/admin/clientes",
-        icon: <FiUsers className="text-sm" />,
-      },
-      {
-        label: "Mascotas",
-        to: "/admin/mascotas",
-        icon: <FiHeart className="text-sm" />,
-      },
-    ],
-  },
-  {
-    id: "admin-catalogo",
-    label: "Catálogo",
-    icon: <FiPackage className="text-lg" />,
-    children: [
-      {
-        label: "Productos",
-        to: "/admin/catalogo/productos",
-        icon: <FiBox className="text-sm" />,
-      },
-      {
-        label: "Insumos",
-        to: "/admin/catalogo/insumos",
-        icon: <FiPackage className="text-sm" />,
-      },
-      {
-        label: "Categorías",
-        to: "/admin/catalogo/categorias",
-        icon: <FiGrid className="text-sm" />,
-      },
-      {
-        label: "Movimientos",
-        to: "/admin/catalogo/movimientos",
-        icon: <FiClock className="text-sm" />,
-      },
-    ],
-  },
-  {
-    id: "admin-reportes",
-    label: "Reportes",
-    icon: <FiBarChart2 className="text-lg" />,
-    to: "/admin/reportes",
-  },
-  {
-    id: "admin-configuracion",
-    label: "Configuración",
-    icon: <FiSettings className="text-lg" />,
-    children: [
-      {
-        label: "Datos del Negocio",
-        to: "/admin/configuracion/negocio",
-        icon: <FiBriefcase className="text-sm" />,
-      },
-      {
-        label: "Usuarios",
-        to: "/admin/configuracion/usuarios",
-        icon: <FiUsers className="text-sm" />,
-      },
-      {
-        label: "Notificaciones",
-        to: "/admin/configuracion/notificaciones",
-        icon: <FiBell className="text-sm" />,
-      },
-    ],
-  },
-  {
-    id: "admin-perfil",
-    label: "Perfil",
-    icon: <FiUser className="text-lg" />,
-    to: "/admin/perfil",
-  },
-];
-
-// ==================== RECEPCIONISTA ====================
-const recepcionistaMenu: MenuItem[] = [
-  {
-    id: "recepcion-dashboard",
-    label: "Dashboard",
-    icon: <FiHome className="text-lg" />,
-    to: "/recepcionista/dashboard",
-  },
-  {
-    id: "recepcion-agenda",
-    label: "Agenda",
-    icon: <FiCalendar className="text-lg" />,
-    to: "/recepcionista/agenda",
-  },
-  {
-    id: "recepcion-clientes",
-    label: "Clientes",
-    icon: <FiUsers className="text-lg" />,
-    children: [
-      {
-        label: "Clientes",
-        to: "/recepcionista/clientes",
-        icon: <FiUsers className="text-sm" />,
-      },
-      {
-        label: "Mascotas",
-        to: "/recepcionista/mascotas",
-        icon: <FiHeart className="text-sm" />,
-      },
-    ],
-  },
-  {
-    id: "recepcion-ventas",
-    label: "Ventas",
-    icon: <FiDollarSign className="text-lg" />,
-    to: "/recepcionista/ventas",
-  },
-  {
-    id: "recepcion-notificaciones",
-    label: "Notificaciones",
-    icon: <FiBell className="text-lg" />,
-    to: "/recepcionista/notificaciones",
-  },
-  {
-    id: "recepcion-perfil",
-    label: "Perfil",
-    icon: <FiUser className="text-lg" />,
-    to: "/recepcionista/perfil",
-  },
-];
-
-// ==================== GROOMER ====================
-const groomerMenu: MenuItem[] = [
-  {
-    id: "groomer-dashboard",
-    label: "Dashboard",
-    icon: <FiHome className="text-lg" />,
-    to: "/groomer/dashboard",
-  },
-  {
-    id: "groomer-agenda",
-    label: "Mi Agenda",
-    icon: <FiCalendar className="text-lg" />,
-    to: "/groomer/agenda",
-  },
-  {
-    id: "groomer-fichas",
-    label: "Fichas",
-    icon: <FiFileText className="text-lg" />,
-    children: [
-      {
-        label: "Fichas de Hoy",
-        to: "/groomer/fichas/hoy",
-        icon: <FiClock className="text-sm" />,
-      },
-      {
-        label: "Todas las Fichas",
-        to: "/groomer/fichas/todas",
-        icon: <FiFileText className="text-sm" />,
-      },
-    ],
-  },
-  {
-    id: "groomer-perfil",
-    label: "Perfil",
-    icon: <FiUser className="text-lg" />,
-    to: "/groomer/perfil",
-  },
-];
-
-// ==================== CLIENTE ====================
-const clienteMenu: MenuItem[] = [
-  {
-    id: "cliente-dashboard",
-    label: "Inicio",
-    icon: <FiHome className="text-lg" />,
-    to: "/cliente/dashboard",
-  },
-  {
-    id: "cliente-mascotas",
-    label: "Mis Mascotas",
-    icon: <FiHeart className="text-lg" />,
-    to: "/cliente/mis-mascotas",
-  },
-  {
-    id: "cliente-citas",
-    label: "Mis Citas",
-    icon: <FiCalendar className="text-lg" />,
-    to: "/cliente/mis-citas",
-  },
-  {
-    id: "cliente-catalogo",
-    label: "Catálogo",
-    icon: <FiShoppingBag className="text-lg" />,
-    to: "/cliente/catalogo",
-  },
-  {
-    id: "cliente-historial",
-    label: "Mi Historial",
-    icon: <FiFileText className="text-lg" />,
-    children: [
-      {
-        label: "Servicios",
-        to: "/cliente/historial/servicios",
-        icon: <FiScissors className="text-sm" />,
-      },
-      {
-        label: "Compras",
-        to: "/cliente/historial/compras",
-        icon: <FiShoppingBag className="text-sm" />,
-      },
-    ],
-  },
-  {
-    id: "cliente-perfil",
-    label: "Perfil",
-    icon: <FiUser className="text-lg" />,
-    to: "/cliente/perfil",
-  },
-];
-
-// ------------- Componentes para sidebar colapsado -------------
-
+// ─── CollapsedSimpleItem ──────────────────────────────────────────────────────
 function CollapsedSimpleItem({ item }: { item: MenuItem }) {
   return (
     <NavLink
       to={item.to!}
-      className={({ isActive }) =>
-        `w-10 h-10 flex items-center justify-center rounded-xl border transition-all duration-200 ${
-          isActive
-            ? "bg-white/20 border-white/80 text-white"
-            : "border-white/20 text-white/90 hover:bg-white/10"
-        }`
-      }
+      title={item.label}
+      className={({ isActive }) => `
+        w-10 h-10 flex items-center justify-center rounded-xl
+        text-lg no-underline transition-all duration-150
+        ${isActive 
+          ? 'bg-blue-600 text-white opacity-100' 
+          : 'text-white/70 hover:bg-white/10 hover:text-white hover:opacity-100'
+        }
+      `}
     >
       {item.icon}
-      <span className="sr-only">{item.label}</span>
     </NavLink>
   );
 }
 
+// ─── CollapsedParentItem ──────────────────────────────────────────────────────
 function CollapsedParentItem({ item }: { item: MenuItem }) {
   const [open, setOpen] = useState(false);
   const [top, setTop] = useState(0);
-  const btnRef = useRef<HTMLButtonElement | null>(null);
+  const btnRef = useRef<HTMLButtonElement>(null);
 
   const handleToggle = () => {
     if (!open && btnRef.current) {
-      const rect = btnRef.current.getBoundingClientRect();
-      const OFFSET = 65;
-      const newTop = Math.max(8, rect.top - OFFSET);
-      setTop(newTop);
+      setTop(Math.max(8, btnRef.current.getBoundingClientRect().top));
     }
-    setOpen((prev) => !prev);
+    setOpen(p => !p);
   };
 
   return (
@@ -455,49 +159,133 @@ function CollapsedParentItem({ item }: { item: MenuItem }) {
       <button
         ref={btnRef}
         onClick={handleToggle}
-        className="w-10 h-10 flex items-center justify-center rounded-xl hover:bg-white/20 transition-all duration-200 border border-white/10"
+        title={item.label}
+        className="
+          w-10 h-10 flex items-center justify-center rounded-xl
+          text-lg opacity-70 hover:opacity-100 hover:bg-white/10
+          transition-all duration-150 cursor-pointer border-none
+        "
       >
         {item.icon}
       </button>
-
+      
       {open && (
-        <div
-          className="fixed left-16 bg-gray-800 rounded-xl shadow-xl border border-gray-600 z-50 min-w-[190px]"
-          style={{ top }}
-          onMouseLeave={() => setOpen(false)}
-        >
-          <p className="px-3 pt-2 pb-1 text-xs font-semibold text-gray-300">
-            {item.label}
-          </p>
-          <div className="py-1">
+        <>
+          <div className="fixed inset-0 z-40" onClick={() => setOpen(false)} />
+          <div
+            className="fixed left-[76px] z-50 min-w-[200px] bg-[#1e3a5f] border border-white/10 rounded-xl shadow-2xl py-1.5"
+            style={{ top }}
+          >
+            <p className="px-4 py-1.5 text-[10px] font-semibold text-white/40 uppercase tracking-wide">
+              {item.label}
+            </p>
             {item.children?.map((child, idx) => (
               <NavLink
                 key={idx}
                 to={child.to}
                 onClick={() => setOpen(false)}
-                className={({ isActive }) =>
-                  `flex items-center gap-2 px-3 py-2 text-sm rounded-lg transition-colors duration-150 ${
-                    isActive
-                      ? "bg-blue-600 text-white"
-                      : "text-gray-300 hover:bg-gray-700"
-                  }`
-                }
+                className={({ isActive }) => `
+                  flex items-center gap-2.5 px-4 py-2 text-sm
+                  no-underline transition-all duration-150
+                  ${isActive 
+                    ? 'bg-blue-600 text-white' 
+                    : 'text-white hover:bg-white/10'
+                  }
+                `}
               >
-                {child.icon && <span>{child.icon}</span>}
+                {child.icon && <span className="opacity-70">{child.icon}</span>}
                 <span>{child.label}</span>
               </NavLink>
             ))}
           </div>
-        </div>
+        </>
       )}
     </>
   );
 }
 
-// -------------------- Sidebar principal --------------------
+// ─── Menús por rol ────────────────────────────────────────────────────────────
+const administradorMenu: MenuItem[] = [
+  { id: "admin-dashboard", label: "Dashboard", icon: <FiHome />, to: "/admin/dashboard" },
+  { id: "admin-agenda", label: "Agenda", icon: <FiCalendar />, to: "/admin/agenda" },
+  { id: "admin-grooming", label: "Grooming", icon: <FiScissors />, to: "/admin/grooming" },
+  {
+    id: "admin-clientes", label: "Clientes", icon: <FiUsers />,
+    children: [
+      { label: "Clientes", to: "/admin/clientes", icon: <FiUsers size={13} /> },
+      { label: "Mascotas", to: "/admin/mascotas", icon: <FiHeart size={13} /> },
+    ]
+  },
+  {
+    id: "admin-catalogo", label: "Catálogo", icon: <FiPackage />,
+    children: [
+      { label: "Productos", to: "/admin/catalogo/productos", icon: <FiBox size={13} /> },
+      { label: "Insumos", to: "/admin/catalogo/insumos", icon: <FiPackage size={13} /> },
+      { label: "Categorías", to: "/admin/catalogo/categorias", icon: <FiGrid size={13} /> },
+      { label: "Movimientos", to: "/admin/catalogo/movimientos", icon: <FiClock size={13} /> },
+    ]
+  },
+  { id: "admin-reportes", label: "Reportes", icon: <FiBarChart2 />, to: "/admin/reportes" },
+  {
+    id: "admin-configuracion", label: "Configuración", icon: <FiSettings />,
+    children: [
+      { label: "Datos del Negocio", to: "/admin/configuracion/negocio", icon: <FiBriefcase size={13} /> },
+      { label: "Usuarios", to: "/admin/configuracion/usuarios", icon: <FiUsers size={13} /> },
+      { label: "Notificaciones", to: "/admin/configuracion/notificaciones", icon: <FiBell size={13} /> },
+    ]
+  },
+];
 
-export default function Sidebar({ collapsed }: SidebarProps) {
-  const [openMenus, setOpenMenus] = useState<{ [key: string]: boolean }>({});
+const recepcionistaMenu: MenuItem[] = [
+  { id: "rec-dashboard", label: "Dashboard", icon: <FiHome />, to: "/recepcionista/dashboard" },
+  { id: "rec-agenda", label: "Agenda", icon: <FiCalendar />, to: "/recepcionista/agenda" },
+  {
+    id: "rec-clientes", label: "Clientes", icon: <FiUsers />,
+    children: [
+      { label: "Clientes", to: "/recepcionista/clientes", icon: <FiUsers size={13} /> },
+      { label: "Mascotas", to: "/recepcionista/mascotas", icon: <FiHeart size={13} /> },
+    ]
+  },
+  { id: "rec-ventas", label: "Ventas", icon: <FiDollarSign />, to: "/recepcionista/ventas" },
+  { id: "rec-notificaciones", label: "Notificaciones", icon: <FiBell />, to: "/recepcionista/notificaciones" },
+];
+
+const groomerMenu: MenuItem[] = [
+  { id: "grm-dashboard", label: "Dashboard", icon: <FiHome />, to: "/groomer/dashboard" },
+  { id: "grm-agenda", label: "Mi Agenda", icon: <FiCalendar />, to: "/groomer/agenda" },
+  {
+    id: "grm-fichas", label: "Fichas", icon: <FiFileText />,
+    children: [
+      { label: "Fichas de Hoy", to: "/groomer/fichas/hoy", icon: <FiClock size={13} /> },
+      { label: "Todas las Fichas", to: "/groomer/fichas/todas", icon: <FiFileText size={13} /> },
+    ]
+  },
+];
+
+const clienteMenu: MenuItem[] = [
+  { id: "cli-dashboard", label: "Inicio", icon: <FiHome />, to: "/cliente/dashboard" },
+  { id: "cli-mascotas", label: "Mis Mascotas", icon: <FiHeart />, to: "/cliente/mis-mascotas" },
+  { id: "cli-citas", label: "Mis Citas", icon: <FiCalendar />, to: "/cliente/mis-citas" },
+  { id: "cli-catalogo", label: "Catálogo", icon: <FiShoppingBag />, to: "/cliente/catalogo" },
+  {
+    id: "cli-historial", label: "Mi Historial", icon: <FiFileText />,
+    children: [
+      { label: "Servicios", to: "/cliente/historial/servicios", icon: <FiScissors size={13} /> },
+      { label: "Compras", to: "/cliente/historial/compras", icon: <FiShoppingBag size={13} /> },
+    ]
+  },
+];
+
+const roleLabels: Record<string, string> = {
+  administrador: "Administrador del Sistema",
+  recepcionista: "Recepcionista",
+  groomer: "Groomer",
+  cliente: "Cliente",
+};
+
+// ─── Sidebar principal ────────────────────────────────────────────────────────
+export default function Sidebar({ collapsed, onToggle }: SidebarProps) {
+  const [openMenus, setOpenMenus] = useState<Record<string, boolean>>({});
   const { user, logout } = useAuth();
   const navigate = useNavigate();
 
@@ -506,92 +294,147 @@ export default function Sidebar({ collapsed }: SidebarProps) {
     navigate("/login");
   };
 
-  const role = user?.rol as UserRole;
+  const role = (user?.rol as UserRole) ?? "administrador";
+  const currentMenu = {
+    administrador: administradorMenu,
+    recepcionista: recepcionistaMenu,
+    groomer: groomerMenu,
+    cliente: clienteMenu
+  }[role] ?? administradorMenu;
+  
+  const initials = [user?.nombre, user?.apellido].filter(Boolean).map(s => s![0].toUpperCase()).join("") || "U";
+  const fullName = [user?.nombre, user?.apellido].filter(Boolean).join(" ") || "Usuario";
+  const roleLabel = roleLabels[role] ?? role;
 
-  let currentMenu: MenuItem[] = administradorMenu;
-  if (role === "recepcionista") currentMenu = recepcionistaMenu;
-  if (role === "groomer") currentMenu = groomerMenu;
-  if (role === "cliente") currentMenu = clienteMenu;
-
-  // ---------- Sidebar EXPANDIDO ----------
-  const renderExpanded = () => (
-    <>
-      <nav className="flex-1 p-4 space-y-1 overflow-y-auto no-scrollbar">
-        {currentMenu.map((item) =>
-          item.children ? (
-            <SidebarDropdown
-              key={item.id}
-              label={item.label}
-              icon={item.icon}
-              open={!!openMenus[item.id]}
-              onClick={() =>
-                setOpenMenus((prev) => ({ ...prev, [item.id]: !prev[item.id] }))
-              }
-              items={item.children}
-            />
-          ) : (
-            item.to && (
-              <SidebarItem
-                key={item.id}
-                icon={item.icon}
-                label={item.label}
-                to={item.to}
-              />
-            )
-          )
-        )}
-      </nav>
-
-      {/* Footer - Cerrar Sesión */}
-      <div className="p-4 border-t border-white/10 space-y-2 bg-white/5">
-        <button
-          onClick={handleLogout}
-          className="flex items-center gap-3 w-full px-4 py-3 rounded-xl hover:bg-white/10 transition-all duration-200 text-white group border border-transparent hover:border-white/10"
-        >
-          <FiLogOut className="text-lg group-hover:scale-110 transition-transform" />
-          <span className="font-medium">Cerrar Sesión</span>
-        </button>
-      </div>
-    </>
+  const navItems = currentMenu.map((item) =>
+    item.children ? (
+      <SidebarDropdown
+        key={item.id}
+        label={item.label}
+        icon={item.icon}
+        open={!!openMenus[item.id]}
+        onClick={() => setOpenMenus(p => ({ ...p, [item.id]: !p[item.id] }))}
+        items={item.children}
+      />
+    ) : item.to ? (
+      <SidebarItem key={item.id} icon={item.icon} label={item.label} to={item.to} />
+    ) : null
   );
 
-  // ---------- Sidebar COLAPSADO ----------
-  const renderCollapsed = () => (
-    <>
-      <nav className="flex-1 py-4 flex flex-col items-center gap-3 overflow-y-auto no-scrollbar">
-        {currentMenu.map((item) =>
+  // ── SIDEBAR EXPANDIDO ──
+  if (!collapsed) {
+    return (
+      <aside className="w-full h-full bg-[#1e3a5f] text-white flex flex-col shadow-2xl overflow-hidden">
+        {/* Header */}
+        <div className="px-3.5 pt-3.5 pb-3 border-b border-white/10 flex items-center justify-between flex-shrink-0">
+          <div className="flex items-center gap-2.5">
+            <div className="w-9 h-9 rounded-lg bg-white/12 flex items-center justify-center flex-shrink-0">
+              <PawIcon size={20} />
+            </div>
+            <div>
+              <p className="text-white font-bold text-[13px] leading-tight m-0">PET SPA</p>
+              <p className="text-white/40 text-[9px] uppercase tracking-wider leading-tight m-0">Sistema de Gestión</p>
+            </div>
+          </div>
+          <button
+            onClick={onToggle}
+            title="Colapsar"
+            className="bg-transparent border-none cursor-pointer text-white/40 p-1.5 rounded-lg flex items-center justify-center hover:bg-white/10 hover:text-white transition-all duration-150"
+          >
+            <FiChevronLeft size={18} />
+          </button>
+        </div>
+
+        {/* Avatar */}
+        <div className="flex flex-col items-center py-4 px-4 border-b border-white/10 flex-shrink-0">
+          <div className="w-14 h-14 rounded-full bg-gradient-to-br from-blue-300 to-blue-600 flex items-center justify-center text-white font-bold text-xl mb-2 shadow-md">
+            {initials}
+          </div>
+          <p className="text-white font-semibold text-sm text-center m-0 leading-tight">{fullName}</p>
+          <p className="text-white/60 text-[11px] text-center mt-1 m-0">{roleLabel}</p>
+        </div>
+
+        {/* Navegación */}
+        <nav className="flex-1 overflow-y-auto py-2">
+          {navItems}
+        </nav>
+
+        {/* Footer */}
+        <div className="border-t border-white/10 py-1.5 flex-shrink-0">
+          <SidebarItem icon={<FiUser />} label="Perfil" to={`/${role}/perfil`} />
+          <button
+            onClick={handleLogout}
+            className="flex items-center gap-2.5 px-3.5 py-2 mx-2 my-0.5 rounded-lg text-sm font-medium text-white/60 bg-transparent hover:bg-white/10 hover:text-white transition-all duration-150 cursor-pointer w-[calc(100%-16px)] border-none"
+          >
+            <FiLogOut className="text-[17px] flex-shrink-0" />
+            <span>Cerrar Sesión</span>
+          </button>
+        </div>
+      </aside>
+    );
+  }
+
+  // ── SIDEBAR COLAPSADO ──
+  return (
+    <aside className="w-full h-full bg-[#1e3a5f] text-white flex flex-col items-center shadow-2xl overflow-hidden">
+      {/* Header colapsado */}
+      <div className="w-full py-3 pb-2.5 border-b border-white/10 flex flex-col items-center gap-2 flex-shrink-0">
+        <div className="w-9 h-9 rounded-lg bg-white/12 flex items-center justify-center">
+          <PawIcon size={20} />
+        </div>
+        <button
+          onClick={onToggle}
+          title="Expandir"
+          className="bg-transparent border-none cursor-pointer text-white/40 p-1 rounded-md flex hover:text-white hover:bg-white/10 transition-all duration-150"
+        >
+          <FiChevronRight size={18} />
+        </button>
+      </div>
+
+      {/* Avatar colapsado */}
+      <div className="w-full py-2.5 border-b border-white/10 flex justify-center flex-shrink-0">
+        <div
+          title={fullName}
+          className="w-9 h-9 rounded-full bg-gradient-to-br from-blue-300 to-blue-600 flex items-center justify-center text-white font-bold text-xs"
+        >
+          {initials}
+        </div>
+      </div>
+
+      {/* Navegación colapsada */}
+      <nav className="flex-1 overflow-y-auto py-2 flex flex-col items-center gap-1 w-full">
+        {currentMenu.map(item =>
           item.children ? (
             <CollapsedParentItem key={item.id} item={item} />
-          ) : (
-            item.to && <CollapsedSimpleItem key={item.id} item={item} />
-          )
+          ) : item.to ? (
+            <CollapsedSimpleItem key={item.id} item={item} />
+          ) : null
         )}
       </nav>
 
       {/* Footer colapsado */}
-      <div className="p-3 border-t border-white/10 bg-white/5 flex flex-col items-center gap-3">
+      <div className="border-t border-white/10 py-2 flex flex-col items-center gap-1.5 flex-shrink-0 w-full">
+        <NavLink
+          to={`/${role}/perfil`}
+          title="Perfil"
+          className={({ isActive }) => `
+            w-10 h-10 flex items-center justify-center rounded-xl
+            text-lg no-underline transition-all duration-150
+            ${isActive
+              ? 'bg-blue-600 text-white opacity-100'
+              : 'text-white/70 hover:bg-white/10 hover:text-white hover:opacity-100'
+            }
+          `}
+        >
+          <FiUser />
+        </NavLink>
         <button
           onClick={handleLogout}
-          className="w-10 h-10 flex items-center justify-center rounded-full border border-white/40 text-white hover:bg-white/20 transition-all duration-200"
+          title="Cerrar Sesión"
+          className="w-10 h-10 flex items-center justify-center rounded-xl text-lg opacity-70 hover:opacity-100 hover:bg-white/10 transition-all duration-150 cursor-pointer border-none bg-transparent text-white"
         >
-          <FiLogOut className="text-lg" />
-          <span className="sr-only">Cerrar Sesión</span>
+          <FiLogOut />
         </button>
-      </div>
-    </>
-  );
-
-  return (
-    <aside
-      className={`
-        h-full bg-gradient-to-b from-blue-800 to-blue-950
-        text-white flex flex-col shadow-2xl
-        transition-all duration-300
-        ${collapsed ? "w-16" : "w-64"}
-      `}
-    >
-      <div className="relative z-10 flex flex-col h-full">
-        {collapsed ? renderCollapsed() : renderExpanded()}
       </div>
     </aside>
   );

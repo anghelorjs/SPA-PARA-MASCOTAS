@@ -1,11 +1,20 @@
 // src/pages/auth/Login.tsx
 import { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../hooks/useAuth';
 import { EyeIcon, EyeSlashIcon } from '@heroicons/react/24/outline';
+import type { UserRole } from '../../services/types/auth';
+
+const dashboardByRole: Record<UserRole, string> = {
+  administrador: '/admin/dashboard',
+  recepcionista: '/recepcionista/dashboard',
+  groomer: '/groomer/dashboard',
+  cliente: '/cliente/dashboard',
+};
 
 export const Login = () => {
   const { login } = useAuth();
+  const navigate = useNavigate();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
@@ -18,7 +27,8 @@ export const Login = () => {
     setIsLoading(true);
 
     try {
-      await login({ email, password });
+      const user = await login({ email, password });
+      navigate(dashboardByRole[user.rol], { replace: true });
     } catch (err: any) {
       setError(err.message);
     } finally {

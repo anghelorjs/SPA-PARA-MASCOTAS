@@ -7,8 +7,8 @@ import type { ReactNode } from 'react';
 interface AuthContextType {
   user: User | null;
   isLoading: boolean;
-  login: (data: LoginData) => Promise<void>;
-  register: (data: RegisterData) => Promise<void>;
+  login: (data: LoginData) => Promise<User>;
+  register: (data: RegisterData) => Promise<User>;
   logout: () => Promise<void>;
   updateUser: (user: User) => void;
 }
@@ -44,11 +44,13 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const login = async (data: LoginData) => {
     const response = await authService.login(data);
     setUser(response.data.user);
+    return response.data.user;
   };
 
   const register = async (data: RegisterData) => {
     const response = await authService.register(data);
     setUser(response.data.user);
+    return response.data.user;
   };
 
   const logout = async () => {

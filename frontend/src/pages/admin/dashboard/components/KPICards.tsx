@@ -1,4 +1,3 @@
-// src/pages/admin/dashboard/components/KPICards.tsx
 import { CalendarIcon, CurrencyDollarIcon, UserGroupIcon, HeartIcon } from '@heroicons/react/24/outline';
 
 interface KPICardsProps {
@@ -16,39 +15,52 @@ export const KPICards = ({ kpi }: KPICardsProps) => {
       title: 'Citas Hoy',
       value: kpi.total_citas_hoy,
       icon: CalendarIcon,
-      color: 'bg-blue-500',
+      color: 'from-blue-500 to-blue-600',
+      bgColor: 'bg-blue-50',
+      iconColor: 'text-blue-600',
     },
     {
       title: 'Ingresos Hoy',
       value: `$${kpi.ingresos_hoy.toFixed(2)}`,
       icon: CurrencyDollarIcon,
-      color: 'bg-green-500',
+      color: 'from-green-500 to-green-600',
+      bgColor: 'bg-green-50',
+      iconColor: 'text-green-600',
     },
     {
       title: 'Groomers Activos',
       value: kpi.groomers_activos,
       icon: UserGroupIcon,
-      color: 'bg-purple-500',
+      color: 'from-purple-500 to-purple-600',
+      bgColor: 'bg-purple-50',
+      iconColor: 'text-purple-600',
     },
     {
       title: 'Mascotas Atendidas',
       value: kpi.mascotas_atendidas,
       icon: HeartIcon,
-      color: 'bg-pink-500',
+      color: 'from-pink-500 to-pink-600',
+      bgColor: 'bg-pink-50',
+      iconColor: 'text-pink-600',
     },
   ];
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
       {cards.map((card, index) => (
-        <div key={index} className="bg-white rounded-lg shadow p-6">
-          <div className="flex items-center">
-            <div className={`${card.color} p-3 rounded-lg`}>
-              <card.icon className="h-6 w-6 text-white" />
-            </div>
-            <div className="ml-4">
-              <p className="text-sm text-gray-500">{card.title}</p>
-              <p className="text-2xl font-bold text-gray-900">{card.value}</p>
+        <div
+          key={index}
+          className="bg-white rounded-xl shadow-sm border border-gray-100 hover:shadow-md transition-shadow duration-200"
+        >
+          <div className="p-5">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium text-gray-500 mb-1">{card.title}</p>
+                <p className="text-2xl font-bold text-gray-900">{card.value}</p>
+              </div>
+              <div className={`${card.bgColor} p-2.5 rounded-xl`}>
+                <card.icon className={`w-5 h-5 ${card.iconColor}`} />
+              </div>
             </div>
           </div>
         </div>

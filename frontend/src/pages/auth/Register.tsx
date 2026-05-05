@@ -2,7 +2,7 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../../hooks/useAuth';
-import { EyeIcon, EyeSlashIcon } from '@heroicons/react/24/outline';
+import fondoLogin from '../../assets/fondo_login.png';
 
 export const Register = () => {
   const { register } = useAuth();
@@ -20,23 +20,18 @@ export const Register = () => {
   const [isLoading, setIsLoading] = useState(false);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setFormData({
-      ...formData,
-      [e.target.name]: e.target.value,
-    });
+    setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
     setIsLoading(true);
-
     if (formData.password !== formData.password_confirmation) {
       setError('Las contraseñas no coinciden');
       setIsLoading(false);
       return;
     }
-
     try {
       await register({
         nombre: formData.nombre,
@@ -53,171 +48,223 @@ export const Register = () => {
     }
   };
 
+  const fields: { name: keyof typeof formData; label: string; type: string; required?: boolean }[] = [
+    { name: 'nombre',               label: 'Nombre',              type: 'text',     required: true },
+    { name: 'apellido',             label: 'Apellido',            type: 'text',     required: true },
+    { name: 'email',                label: 'Correo electrónico',  type: 'email',    required: true },
+    { name: 'telefono',             label: 'Teléfono',            type: 'tel' },
+    { name: 'direccion',            label: 'Dirección',           type: 'text' },
+    { name: 'password',             label: 'Contraseña',          type: 'password', required: true },
+    { name: 'password_confirmation',label: 'Confirmar Contraseña',type: 'password', required: true },
+  ];
+
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-md w-full space-y-8">
-        <div>
-          <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">
-            Crear Cuenta
-          </h2>
-          <p className="mt-2 text-center text-sm text-gray-600">
-            Regístrate como cliente
-          </p>
+    <div style={styles.page}>
+      {/* NAVBAR */}
+      <nav style={styles.navbar}>
+        <span style={styles.navLogo}>PetSpa</span>
+        <div style={styles.navLinks}>
+          <Link to="/login" style={styles.navButton}>Login</Link>
         </div>
+      </nav>
 
-        <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
-          {error && (
-            <div className="rounded-md bg-red-50 p-4">
-              <p className="text-sm text-red-700">{error}</p>
-            </div>
-          )}
+      {/* CARD */}
+      <div style={styles.card}>
+        <h2 style={styles.title}>Crear Cuenta</h2>
+        <p style={styles.subtitle}>Regístrate como cliente</p>
 
-          <div className="space-y-4">
-            <div>
-              <label htmlFor="nombre" className="block text-sm font-medium text-gray-700">
-                Nombre
-              </label>
-              <input
-                id="nombre"
-                name="nombre"
-                type="text"
-                required
-                value={formData.nombre}
-                onChange={handleChange}
-                className="mt-1 appearance-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
-                placeholder="Nombre"
-              />
-            </div>
+        {error && <div style={styles.errorBox}>{error}</div>}
 
-            <div>
-              <label htmlFor="apellido" className="block text-sm font-medium text-gray-700">
-                Apellido
-              </label>
-              <input
-                id="apellido"
-                name="apellido"
-                type="text"
-                required
-                value={formData.apellido}
-                onChange={handleChange}
-                className="mt-1 appearance-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
-                placeholder="Apellido"
-              />
-            </div>
+        <form onSubmit={handleSubmit} style={styles.form}>
+          {fields.map(({ name, label, type, required }) => {
+            const isPasswordField = type === 'password';
+            const resolvedType = isPasswordField
+              ? (showPassword ? 'text' : 'password')
+              : type;
 
-            <div>
-              <label htmlFor="email" className="block text-sm font-medium text-gray-700">
-                Correo electrónico
-              </label>
-              <input
-                id="email"
-                name="email"
-                type="email"
-                autoComplete="email"
-                required
-                value={formData.email}
-                onChange={handleChange}
-                className="mt-1 appearance-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
-                placeholder="correo@ejemplo.com"
-              />
-            </div>
-
-            <div>
-              <label htmlFor="telefono" className="block text-sm font-medium text-gray-700">
-                Teléfono
-              </label>
-              <input
-                id="telefono"
-                name="telefono"
-                type="tel"
-                value={formData.telefono}
-                onChange={handleChange}
-                className="mt-1 appearance-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
-                placeholder="Teléfono"
-              />
-            </div>
-
-            <div>
-              <label htmlFor="direccion" className="block text-sm font-medium text-gray-700">
-                Dirección
-              </label>
-              <input
-                id="direccion"
-                name="direccion"
-                type="text"
-                value={formData.direccion}
-                onChange={handleChange}
-                className="mt-1 appearance-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
-                placeholder="Dirección"
-              />
-            </div>
-
-            <div>
-              <label htmlFor="password" className="block text-sm font-medium text-gray-700">
-                Contraseña
-              </label>
-              <div className="relative">
+            return (
+              <div key={name} style={styles.inputWrapper}>
                 <input
-                  id="password"
-                  name="password"
-                  type={showPassword ? 'text' : 'password'}
-                  required
-                  value={formData.password}
+                  id={name}
+                  name={name}
+                  type={resolvedType}
+                  required={required}
+                  value={formData[name]}
                   onChange={handleChange}
-                  className="mt-1 appearance-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
-                  placeholder="Contraseña"
+                  placeholder={label}
+                  autoComplete={name === 'email' ? 'email' : undefined}
+                  style={styles.input}
                 />
-                <button
-                  type="button"
-                  onClick={() => setShowPassword(!showPassword)}
-                  className="absolute inset-y-0 right-0 pr-3 flex items-center"
-                >
-                  {showPassword ? (
-                    <EyeSlashIcon className="h-5 w-5 text-gray-400" />
-                  ) : (
-                    <EyeIcon className="h-5 w-5 text-gray-400" />
-                  )}
-                </button>
+                {name === 'password' && (
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword(!showPassword)}
+                    style={styles.eyeBtn}
+                    aria-label="Toggle password"
+                  >
+                    {showPassword ? '🔓' : '🔒'}
+                  </button>
+                )}
               </div>
-            </div>
+            );
+          })}
 
-            <div>
-              <label htmlFor="password_confirmation" className="block text-sm font-medium text-gray-700">
-                Confirmar Contraseña
-              </label>
-              <input
-                id="password_confirmation"
-                name="password_confirmation"
-                type={showPassword ? 'text' : 'password'}
-                required
-                value={formData.password_confirmation}
-                onChange={handleChange}
-                className="mt-1 appearance-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
-                placeholder="Confirmar contraseña"
-              />
-            </div>
-          </div>
-
-          <div>
-            <button
-              type="submit"
-              disabled={isLoading}
-              className="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              {isLoading ? 'Registrando...' : 'Registrarse'}
-            </button>
-          </div>
-
-          <div className="text-sm text-center">
-            <Link
-              to="/login"
-              className="font-medium text-blue-600 hover:text-blue-500"
-            >
-              ¿Ya tienes cuenta? Inicia Sesión
-            </Link>
-          </div>
+          <button
+            type="submit"
+            disabled={isLoading}
+            style={styles.submitBtn}
+          >
+            {isLoading ? 'Registrando...' : 'Registrarse'}
+          </button>
         </form>
+
+        <div style={styles.footerText}>
+          ¿Ya tienes cuenta?{' '}
+          <Link to="/login" style={styles.footerLink}>Inicia Sesión</Link>
+        </div>
       </div>
     </div>
   );
+};
+
+const styles: Record<string, React.CSSProperties> = {
+  page: {
+    minHeight: '100vh',
+    display: 'flex',
+    flexDirection: 'column',
+    alignItems: 'center',
+    justifyContent: 'center',
+    position: 'relative',
+    backgroundImage: `url(${fondoLogin})`,  // ← usa la variable importada
+    backgroundSize: 'cover',
+    backgroundPosition: 'center',
+  },
+  navbar: {
+    position: 'fixed',
+    top: 0,
+    left: 0,
+    right: 0,
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    padding: '18px 48px',
+    zIndex: 100,
+  },
+  navLogo: {
+    color: '#ffffff',
+    fontWeight: 700,
+    fontSize: '20px',
+    letterSpacing: '0.5px',
+  },
+  navLinks: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: '32px',
+  },
+  navLink: {
+    color: '#d0e4f7',
+    textDecoration: 'none',
+    fontSize: '14px',
+    letterSpacing: '0.3px',
+  },
+  navButton: {
+    color: '#000000',
+    textDecoration: 'none',
+    fontSize: '14px',
+    border: '1.5px solid #000000',
+    padding: '6px 22px',
+    borderRadius: '20px',
+    letterSpacing: '0.3px',
+  },
+  card: {
+    background: 'rgba(180, 210, 240, 0.18)',
+    backdropFilter: 'blur(16px)',
+    WebkitBackdropFilter: 'blur(16px)',
+    border: '1px solid rgba(0,0,0,0.25)',
+    borderRadius: '16px',
+    padding: '36px 36px',
+    width: '100%',
+    maxWidth: '420px',
+    boxShadow: '0 8px 32px rgba(0,0,0,0.3)',
+    marginTop: '72px',
+    marginBottom: '32px',
+  },
+  title: {
+    color: '#000000',
+    fontSize: '26px',
+    fontWeight: 600,
+    textAlign: 'center',
+    margin: '0 0 4px 0',
+    letterSpacing: '0.5px',
+  },
+  subtitle: {
+    color: 'rgba(0,0,0,0.65)',
+    fontSize: '13px',
+    textAlign: 'center',
+    margin: '0 0 24px 0',
+  },
+  form: {
+    display: 'flex',
+    flexDirection: 'column',
+    gap: '14px',
+  },
+  inputWrapper: {
+    position: 'relative',
+  },
+  input: {
+    width: '100%',
+    background: 'transparent',
+    border: 'none',
+    borderBottom: '1.5px solid rgba(0,0,0,0.6)',
+    color: '#000000',
+    fontSize: '14px',
+    padding: '10px 32px 10px 0',
+    outline: 'none',
+    boxSizing: 'border-box',
+    caretColor: '#ffffff',
+  },
+  eyeBtn: {
+    position: 'absolute',
+    right: '4px',
+    top: '50%',
+    transform: 'translateY(-50%)',
+    background: 'none',
+    border: 'none',
+    cursor: 'pointer',
+    fontSize: '14px',
+    padding: 0,
+  },
+  submitBtn: {
+    marginTop: '10px',
+    background: '#1a1a2e',
+    color: '#ffffff',
+    border: 'none',
+    borderRadius: '6px',
+    padding: '12px',
+    fontSize: '15px',
+    fontWeight: 600,
+    cursor: 'pointer',
+    letterSpacing: '0.5px',
+    width: '100%',
+  },
+  footerText: {
+    marginTop: '18px',
+    textAlign: 'center',
+    fontSize: '13px',
+    color: 'rgba(0,0,0,0.75)',
+  },
+  footerLink: {
+    color: '#7ec8f5',
+    fontWeight: 600,
+    textDecoration: 'none',
+  },
+  errorBox: {
+    background: 'rgba(220,53,69,0.25)',
+    border: '1px solid rgba(220,53,69,0.5)',
+    color: '#ffb3bb',
+    borderRadius: '8px',
+    padding: '10px 14px',
+    fontSize: '13px',
+    marginBottom: '12px',
+  },
 };

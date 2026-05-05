@@ -21,7 +21,7 @@ export const KPICards = ({ kpi }: KPICardsProps) => {
     },
     {
       title: 'Ingresos Hoy',
-      value: `$${kpi.ingresos_hoy.toFixed(2)}`,
+      value: `Bs ${kpi.ingresos_hoy.toFixed(2)}`,
       icon: CurrencyDollarIcon,
       color: 'from-green-500 to-green-600',
       bgColor: 'bg-green-50',

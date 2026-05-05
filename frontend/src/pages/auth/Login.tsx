@@ -2,8 +2,8 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../hooks/useAuth';
-import { EyeIcon, EyeSlashIcon } from '@heroicons/react/24/outline';
 import type { UserRole } from '../../services/types/auth';
+import fondoLogin from '../../assets/fondo_login.png';
 
 const dashboardByRole: Record<UserRole, string> = {
   administrador: '/admin/dashboard',
@@ -25,7 +25,6 @@ export const Login = () => {
     e.preventDefault();
     setError('');
     setIsLoading(true);
-
     try {
       const user = await login({ email, password });
       navigate(dashboardByRole[user.rol], { replace: true });
@@ -37,90 +36,219 @@ export const Login = () => {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-md w-full space-y-8">
-        <div>
-          <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">
-            Iniciar Sesión
-          </h2>
-          <p className="mt-2 text-center text-sm text-gray-600">
-            SPA para Mascotas
-          </p>
+    <div style={styles.page}>
+      {/* NAVBAR */}
+      <nav style={styles.navbar}>
+        <span style={styles.navLogo}>PetSpa</span>
+        <div style={styles.navLinks}>
+          <Link to="/register" style={styles.navButton}>Registrate</Link>
         </div>
+      </nav>
 
-        <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
-          {error && (
-            <div className="rounded-md bg-red-50 p-4">
-              <p className="text-sm text-red-700">{error}</p>
-            </div>
-          )}
+      {/* CARD */}
+      <div style={styles.card}>
+        <h2 style={styles.title}>Login</h2>
 
-          <div className="rounded-md shadow-sm -space-y-px">
-            <div>
-              <label htmlFor="email" className="sr-only">
-                Correo electrónico
-              </label>
-              <input
-                id="email"
-                name="email"
-                type="email"
-                autoComplete="email"
-                required
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                className="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-t-md focus:outline-none focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm"
-                placeholder="Correo electrónico"
-              />
-            </div>
-            <div className="relative">
-              <label htmlFor="password" className="sr-only">
-                Contraseña
-              </label>
-              <input
-                id="password"
-                name="password"
-                type={showPassword ? 'text' : 'password'}
-                autoComplete="current-password"
-                required
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                className="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-b-md focus:outline-none focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm"
-                placeholder="Contraseña"
-              />
-              <button
-                type="button"
-                onClick={() => setShowPassword(!showPassword)}
-                className="absolute inset-y-0 right-0 pr-3 flex items-center"
-              >
-                {showPassword ? (
-                  <EyeSlashIcon className="h-5 w-5 text-gray-400" />
-                ) : (
-                  <EyeIcon className="h-5 w-5 text-gray-400" />
-                )}
-              </button>
-            </div>
+        {error && <div style={styles.errorBox}>{error}</div>}
+
+        <form onSubmit={handleSubmit} style={styles.form}>
+          <div style={styles.inputWrapper}>
+            <input
+              id="email"
+              name="email"
+              type="email"
+              autoComplete="email"
+              required
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              placeholder="Email"
+              style={styles.input}
+            />
+            <span style={styles.inputIcon}>✉</span>
           </div>
 
-          <div>
+          <div style={styles.inputWrapper}>
+            <input
+              id="password"
+              name="password"
+              type={showPassword ? 'text' : 'password'}
+              autoComplete="current-password"
+              required
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              placeholder="Password"
+              style={styles.input}
+            />
             <button
-              type="submit"
-              disabled={isLoading}
-              className="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
+              type="button"
+              onClick={() => setShowPassword(!showPassword)}
+              style={styles.eyeBtn}
+              aria-label="Toggle password"
             >
-              {isLoading ? 'Iniciando sesión...' : 'Iniciar Sesión'}
+              {showPassword ? '🔓' : '🔒'}
             </button>
           </div>
 
-          <div className="text-sm text-center">
-            <Link
-              to="/register"
-              className="font-medium text-blue-600 hover:text-blue-500"
-            >
-              ¿No tienes cuenta? Regístrate
-            </Link>
-          </div>
+          <button
+            type="submit"
+            disabled={isLoading}
+            style={styles.submitBtn}
+          >
+            {isLoading ? 'Iniciando sesión...' : 'Login'}
+          </button>
         </form>
+
+        <div style={styles.footerText}>
+          ¿No tienes una cuenta?{' '}
+          <Link to="/register" style={styles.footerLink}>Registrate</Link>
+        </div>
       </div>
     </div>
   );
+};
+
+const styles: Record<string, React.CSSProperties> = {
+  page: {
+    minHeight: '100vh',
+    display: 'flex',
+    flexDirection: 'column',
+    alignItems: 'center',
+    justifyContent: 'center',
+    position: 'relative',
+    backgroundImage: `url(${fondoLogin})`,  // ← usa la variable importada
+    backgroundSize: 'cover',
+    backgroundPosition: 'center',
+  },
+  navbar: {
+    position: 'fixed',
+    top: 0,
+    left: 0,
+    right: 0,
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    padding: '18px 48px',
+    zIndex: 100,
+  },
+  navLogo: {
+    color: '#ffffff',
+    fontWeight: 700,
+    fontSize: '20px',
+    letterSpacing: '0.5px',
+  },
+  navLinks: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: '32px',
+  },
+  navLink: {
+    color: '#d0e4f7',
+    textDecoration: 'none',
+    fontSize: '14px',
+    letterSpacing: '0.3px',
+    transition: 'color 0.2s',
+  },
+  navButton: {
+    color: '#000000',
+    textDecoration: 'none',
+    fontSize: '14px',
+    border: '1.5px solid #000000',
+    padding: '6px 22px',
+    borderRadius: '20px',
+    letterSpacing: '0.3px',
+    transition: 'background 0.2s',
+  },
+  card: {
+    background: 'rgba(180, 210, 240, 0.18)',
+    backdropFilter: 'blur(16px)',
+    WebkitBackdropFilter: 'blur(16px)',
+    border: '1px solid rgba(0,0,0,0.25)',
+    borderRadius: '16px',
+    padding: '40px 36px',
+    width: '100%',
+    maxWidth: '400px',
+    boxShadow: '0 8px 32px rgba(0,0,0,0.3)',
+  },
+  title: {
+    color: '#000000',
+    fontSize: '28px',
+    fontWeight: 600,
+    textAlign: 'center',
+    margin: '0 0 28px 0',
+    letterSpacing: '0.5px',
+  },
+  form: {
+    display: 'flex',
+    flexDirection: 'column',
+    gap: '16px',
+  },
+  inputWrapper: {
+    position: 'relative',
+  },
+  input: {
+    width: '100%',
+    background: 'transparent',
+    border: 'none',
+    borderBottom: '1.5px solid rgba(0,0,0,0.6)',
+    color: '#000000',
+    fontSize: '14px',
+    padding: '10px 36px 10px 0',
+    outline: 'none',
+    boxSizing: 'border-box',
+    caretColor: '#ffffff',
+  },
+  inputIcon: {
+    position: 'absolute',
+    right: '4px',
+    top: '50%',
+    transform: 'translateY(-50%)',
+    color: 'rgba(255,255,255,0.7)',
+    fontSize: '14px',
+    pointerEvents: 'none',
+  },
+  eyeBtn: {
+    position: 'absolute',
+    right: '4px',
+    top: '50%',
+    transform: 'translateY(-50%)',
+    background: 'none',
+    border: 'none',
+    cursor: 'pointer',
+    fontSize: '14px',
+    padding: 0,
+  },
+  submitBtn: {
+    marginTop: '12px',
+    background: '#1a1a2e',
+    color: '#ffffff',
+    border: 'none',
+    borderRadius: '6px',
+    padding: '12px',
+    fontSize: '15px',
+    fontWeight: 600,
+    cursor: 'pointer',
+    letterSpacing: '0.5px',
+    transition: 'background 0.2s',
+    width: '100%',
+  },
+  footerText: {
+    marginTop: '20px',
+    textAlign: 'center',
+    fontSize: '13px',
+    color: 'rgba(255,255,255,0.75)',
+  },
+  footerLink: {
+    color: '#7ec8f5',
+    fontWeight: 600,
+    textDecoration: 'none',
+  },
+  errorBox: {
+    background: 'rgba(220,53,69,0.25)',
+    border: '1px solid rgba(220,53,69,0.5)',
+    color: '#ffb3bb',
+    borderRadius: '8px',
+    padding: '10px 14px',
+    fontSize: '13px',
+    marginBottom: '12px',
+  },
 };

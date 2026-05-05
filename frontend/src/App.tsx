@@ -5,6 +5,7 @@ import { AuthProvider } from "./contexts/AuthContext";
 import { ProtectedRoute } from "./components/auth/ProtectedRoute";
 import LoadingSpinner from "./components/common/LoadingSpinner";
 import type { UserRole } from "./services/types/auth";
+import { useToast } from './hooks/useToast';
 
 // Pages de Auth
 import { Login } from "./pages/auth/Login";
@@ -30,7 +31,7 @@ const CategoriasAdmin = () => <div className="p-6"><h1 className="text-2xl font-
 const MovimientosAdmin = () => <div className="p-6"><h1 className="text-2xl font-bold">Movimientos de Inventario</h1><p className="mt-4 text-gray-600">Historial de movimientos de stock.</p></div>;
 const ReportesAdmin = () => <div className="p-6"><h1 className="text-2xl font-bold">Reportes</h1><p className="mt-4 text-gray-600">Generación de reportes del sistema.</p></div>;
 const ConfiguracionNegocio = () => <div className="p-6"><h1 className="text-2xl font-bold">Datos del Negocio</h1><p className="mt-4 text-gray-600">Configuración de la empresa.</p></div>;
-const ConfiguracionUsuarios = () => <div className="p-6"><h1 className="text-2xl font-bold">Usuarios del Sistema</h1><p className="mt-4 text-gray-600">Gestión de usuarios y roles.</p></div>;
+import { UsuariosPage } from "./pages/admin/configuracion/usuarios/pages/UsuariosPage";
 const ConfiguracionNotificaciones = () => <div className="p-6"><h1 className="text-2xl font-bold">Notificaciones del Sistema</h1><p className="mt-4 text-gray-600">Historial y envío de notificaciones.</p></div>;
 import { PerfilAdmin } from "./pages/admin/perfil/pages/PerfilAdmin";
 
@@ -119,7 +120,7 @@ const AppRoutes = () => {
         <Route path="admin/catalogo/movimientos" element={<MovimientosAdmin />} />
         <Route path="admin/reportes" element={<ReportesAdmin />} />
         <Route path="admin/configuracion/negocio" element={<ConfiguracionNegocio />} />
-        <Route path="admin/configuracion/usuarios" element={<ConfiguracionUsuarios />} />
+        <Route path="admin/configuracion/usuarios" element={<UsuariosPage />} />
         <Route path="admin/configuracion/notificaciones" element={<ConfiguracionNotificaciones />} />
         <Route path="admin/perfil" element={<PerfilAdmin />} />
 
@@ -165,9 +166,11 @@ const AppRoutes = () => {
 };
 
 function App() {
+  const { ToastContainer } = useToast();
   return (
     <AuthProvider>
       <AppRoutes />
+      <ToastContainer />
     </AuthProvider>
   );
 }

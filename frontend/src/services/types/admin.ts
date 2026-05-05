@@ -42,3 +42,27 @@ export interface UpdatePasswordResponse {
   message: string;
   data: null;
 }
+
+export interface Usuario {
+  idUsuario: number;
+  nombre: string;
+  apellido: string;
+  email: string;
+  telefono: string | null;
+  rol: 'administrador' | 'recepcionista' | 'groomer' | 'cliente';
+  activo: boolean;
+  creadoEn: string;
+  perfil_datos: PerfilData | null;
+}
+
+export interface PerfilData {
+  idAdministrador?: number;
+  idRecepcionista?: number;
+  idGroomer?: number;
+  idCliente?: number;
+  turno?: string;
+  especialidad?: string;
+  maxServiciosSimultaneos?: number;
+  direccion?: string;
+  canalContacto?: string;
+}

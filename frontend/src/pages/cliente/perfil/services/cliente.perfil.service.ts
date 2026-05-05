@@ -31,6 +31,7 @@ export interface PerfilClienteData {
 export interface UpdatePerfilData {
   nombre?: string;
   apellido?: string;
+  email?: string;
   telefono?: string;
   direccion?: string;
   canal_contacto?: 'whatsapp' | 'telegram' | 'email' | 'sms';

@@ -79,6 +79,7 @@ class PerfilController extends ApiController
         $request->validate([
             'nombre' => 'sometimes|string|max:100',
             'apellido' => 'sometimes|string|max:100',
+            'email' => 'sometimes|email|unique:users,email,' . $user->idUsuario . ',idUsuario', // ✅ Agregado
             'telefono' => 'nullable|string|max:20',
             'direccion' => 'nullable|string',
             'canal_contacto' => 'nullable|in:whatsapp,telegram,email,sms'
@@ -87,6 +88,7 @@ class PerfilController extends ApiController
         try {
             if ($request->has('nombre')) $user->nombre = $request->nombre;
             if ($request->has('apellido')) $user->apellido = $request->apellido;
+            if ($request->has('email')) $user->email = $request->email; // ✅ Agregado
             if ($request->has('telefono')) $user->telefono = $request->telefono;
             $user->save();
             
@@ -97,7 +99,7 @@ class PerfilController extends ApiController
             return $this->successResponse([
                 'nombre' => $user->nombre,
                 'apellido' => $user->apellido,
-                'email' => $user->email,
+                'email' => $user->email, // ✅ Incluido en la respuesta
                 'telefono' => $user->telefono,
                 'direccion' => $cliente->direccion,
                 'canal_contacto' => $cliente->canalContacto

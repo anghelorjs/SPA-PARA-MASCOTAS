@@ -43,7 +43,7 @@ const ClientesRecepcionista = () => <div className="p-6"><h1 className="text-2xl
 const MascotasRecepcionista = () => <div className="p-6"><h1 className="text-2xl font-bold">Mascotas</h1><p className="mt-4 text-gray-600">Gestión de mascotas.</p></div>;
 const VentasRecepcionista = () => <div className="p-6"><h1 className="text-2xl font-bold">Ventas</h1><p className="mt-4 text-gray-600">Registro de ventas.</p></div>;
 const NotificacionesRecepcionista = () => <div className="p-6"><h1 className="text-2xl font-bold">Notificaciones</h1><p className="mt-4 text-gray-600">Envío de notificaciones a clientes.</p></div>;
-const PerfilRecepcionista = () => <div className="p-6"><h1 className="text-2xl font-bold">Mi Perfil</h1><p className="mt-4 text-gray-600">Configuración de tu cuenta.</p></div>;
+import { PerfilRecepcionista } from "./pages/recepcionista/perfil/pages/PerfilRecepcionista";
 
 // ========================
 // GROOMER
@@ -52,8 +52,7 @@ const DashboardGroomer = () => <div className="p-6"><h1 className="text-2xl font
 const AgendaGroomer = () => <div className="p-6"><h1 className="text-2xl font-bold">Mi Agenda</h1><p className="mt-4 text-gray-600">Lista de tus citas del día.</p></div>;
 const FichasGroomerHoy = () => <div className="p-6"><h1 className="text-2xl font-bold">Fichas de Hoy</h1><p className="mt-4 text-gray-600">Fichas de grooming del día.</p></div>;
 const FichasGroomerTodas = () => <div className="p-6"><h1 className="text-2xl font-bold">Todas las Fichas</h1><p className="mt-4 text-gray-600">Historial de fichas de grooming.</p></div>;
-const PerfilGroomer = () => <div className="p-6"><h1 className="text-2xl font-bold">Mi Perfil</h1><p className="mt-4 text-gray-600">Configuración de tu cuenta.</p></div>;
-
+import { PerfilGroomer } from "./pages/groomer/perfil/pages/PerfilGroomer";
 // ========================
 // CLIENTE
 // ========================
@@ -63,7 +62,7 @@ const MisCitas = () => <div className="p-6"><h1 className="text-2xl font-bold">M
 const CatalogoCliente = () => <div className="p-6"><h1 className="text-2xl font-bold">Catálogo</h1><p className="mt-4 text-gray-600">Productos disponibles.</p></div>;
 const HistorialServicios = () => <div className="p-6"><h1 className="text-2xl font-bold">Historial de Servicios</h1><p className="mt-4 text-gray-600">Servicios realizados.</p></div>;
 const HistorialCompras = () => <div className="p-6"><h1 className="text-2xl font-bold">Historial de Compras</h1><p className="mt-4 text-gray-600">Tus compras realizadas.</p></div>;
-const PerfilCliente = () => <div className="p-6"><h1 className="text-2xl font-bold">Mi Perfil</h1><p className="mt-4 text-gray-600">Configuración de tu cuenta.</p></div>;
+import { PerfilCliente } from "./pages/cliente/perfil/pages/PerfilCliente";
 
 // ============================================================
 // COMPONENTE PARA REDIRIGIR AL DASHBOARD SEGÚN EL ROL

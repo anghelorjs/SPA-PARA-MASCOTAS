@@ -32,7 +32,7 @@ const ReportesAdmin = () => <div className="p-6"><h1 className="text-2xl font-bo
 const ConfiguracionNegocio = () => <div className="p-6"><h1 className="text-2xl font-bold">Datos del Negocio</h1><p className="mt-4 text-gray-600">Configuración de la empresa.</p></div>;
 const ConfiguracionUsuarios = () => <div className="p-6"><h1 className="text-2xl font-bold">Usuarios del Sistema</h1><p className="mt-4 text-gray-600">Gestión de usuarios y roles.</p></div>;
 const ConfiguracionNotificaciones = () => <div className="p-6"><h1 className="text-2xl font-bold">Notificaciones del Sistema</h1><p className="mt-4 text-gray-600">Historial y envío de notificaciones.</p></div>;
-const PerfilAdmin = () => <div className="p-6"><h1 className="text-2xl font-bold">Mi Perfil</h1><p className="mt-4 text-gray-600">Configuración de tu cuenta.</p></div>;
+import { PerfilAdmin } from "./pages/admin/perfil/pages/PerfilAdmin";
 
 // ========================
 // RECEPCIONISTA

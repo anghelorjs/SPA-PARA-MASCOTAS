@@ -19,6 +19,22 @@ const NOTIFS = [
   { title: "Recordatorio", desc: "Rocky — Cita mañana a las 14:30", time: "hace 2 h", dot: "#60a5fa" },
 ];
 
+// Función para obtener el path correcto del perfil según el rol
+const getPerfilPath = (role: string): string => {
+  switch (role) {
+    case 'administrador':
+      return '/admin/perfil';
+    case 'recepcionista':
+      return '/recepcionista/perfil';
+    case 'groomer':
+      return '/groomer/perfil';
+    case 'cliente':
+      return '/cliente/perfil';
+    default:
+      return '/perfil';
+  }
+};
+
 export default function Navbar({ sidebarCollapsed }: NavbarProps) {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
@@ -45,6 +61,7 @@ export default function Navbar({ sidebarCollapsed }: NavbarProps) {
   const roleLabel = roleLabels[role] ?? role;
   const fullName = [user?.nombre, user?.apellido].filter(Boolean).join(" ") || "Usuario";
   const initials = [user?.nombre, user?.apellido].filter(Boolean).map(s => s![0].toUpperCase()).join("") || "U";
+  const perfilPath = getPerfilPath(role);
 
   return (
     <header
@@ -142,7 +159,7 @@ export default function Navbar({ sidebarCollapsed }: NavbarProps) {
               <button
                 onClick={() => {
                   setDropdownOpen(false);
-                  navigate(`/${role}/perfil`);
+                  navigate(perfilPath);  // ✅ CORREGIDO: usa la ruta correcta
                 }}
                 className="flex items-center gap-2.5 w-full px-4 py-2.5 bg-transparent text-white/75 text-xs transition-all duration-150 hover:bg-white/10 hover:text-white cursor-pointer border-none"
               >

@@ -1,11 +1,12 @@
 // src/pages/auth/Register.tsx
 import { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom'; // ← Agregar useNavigate
 import { useAuth } from '../../hooks/useAuth';
 import fondoLogin from '../../assets/fondo_login.png';
 
 export const Register = () => {
   const { register } = useAuth();
+  const navigate = useNavigate(); // ← Agregar navigate
   const [formData, setFormData] = useState({
     nombre: '',
     apellido: '',
@@ -27,11 +28,13 @@ export const Register = () => {
     e.preventDefault();
     setError('');
     setIsLoading(true);
+    
     if (formData.password !== formData.password_confirmation) {
       setError('Las contraseñas no coinciden');
       setIsLoading(false);
       return;
     }
+    
     try {
       await register({
         nombre: formData.nombre,
@@ -41,6 +44,8 @@ export const Register = () => {
         telefono: formData.telefono,
         direccion: formData.direccion,
       });
+      // ✅ Redirigir al dashboard después del registro exitoso
+      navigate('/');
     } catch (err: any) {
       setError(err.message);
     } finally {
@@ -135,7 +140,7 @@ const styles: Record<string, React.CSSProperties> = {
     alignItems: 'center',
     justifyContent: 'center',
     position: 'relative',
-    backgroundImage: `url(${fondoLogin})`,  // ← usa la variable importada
+    backgroundImage: `url(${fondoLogin})`,
     backgroundSize: 'cover',
     backgroundPosition: 'center',
   },

@@ -27,6 +27,11 @@ api.interceptors.request.use(
 api.interceptors.response.use(
   (response) => response,
   (error) => {
+    const backendMessage = error.response?.data?.message;
+    if (backendMessage) {
+      error.message = backendMessage;
+    }
+
     if (error.response?.status === 401) {
       // Token expirado o inválido
       localStorage.removeItem('token');

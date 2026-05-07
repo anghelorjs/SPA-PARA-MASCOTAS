@@ -22,56 +22,49 @@ const canalesContacto = [
   { value: 'whatsapp', label: 'WhatsApp' },
   { value: 'telegram', label: 'Telegram' },
   { value: 'email', label: 'Email' },
+  { value: 'sms', label: 'SMS' },
 ];
 
+// Valores por defecto
+const defaultFormData: CreateUsuarioData = {
+  nombre: '',
+  apellido: '',
+  email: '',
+  telefono: '',
+  rol: '',
+  turno: 'matutino',
+  especialidad: '',
+  maxServiciosSimultaneos: 1,
+  direccion: '',
+  canalContacto: 'whatsapp',
+};
+
 export const UsuarioFormModal = ({ isOpen, onClose, onSave, usuario, roles, isEditing }: UsuarioFormModalProps) => {
-  const [formData, setFormData] = useState<CreateUsuarioData>({
-    nombre: '',
-    apellido: '',
-    email: '',
-    telefono: '',
-    rol: '',
-    password: '',
-    turno: 'matutino',
-    especialidad: '',
-    maxServiciosSimultaneos: 1,
-    direccion: '',
-    canalContacto: 'whatsapp',
-  });
+  const [formData, setFormData] = useState<CreateUsuarioData>(defaultFormData);
   const [isLoading, setIsLoading] = useState(false);
   const [errors, setErrors] = useState<{ [key: string]: string }>({});
 
   useEffect(() => {
-    if (usuario && isEditing) {
-      setFormData({
-        nombre: usuario.nombre,
-        apellido: usuario.apellido,
-        email: usuario.email,
-        telefono: usuario.telefono || '',
-        rol: usuario.rol,
-        password: '',
-        turno: usuario.perfil_datos?.turno || 'matutino',
-        especialidad: usuario.perfil_datos?.especialidad || '',
-        maxServiciosSimultaneos: usuario.perfil_datos?.maxServiciosSimultaneos || 1,
-        direccion: usuario.perfil_datos?.direccion || '',
-        canalContacto: usuario.perfil_datos?.canalContacto || 'whatsapp',
-      });
-    } else {
-      setFormData({
-        nombre: '',
-        apellido: '',
-        email: '',
-        telefono: '',
-        rol: '',
-        password: '',
-        turno: 'matutino',
-        especialidad: '',
-        maxServiciosSimultaneos: 1,
-        direccion: '',
-        canalContacto: 'whatsapp',
-      });
+    if (isOpen) {
+      if (usuario && isEditing) {
+        const perfilDatos = usuario.perfil_datos || {};
+        setFormData({
+          nombre: usuario.nombre || '',
+          apellido: usuario.apellido || '',
+          email: usuario.email || '',
+          telefono: usuario.telefono || '',
+          rol: usuario.rol || '',
+          turno: perfilDatos.turno || 'matutino',
+          especialidad: perfilDatos.especialidad || '',
+          maxServiciosSimultaneos: perfilDatos.maxServiciosSimultaneos || 1,
+          direccion: perfilDatos.direccion || '',
+          canalContacto: perfilDatos.canalContacto || 'whatsapp',
+        });
+      } else {
+        setFormData(defaultFormData);
+      }
+      setErrors({});
     }
-    setErrors({});
   }, [usuario, isEditing, isOpen]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
@@ -84,18 +77,19 @@ export const UsuarioFormModal = ({ isOpen, onClose, onSave, usuario, roles, isEd
 
   const validate = () => {
     const newErrors: { [key: string]: string } = {};
+    
     if (!formData.nombre) newErrors.nombre = 'El nombre es requerido';
     if (!formData.apellido) newErrors.apellido = 'El apellido es requerido';
     if (!formData.email) newErrors.email = 'El email es requerido';
     else if (!/\S+@\S+\.\S+/.test(formData.email)) newErrors.email = 'Email inválido';
     if (!formData.rol) newErrors.rol = 'El rol es requerido';
-    if (!isEditing && !formData.password) newErrors.password = 'La contraseña es requerida';
-    else if (!isEditing && formData.password.length < 6) newErrors.password = 'Mínimo 6 caracteres';
+    
+    // ❌ NO hay validación de contraseña - el backend la genera automáticamente
+    
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
 
-  // ← Sin <form>, manejamos el submit con onClick
   const handleSubmit = async () => {
     if (!validate()) return;
     setIsLoading(true);
@@ -112,7 +106,6 @@ export const UsuarioFormModal = ({ isOpen, onClose, onSave, usuario, roles, isEd
       onClick={onClose}
     >
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: '100%', padding: '16px' }}>
-        {/* Detener propagación para que clicks dentro no cierren el modal */}
         <div
           style={{ background: 'white', borderRadius: '8px', width: '100%', maxWidth: '512px', boxShadow: '0 20px 60px rgba(0,0,0,0.3)' }}
           onClick={e => e.stopPropagation()}
@@ -128,7 +121,7 @@ export const UsuarioFormModal = ({ isOpen, onClose, onSave, usuario, roles, isEd
               </button>
             </div>
 
-            {/* Campos — div en lugar de form */}
+            {/* Campos */}
             <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
 
               {/* Nombre + Apellido */}
@@ -199,22 +192,10 @@ export const UsuarioFormModal = ({ isOpen, onClose, onSave, usuario, roles, isEd
                 {errors.rol && <p className="mt-1 text-xs text-red-500">{errors.rol}</p>}
               </div>
 
-              {/* Contraseña — solo al crear */}
-              {!isEditing && (
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Contraseña *</label>
-                  <input
-                    type="password"
-                    name="password"
-                    value={formData.password}
-                    onChange={handleChange}
-                    className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 ${errors.password ? 'border-red-500' : 'border-gray-300'}`}
-                  />
-                  {errors.password && <p className="mt-1 text-xs text-red-500">{errors.password}</p>}
-                </div>
-              )}
+              {/* NOTA: El campo de contraseña ha sido ELIMINADO - El backend la genera automáticamente */}
+              {/* El usuario recibirá la contraseña por email junto al link de activación */}
 
-              {/* Turno — recepcionista */}
+              {/* Turno — Recepcionista */}
               {formData.rol === 'recepcionista' && (
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">Turno</label>
@@ -229,7 +210,7 @@ export const UsuarioFormModal = ({ isOpen, onClose, onSave, usuario, roles, isEd
                 </div>
               )}
 
-              {/* Especialidad + Máx servicios — groomer */}
+              {/* Especialidad + Máx servicios — Groomer */}
               {formData.rol === 'groomer' && (
                 <>
                   <div>
@@ -258,7 +239,6 @@ export const UsuarioFormModal = ({ isOpen, onClose, onSave, usuario, roles, isEd
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                           </svg>
                         </button>
-                        {/* Tooltip */}
                         <div className="absolute left-0 bottom-full mb-2 hidden group-hover:block z-10 w-64 p-2 bg-gray-900 text-white text-xs rounded-lg shadow-lg">
                           <p className="font-medium mb-1">¿Qué significa esto?</p>
                           <p className="text-gray-300">
@@ -289,7 +269,7 @@ export const UsuarioFormModal = ({ isOpen, onClose, onSave, usuario, roles, isEd
                 </>
               )}
 
-              {/* Dirección + Canal contacto — cliente */}
+              {/* Dirección + Canal contacto — Cliente */}
               {formData.rol === 'cliente' && (
                 <>
                   <div>
@@ -314,6 +294,20 @@ export const UsuarioFormModal = ({ isOpen, onClose, onSave, usuario, roles, isEd
                     </select>
                   </div>
                 </>
+              )}
+
+              {/* Nota informativa sobre la contraseña */}
+              {!isEditing && (
+                <div style={{ 
+                  background: '#e0f2fe', 
+                  padding: '12px', 
+                  borderRadius: '8px', 
+                  marginTop: '8px',
+                  fontSize: '13px',
+                  color: '#0369a1'
+                }}>
+                  <strong>ℹ️ Nota:</strong> La contraseña será generada automáticamente y enviada al correo del usuario junto con el link de activación.
+                </div>
               )}
 
               {/* Botones */}

@@ -9,6 +9,7 @@ export interface User {
   rol: 'administrador' | 'recepcionista' | 'groomer' | 'cliente';
   activo: boolean;
   creadoEn: string;
+  must_change_password?: boolean;
 }
 
 export type UserRole = User['rol'];
@@ -53,7 +54,16 @@ export interface LoginResponse {
     perfil: Perfil;
     token: string;
     token_type: string;
+    must_change_password?: boolean;
   };
+}
+
+export interface LoginResponseData {
+  user: User;
+  perfil: Perfil;
+  token: string;
+  token_type: string;
+  must_change_password?: boolean;
 }
 
 export interface LoginData {

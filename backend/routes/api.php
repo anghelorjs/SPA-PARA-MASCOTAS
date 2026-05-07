@@ -60,10 +60,13 @@ use App\Http\Controllers\Api\Cliente\CitaController as ClienteCitaController;
 use App\Http\Controllers\Api\Cliente\CatalogoController as ClienteCatalogoController;
 use App\Http\Controllers\Api\Cliente\HistorialController as ClienteHistorialController;
 use App\Http\Controllers\Api\Cliente\PerfilController as ClientePerfilController;
+use App\Http\Controllers\Api\ActivationController;
 
 // ==================== RUTAS PÚBLICAS ====================
 Route::post('login', [AuthController::class, 'login']);
 Route::post('register', [AuthController::class, 'register']);
+Route::post('activate-account', [ActivationController::class, 'activate']);  // ← NUEVA
+Route::post('resend-activation', [ActivationController::class, 'resend']);    // ← NUEVA (opcional)
 
 // ==================== RUTAS PROTEGIDAS (requieren autenticación) ====================
 Route::middleware('auth:sanctum')->group(function () {
@@ -72,6 +75,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('logout', [AuthController::class, 'logout']);
     Route::get('me', [AuthController::class, 'me']);
     Route::post('change-password', [AuthController::class, 'changePassword']);
+    Route::post('force-change-password', [AuthController::class, 'forceChangePassword']); // ← NUEVA
     
     // ==================== ADMINISTRADOR ====================
     Route::prefix('admin')->middleware('role:administrador')->group(function () {

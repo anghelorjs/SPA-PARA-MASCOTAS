@@ -9,10 +9,14 @@ use App\Models\Administrador;
 use App\Models\Recepcionista;
 use App\Models\Groomer;
 use App\Models\Cliente;
+use App\Mail\WelcomeActivationMail;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Mail;
+
 
 class UsuarioController extends ApiController
 {
@@ -23,17 +27,14 @@ class UsuarioController extends ApiController
     {
         $query = User::with(['administrador', 'recepcionista', 'groomer', 'cliente']);
         
-        // Filtro por rol
         if ($request->has('rol')) {
             $query->where('rol', $request->rol);
         }
         
-        // Filtro por estado activo/inactivo
         if ($request->has('activo')) {
             $query->where('activo', $request->activo);
         }
         
-        // Búsqueda por nombre, email o teléfono
         if ($request->has('search')) {
             $search = $request->search;
             $query->where(function($q) use ($search) {
@@ -47,7 +48,6 @@ class UsuarioController extends ApiController
         $usuarios = $query->orderBy('created_at', 'desc')
             ->paginate($request->get('per_page', 15));
         
-        // Agregar información del perfil según rol
         $usuarios->getCollection()->transform(function($user) {
             $user->perfil_datos = null;
             
@@ -97,26 +97,39 @@ class UsuarioController extends ApiController
             'email' => 'required|email|unique:users,email',
             'telefono' => 'nullable|string|max:20',
             'rol' => 'required|in:administrador,recepcionista,groomer,cliente',
-            'password' => 'required|string|min:6'
+            'password' => 'nullable|string|min:6',
+            'turno' => 'nullable|in:matutino,vespertino,completo',
+            'especialidad' => 'nullable|string|max:100',
+            'maxServiciosSimultaneos' => 'nullable|integer|min:1|max:5',
+            'direccion' => 'nullable|string',
+            'canalContacto' => 'nullable|in:whatsapp,telegram,email,sms',
         ]);
         
         DB::beginTransaction();
         
         try {
+            // ✅ Generar contraseña aleatoria si no viene en la petición
+            $plainPassword = $request->password ?? $this->generateRandomPassword();
+            
             $user = User::create([
                 'nombre' => $request->nombre,
                 'apellido' => $request->apellido,
                 'email' => $request->email,
-                'passwordHash' => Hash::make($request->password),
+                'passwordHash' => Hash::make($plainPassword),
                 'telefono' => $request->telefono,
                 'rol' => $request->rol,
-                'activo' => true
+                'activo' => true,
+                'email_verified_at' => null,
+                'must_change_password' => true,
             ]);
             
             // Crear perfil según rol
             switch ($request->rol) {
                 case 'administrador':
                     Administrador::create(['idUsuario' => $user->idUsuario]);
+                    $user->email_verified_at = now();
+                    $user->must_change_password = false;
+                    $user->save();
                     break;
                 case 'recepcionista':
                     Recepcionista::create([
@@ -138,17 +151,55 @@ class UsuarioController extends ApiController
                         'preferencias' => null,
                         'canalContacto' => $request->canalContacto ?? 'whatsapp'
                     ]);
+                    $user->email_verified_at = now();
+                    $user->must_change_password = false;
+                    $user->save();
                     break;
             }
             
             DB::commit();
+
+            $activationMailFailed = false;
+            if (in_array($request->rol, ['recepcionista', 'groomer'], true)) {
+                try {
+                    Mail::to($user->email)->send(new WelcomeActivationMail($user, $plainPassword));
+                } catch (\Throwable $mailException) {
+                    $activationMailFailed = true;
+                    try {
+                        Log::warning('No se pudo enviar el correo de activacion del usuario.', [
+                            'idUsuario' => $user->idUsuario,
+                            'email' => $user->email,
+                            'error' => $mailException->getMessage(),
+                        ]);
+                    } catch (\Throwable) {
+                        // Evita que un problema de logging convierta el alta en un 500.
+                    }
+                }
+            }
             
-            return $this->successResponse($user, 'Usuario creado exitosamente', 201);
+            $message = $request->rol === 'recepcionista' || $request->rol === 'groomer' 
+                ? 'Usuario creado exitosamente. Se ha enviado un email de activación.' 
+                : 'Usuario creado exitosamente.';
             
-        } catch (\Exception $e) {
+            if ($activationMailFailed) {
+                $message = 'Usuario creado exitosamente, pero no se pudo enviar el email de activacion. Puedes reenviarlo o restablecer la contrasena.';
+            }
+
+            return $this->successResponse($user, $message, 201);
+            
+        } catch (\Throwable $e) {
             DB::rollBack();
             return $this->errorResponse('Error al crear usuario: ' . $e->getMessage(), 500);
         }
+    }
+
+    /**
+     * Generar contraseña aleatoria
+     */
+    private function generateRandomPassword($length = 10)
+    {
+        $chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*';
+        return substr(str_shuffle($chars), 0, $length);
     }
     
     /**
@@ -178,14 +229,12 @@ class UsuarioController extends ApiController
         DB::beginTransaction();
         
         try {
-            // Actualizar datos base
             if ($request->has('nombre')) $user->nombre = $request->nombre;
             if ($request->has('apellido')) $user->apellido = $request->apellido;
             if ($request->has('telefono')) $user->telefono = $request->telefono;
             if ($request->has('activo')) $user->activo = $request->activo;
             $user->save();
             
-            // Actualizar perfil según rol
             if ($user->rol === 'groomer' && $user->groomer) {
                 if ($request->has('especialidad')) $user->groomer->especialidad = $request->especialidad;
                 if ($request->has('maxServiciosSimultaneos')) $user->groomer->maxServiciosSimultaneos = $request->maxServiciosSimultaneos;
@@ -245,7 +294,6 @@ class UsuarioController extends ApiController
             return $this->errorResponse('Usuario no encontrado', 404);
         }
         
-        // No permitir desactivar el propio usuario
         if (Auth::user()->idUsuario === $user->idUsuario) {
             return $this->errorResponse('No puedes desactivar tu propio usuario', 400);
         }

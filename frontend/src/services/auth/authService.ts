@@ -2,36 +2,61 @@
 import api from '../api';
 import type { 
   LoginData, 
-  LoginResponse, 
+  LoginResponseData,
   RegisterData, 
   RegisterResponse,
   User
 } from '../types/auth';
 
+export interface ForceChangePasswordResponse {
+  success: boolean;
+  message: string;
+  data: {
+    token: string;
+    token_type: string;
+  };
+}
+
+export interface ActivateAccountResponse {
+  success: boolean;
+  message: string;
+  data: {
+    email: string;
+    message: string;
+  };
+}
+
+export interface LoginResponse {
+  success: boolean;
+  message: string;
+  data: LoginResponseData;
+}
+
 export const authService = {
-  /**
-   * Iniciar sesión
-   */
-  async login(credentials: LoginData): Promise<LoginResponse> {
+  async login(credentials: LoginData): Promise<LoginResponseData> {
     try {
       const response = await api.post<LoginResponse>('/login', credentials);
-      const { token, user } = response.data.data;
+      const { token, user, must_change_password } = response.data.data;
       
       // Guardar token y datos en localStorage
       localStorage.setItem('token', token);
       localStorage.setItem('userRole', user.rol);
       localStorage.setItem('user', JSON.stringify(user));
       
-      return response.data;
+      // Retornar los datos que necesita el frontend
+      return {
+        user,
+        token,
+        must_change_password: must_change_password || false,
+        token_type: 'Bearer',
+        perfil: response.data.data.perfil
+      };
     } catch (error: any) {
       const message = error.response?.data?.message || 'Credenciales incorrectas';
       throw new Error(message);
     }
   },
 
-  /**
-   * Registrar nuevo cliente
-   */
   async register(userData: RegisterData): Promise<RegisterResponse> {
     try {
       const response = await api.post<RegisterResponse>('/register', userData);
@@ -53,9 +78,6 @@ export const authService = {
     }
   },
 
-  /**
-   * Cerrar sesión
-   */
   async logout(): Promise<void> {
     try {
       await api.post('/logout');
@@ -68,9 +90,6 @@ export const authService = {
     }
   },
 
-  /**
-   * Obtener información del usuario autenticado
-   */
   async getUser(): Promise<User> {
     try {
       const response = await api.get<{ success: boolean; data: User }>('/me');
@@ -89,9 +108,6 @@ export const authService = {
     }
   },
 
-  /**
-   * Cambiar contraseña
-   */
   async changePassword(currentPassword: string, newPassword: string): Promise<void> {
     try {
       await api.post('/change-password', {
@@ -104,23 +120,38 @@ export const authService = {
     }
   },
 
-  /**
-   * Obtener token almacenado
-   */
+  async forceChangePassword(newPassword: string): Promise<{ token: string; token_type: string }> {
+    try {
+      const response = await api.post<ForceChangePasswordResponse>('/force-change-password', {
+        new_password: newPassword,
+      });
+      const { token, token_type } = response.data.data;
+      localStorage.setItem('token', token);
+      return { token, token_type };
+    } catch (error: any) {
+      const message = error.response?.data?.message || 'Error al cambiar la contraseña';
+      throw new Error(message);
+    }
+  },
+
+  async activateAccount(token: string): Promise<{ email: string; message: string }> {
+    try {
+      const response = await api.post<ActivateAccountResponse>('/activate-account', { token });
+      return response.data.data;
+    } catch (error: any) {
+      const message = error.response?.data?.message || 'Error al activar la cuenta';
+      throw new Error(message);
+    }
+  },
+
   getToken(): string | null {
     return localStorage.getItem('token');
   },
 
-  /**
-   * Obtener rol del usuario
-   */
   getUserRole(): string | null {
     return localStorage.getItem('userRole');
   },
 
-  /**
-   * Obtener usuario almacenado
-   */
   getStoredUser(): User | null {
     const userStr = localStorage.getItem('user');
     if (!userStr) return null;
@@ -131,16 +162,10 @@ export const authService = {
     }
   },
 
-  /**
-   * Verificar si hay un usuario autenticado
-   */
   isAuthenticated(): boolean {
     return !!this.getToken();
   },
 
-  /**
-   * Verificar si el token es válido
-   */
   async checkAuth(): Promise<boolean> {
     try {
       await this.getUser();

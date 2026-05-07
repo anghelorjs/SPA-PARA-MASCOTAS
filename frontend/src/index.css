@@ -14,3 +14,5 @@
 .animate-slide-in {
   animation: slideIn 0.3s ease-out;
 }
+
+@keyframes spin { to { transform: rotate(360deg); } }

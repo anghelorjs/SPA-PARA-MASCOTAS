@@ -26,8 +26,14 @@ export const Login = () => {
     setError('');
     setIsLoading(true);
     try {
-      const user = await login({ email, password });
-      navigate(dashboardByRole[user.rol], { replace: true });
+      const response = await login({ email, password });
+      
+      // response tiene user, must_change_password, etc.
+      if (response.must_change_password) {
+        navigate('/force-change-password', { replace: true });
+      } else {
+        navigate(dashboardByRole[response.user.rol], { replace: true });
+      }
     } catch (err: any) {
       setError(err.message);
     } finally {

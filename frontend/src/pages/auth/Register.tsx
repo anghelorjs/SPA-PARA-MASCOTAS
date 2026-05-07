@@ -3,6 +3,7 @@ import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom'; // ← Agregar useNavigate
 import { useAuth } from '../../hooks/useAuth';
 import fondoLogin from '../../assets/fondo_login.png';
+import { PasswordStrengthMeter } from '../../components/common/PasswordStrengthMeter';
 
 export const Register = () => {
   const { register } = useAuth();
@@ -101,6 +102,9 @@ export const Register = () => {
                   style={styles.input}
                 />
                 {name === 'password' && (
+                  <PasswordStrengthMeter password={formData.password} />
+                )}
+                {name === 'password' && (
                   <button
                     type="button"
                     onClick={() => setShowPassword(!showPassword)}
@@ -109,7 +113,9 @@ export const Register = () => {
                   >
                     {showPassword ? '🔓' : '🔒'}
                   </button>
+                  
                 )}
+                
               </div>
             );
           })}

@@ -6,6 +6,8 @@ import { ProtectedRoute } from "./components/auth/ProtectedRoute";
 import LoadingSpinner from "./components/common/LoadingSpinner";
 import type { UserRole } from "./services/types/auth";
 import { useToast } from './hooks/useToast';
+import { ActivateAccount } from "./pages/auth/ActivateAccount";
+import { ForceChangePassword } from "./pages/auth/ForceChangePassword";
 
 // Pages de Auth
 import { Login } from "./pages/auth/Login";
@@ -94,6 +96,8 @@ const AppRoutes = () => {
       <Route path="/login" element={<Login />} />
       <Route path="/register" element={<Register />} />
       <Route path="/unauthorized" element={<Unauthorized />} />
+      <Route path="/activar-cuenta" element={<ActivateAccount />} />
+      <Route path="/force-change-password" element={<ForceChangePassword />} />
 
       {/* Ruta raíz - redirige según rol */}
       <Route path="/" element={<NavigateToDashboard />} />

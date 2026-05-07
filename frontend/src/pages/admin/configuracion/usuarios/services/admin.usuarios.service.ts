@@ -41,7 +41,7 @@ export interface CreateUsuarioData {
   email: string;
   telefono?: string;
   rol: string;
-  password: string;
+  password?: string;
   turno?: string; // para recepcionista
   especialidad?: string; // para groomer
   maxServiciosSimultaneos?: number; // para groomer

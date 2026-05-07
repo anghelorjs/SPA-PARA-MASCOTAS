@@ -1,15 +1,16 @@
 // src/contexts/AuthContext.tsx
 import React, { createContext, useState, useEffect } from 'react';
 import { authService } from '../services/auth/authService';
-import type { User, LoginData, RegisterData } from '../services/types/auth';
+import type { User, LoginData, LoginResponseData, RegisterData } from '../services/types/auth';
 import type { ReactNode } from 'react';
 
 interface AuthContextType {
   user: User | null;
   isLoading: boolean;
-  login: (data: LoginData) => Promise<User>;
+  login: (data: LoginData) => Promise<LoginResponseData>;
   register: (data: RegisterData) => Promise<User>;
   logout: () => Promise<void>;
+  forceChangePassword: (newPassword: string) => Promise<void>;
   updateUser: (user: User) => void;
 }
 
@@ -43,8 +44,8 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
   const login = async (data: LoginData) => {
     const response = await authService.login(data);
-    setUser(response.data.user);
-    return response.data.user;
+    setUser(response.user);
+    return response; // ← Importante: retornar la respuesta completa
   };
 
   const register = async (data: RegisterData) => {
@@ -58,6 +59,12 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     setUser(null);
   };
 
+  const forceChangePassword = async (newPassword: string) => {
+    await authService.forceChangePassword(newPassword);
+    const updatedUser = await authService.getUser();
+    setUser(updatedUser);
+  };
+
   const updateUser = (updatedUser: User) => {
     setUser(updatedUser);
     localStorage.setItem('user', JSON.stringify(updatedUser));
@@ -69,6 +76,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     login,
     register,
     logout,
+    forceChangePassword,
     updateUser,
   };
 

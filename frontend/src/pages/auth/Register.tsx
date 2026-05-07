@@ -1,13 +1,16 @@
 // src/pages/auth/Register.tsx
 import { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom'; // ← Agregar useNavigate
+import { Link, useNavigate } from 'react-router-dom';
+import { FiMail, FiLock, FiUser, FiPhone, FiMapPin, FiEye, FiEyeOff } from 'react-icons/fi';
+import { FcGoogle } from 'react-icons/fc';
 import { useAuth } from '../../hooks/useAuth';
 import fondoLogin from '../../assets/fondo_login.png';
 import { PasswordStrengthMeter } from '../../components/common/PasswordStrengthMeter';
+import { authService } from '../../services/auth/authService';
 
 export const Register = () => {
   const { register } = useAuth();
-  const navigate = useNavigate(); // ← Agregar navigate
+  const navigate = useNavigate();
   const [formData, setFormData] = useState({
     nombre: '',
     apellido: '',
@@ -18,8 +21,13 @@ export const Register = () => {
     direccion: '',
   });
   const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+
+  const handleGoogleLogin = () => {
+    authService.loginWithGoogle();
+  };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -45,7 +53,6 @@ export const Register = () => {
         telefono: formData.telefono,
         direccion: formData.direccion,
       });
-      // ✅ Redirigir al dashboard después del registro exitoso
       navigate('/');
     } catch (err: any) {
       setError(err.message);
@@ -54,19 +61,16 @@ export const Register = () => {
     }
   };
 
-  const fields: { name: keyof typeof formData; label: string; type: string; required?: boolean }[] = [
-    { name: 'nombre',               label: 'Nombre',              type: 'text',     required: true },
-    { name: 'apellido',             label: 'Apellido',            type: 'text',     required: true },
-    { name: 'email',                label: 'Correo electrónico',  type: 'email',    required: true },
-    { name: 'telefono',             label: 'Teléfono',            type: 'tel' },
-    { name: 'direccion',            label: 'Dirección',           type: 'text' },
-    { name: 'password',             label: 'Contraseña',          type: 'password', required: true },
-    { name: 'password_confirmation',label: 'Confirmar Contraseña',type: 'password', required: true },
+  const fields = [
+    { name: 'nombre', label: 'Nombre', icon: <FiUser size={18} />, type: 'text', required: true },
+    { name: 'apellido', label: 'Apellido', icon: <FiUser size={18} />, type: 'text', required: true },
+    { name: 'email', label: 'Correo electrónico', icon: <FiMail size={18} />, type: 'email', required: true },
+    { name: 'telefono', label: 'Teléfono', icon: <FiPhone size={18} />, type: 'tel', required: false },
+    { name: 'direccion', label: 'Dirección', icon: <FiMapPin size={18} />, type: 'text', required: false },
   ];
 
   return (
     <div style={styles.page}>
-      {/* NAVBAR */}
       <nav style={styles.navbar}>
         <span style={styles.navLogo}>PetSpa</span>
         <div style={styles.navLinks}>
@@ -74,7 +78,6 @@ export const Register = () => {
         </div>
       </nav>
 
-      {/* CARD */}
       <div style={styles.card}>
         <h2 style={styles.title}>Crear Cuenta</h2>
         <p style={styles.subtitle}>Regístrate como cliente</p>
@@ -82,43 +85,77 @@ export const Register = () => {
         {error && <div style={styles.errorBox}>{error}</div>}
 
         <form onSubmit={handleSubmit} style={styles.form}>
-          {fields.map(({ name, label, type, required }) => {
-            const isPasswordField = type === 'password';
-            const resolvedType = isPasswordField
-              ? (showPassword ? 'text' : 'password')
-              : type;
+          {/* Campos normales (nombre, apellido, email, teléfono, dirección) */}
+          {fields.map(({ name, label, icon, type, required }) => (
+            <div key={name} style={styles.inputWrapper}>
+              <span style={styles.inputIcon}>{icon}</span>
+              <input
+                id={name}
+                name={name}
+                type={type}
+                required={required}
+                value={formData[name as keyof typeof formData]}
+                onChange={handleChange}
+                placeholder={label}
+                autoComplete={name === 'email' ? 'email' : undefined}
+                style={styles.input}
+              />
+            </div>
+          ))}
 
-            return (
-              <div key={name} style={styles.inputWrapper}>
-                <input
-                  id={name}
-                  name={name}
-                  type={resolvedType}
-                  required={required}
-                  value={formData[name]}
-                  onChange={handleChange}
-                  placeholder={label}
-                  autoComplete={name === 'email' ? 'email' : undefined}
-                  style={styles.input}
-                />
-                {name === 'password' && (
-                  <PasswordStrengthMeter password={formData.password} />
-                )}
-                {name === 'password' && (
-                  <button
-                    type="button"
-                    onClick={() => setShowPassword(!showPassword)}
-                    style={styles.eyeBtn}
-                    aria-label="Toggle password"
-                  >
-                    {showPassword ? '🔓' : '🔒'}
-                  </button>
-                  
-                )}
-                
+          {/* Campo de Contraseña (con medidor debajo) */}
+          <div style={styles.passwordWrapper}>
+            <div style={styles.inputWrapper}>
+              <span style={styles.inputIcon}><FiLock size={18} /></span>
+              <input
+                id="password"
+                name="password"
+                type={showPassword ? 'text' : 'password'}
+                required
+                value={formData.password}
+                onChange={handleChange}
+                placeholder="Contraseña"
+                style={styles.input}
+              />
+              <button
+                type="button"
+                onClick={() => setShowPassword(!showPassword)}
+                style={styles.eyeBtn}
+                aria-label="Toggle password"
+              >
+                {showPassword ? <FiEyeOff size={18} /> : <FiEye size={18} />}
+              </button>
+            </div>
+            {/* Medidor de fuerza - fuera del inputWrapper */}
+            {formData.password && (
+              <div style={styles.strengthMeterContainer}>
+                <PasswordStrengthMeter password={formData.password} />
               </div>
-            );
-          })}
+            )}
+          </div>
+
+          {/* Campo de Confirmar Contraseña */}
+          <div style={styles.inputWrapper}>
+            <span style={styles.inputIcon}><FiLock size={18} /></span>
+            <input
+              id="password_confirmation"
+              name="password_confirmation"
+              type={showConfirmPassword ? 'text' : 'password'}
+              required
+              value={formData.password_confirmation}
+              onChange={handleChange}
+              placeholder="Confirmar Contraseña"
+              style={styles.input}
+            />
+            <button
+              type="button"
+              onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+              style={styles.eyeBtn}
+              aria-label="Toggle password"
+            >
+              {showConfirmPassword ? <FiEyeOff size={18} /> : <FiEye size={18} />}
+            </button>
+          </div>
 
           <button
             type="submit"
@@ -126,6 +163,15 @@ export const Register = () => {
             style={styles.submitBtn}
           >
             {isLoading ? 'Registrando...' : 'Registrarse'}
+          </button>
+
+          <button
+            type="button"
+            onClick={handleGoogleLogin}
+            style={styles.googleBtn}
+          >
+            <FcGoogle size={20} />
+            Continuar con Google
           </button>
         </form>
 
@@ -146,7 +192,7 @@ const styles: Record<string, React.CSSProperties> = {
     alignItems: 'center',
     justifyContent: 'center',
     position: 'relative',
-    backgroundImage: `url(${fondoLogin})`,
+    backgroundImage: `linear-gradient(rgba(0, 0, 0, 0.3), rgba(0, 0, 0, 0.3)), url(${fondoLogin})`,
     backgroundSize: 'cover',
     backgroundPosition: 'center',
   },
@@ -172,17 +218,11 @@ const styles: Record<string, React.CSSProperties> = {
     alignItems: 'center',
     gap: '32px',
   },
-  navLink: {
-    color: '#d0e4f7',
-    textDecoration: 'none',
-    fontSize: '14px',
-    letterSpacing: '0.3px',
-  },
   navButton: {
-    color: '#000000',
+    color: '#ffffff',
     textDecoration: 'none',
     fontSize: '14px',
-    border: '1.5px solid #000000',
+    border: '1.5px solid #ffffff',
     padding: '6px 22px',
     borderRadius: '20px',
     letterSpacing: '0.3px',
@@ -217,10 +257,16 @@ const styles: Record<string, React.CSSProperties> = {
   form: {
     display: 'flex',
     flexDirection: 'column',
-    gap: '14px',
+    gap: '16px',
   },
   inputWrapper: {
     position: 'relative',
+    width: '100%',
+  },
+  passwordWrapper: {
+    display: 'flex',
+    flexDirection: 'column',
+    gap: '4px',
   },
   input: {
     width: '100%',
@@ -229,21 +275,34 @@ const styles: Record<string, React.CSSProperties> = {
     borderBottom: '1.5px solid rgba(0,0,0,0.6)',
     color: '#000000',
     fontSize: '14px',
-    padding: '10px 32px 10px 0',
+    padding: '10px 28px 10px 28px',
     outline: 'none',
     boxSizing: 'border-box',
     caretColor: '#ffffff',
   },
+  inputIcon: {
+    position: 'absolute',
+    left: '0',
+    top: '50%',
+    transform: 'translateY(-50%)',
+    color: 'rgba(0,0,0,0.5)',
+    display: 'flex',
+    alignItems: 'center',
+  },
   eyeBtn: {
     position: 'absolute',
-    right: '4px',
+    right: '0',
     top: '50%',
     transform: 'translateY(-50%)',
     background: 'none',
     border: 'none',
     cursor: 'pointer',
-    fontSize: '14px',
     padding: 0,
+    color: 'rgba(0,0,0,0.5)',
+  },
+  strengthMeterContainer: {
+    marginTop: '8px',
+    marginBottom: '4px',
   },
   submitBtn: {
     marginTop: '10px',
@@ -257,6 +316,22 @@ const styles: Record<string, React.CSSProperties> = {
     cursor: 'pointer',
     letterSpacing: '0.5px',
     width: '100%',
+  },
+  googleBtn: {
+    marginTop: '2px',
+    background: '#ffffff',
+    color: '#333333',
+    border: '1px solid #ddd',
+    borderRadius: '6px',
+    padding: '10px',
+    fontSize: '14px',
+    fontWeight: 500,
+    cursor: 'pointer',
+    width: '100%',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: '10px',
   },
   footerText: {
     marginTop: '18px',

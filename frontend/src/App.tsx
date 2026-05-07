@@ -8,6 +8,7 @@ import type { UserRole } from "./services/types/auth";
 import { useToast } from './hooks/useToast';
 import { ActivateAccount } from "./pages/auth/ActivateAccount";
 import { ForceChangePassword } from "./pages/auth/ForceChangePassword";
+import { GoogleCallback } from "./pages/auth/GoogleCallback";
 
 // Pages de Auth
 import { Login } from "./pages/auth/Login";
@@ -98,6 +99,7 @@ const AppRoutes = () => {
       <Route path="/unauthorized" element={<Unauthorized />} />
       <Route path="/activar-cuenta" element={<ActivateAccount />} />
       <Route path="/force-change-password" element={<ForceChangePassword />} />
+      <Route path="/auth/google/callback" element={<GoogleCallback />} />
 
       {/* Ruta raíz - redirige según rol */}
       <Route path="/" element={<NavigateToDashboard />} />

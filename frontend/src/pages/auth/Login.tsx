@@ -1,9 +1,12 @@
 // src/pages/auth/Login.tsx
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+import { FiMail, FiLock, FiEye, FiEyeOff } from 'react-icons/fi';
+import { FcGoogle } from 'react-icons/fc';
 import { useAuth } from '../../hooks/useAuth';
 import type { UserRole } from '../../services/types/auth';
 import fondoLogin from '../../assets/fondo_login.png';
+import { authService } from '../../services/auth/authService';
 
 const dashboardByRole: Record<UserRole, string> = {
   administrador: '/admin/dashboard',
@@ -21,6 +24,10 @@ export const Login = () => {
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
 
+  const handleGoogleLogin = () => {
+    authService.loginWithGoogle();
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
@@ -28,7 +35,6 @@ export const Login = () => {
     try {
       const response = await login({ email, password });
       
-      // response tiene user, must_change_password, etc.
       if (response.must_change_password) {
         navigate('/force-change-password', { replace: true });
       } else {
@@ -43,7 +49,6 @@ export const Login = () => {
 
   return (
     <div style={styles.page}>
-      {/* NAVBAR */}
       <nav style={styles.navbar}>
         <span style={styles.navLogo}>PetSpa</span>
         <div style={styles.navLinks}>
@@ -51,7 +56,6 @@ export const Login = () => {
         </div>
       </nav>
 
-      {/* CARD */}
       <div style={styles.card}>
         <h2 style={styles.title}>Login</h2>
 
@@ -59,6 +63,7 @@ export const Login = () => {
 
         <form onSubmit={handleSubmit} style={styles.form}>
           <div style={styles.inputWrapper}>
+            <FiMail style={styles.inputIcon} />
             <input
               id="email"
               name="email"
@@ -70,10 +75,10 @@ export const Login = () => {
               placeholder="Email"
               style={styles.input}
             />
-            <span style={styles.inputIcon}>✉</span>
           </div>
 
           <div style={styles.inputWrapper}>
+            <FiLock style={styles.inputIcon} />
             <input
               id="password"
               name="password"
@@ -91,7 +96,7 @@ export const Login = () => {
               style={styles.eyeBtn}
               aria-label="Toggle password"
             >
-              {showPassword ? '🔓' : '🔒'}
+              {showPassword ? <FiEyeOff size={18} /> : <FiEye size={18} />}
             </button>
           </div>
 
@@ -101,6 +106,15 @@ export const Login = () => {
             style={styles.submitBtn}
           >
             {isLoading ? 'Iniciando sesión...' : 'Login'}
+          </button>
+
+          <button
+            type="button"
+            onClick={handleGoogleLogin}
+            style={styles.googleBtn}
+          >
+            <FcGoogle size={20} />
+            Continuar con Google
           </button>
         </form>
 
@@ -121,7 +135,7 @@ const styles: Record<string, React.CSSProperties> = {
     alignItems: 'center',
     justifyContent: 'center',
     position: 'relative',
-    backgroundImage: `url(${fondoLogin})`,  // ← usa la variable importada
+    backgroundImage: `linear-gradient(rgba(0, 0, 0, 0.3), rgba(0, 0, 0, 0.3)), url(${fondoLogin})`,
     backgroundSize: 'cover',
     backgroundPosition: 'center',
   },
@@ -147,18 +161,11 @@ const styles: Record<string, React.CSSProperties> = {
     alignItems: 'center',
     gap: '32px',
   },
-  navLink: {
-    color: '#d0e4f7',
-    textDecoration: 'none',
-    fontSize: '14px',
-    letterSpacing: '0.3px',
-    transition: 'color 0.2s',
-  },
   navButton: {
-    color: '#000000',
+    color: '#ffffff',
     textDecoration: 'none',
     fontSize: '14px',
-    border: '1.5px solid #000000',
+    border: '1.5px solid #ffffff',
     padding: '6px 22px',
     borderRadius: '20px',
     letterSpacing: '0.3px',
@@ -190,6 +197,7 @@ const styles: Record<string, React.CSSProperties> = {
   },
   inputWrapper: {
     position: 'relative',
+    width: '100%',
   },
   input: {
     width: '100%',
@@ -198,30 +206,29 @@ const styles: Record<string, React.CSSProperties> = {
     borderBottom: '1.5px solid rgba(0,0,0,0.6)',
     color: '#000000',
     fontSize: '14px',
-    padding: '10px 36px 10px 0',
+    padding: '10px 0 10px 32px',
     outline: 'none',
     boxSizing: 'border-box',
     caretColor: '#ffffff',
   },
   inputIcon: {
     position: 'absolute',
-    right: '4px',
+    left: '0',
     top: '50%',
     transform: 'translateY(-50%)',
-    color: 'rgba(255,255,255,0.7)',
-    fontSize: '14px',
-    pointerEvents: 'none',
+    color: 'rgba(0,0,0,0.5)',
+    fontSize: '18px',
   },
   eyeBtn: {
     position: 'absolute',
-    right: '4px',
+    right: '0',
     top: '50%',
     transform: 'translateY(-50%)',
     background: 'none',
     border: 'none',
     cursor: 'pointer',
-    fontSize: '14px',
     padding: 0,
+    color: 'rgba(0,0,0,0.5)',
   },
   submitBtn: {
     marginTop: '12px',
@@ -236,6 +243,23 @@ const styles: Record<string, React.CSSProperties> = {
     letterSpacing: '0.5px',
     transition: 'background 0.2s',
     width: '100%',
+  },
+  googleBtn: {
+    marginTop: '2px',
+    background: '#ffffff',
+    color: '#333333',
+    border: '1px solid #ddd',
+    borderRadius: '6px',
+    padding: '10px',
+    fontSize: '14px',
+    fontWeight: 500,
+    cursor: 'pointer',
+    width: '100%',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: '10px',
+    transition: 'background 0.2s',
   },
   footerText: {
     marginTop: '20px',

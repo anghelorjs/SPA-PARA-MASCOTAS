@@ -2,6 +2,7 @@
 
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\AuthController;
+use App\Http\Controllers\Api\GoogleAuthController;
 
 // ==================== ADMINISTRADOR ====================
 // Dashboard y Perfil
@@ -67,6 +68,9 @@ Route::post('login', [AuthController::class, 'login']);
 Route::post('register', [AuthController::class, 'register']);
 Route::post('activate-account', [ActivationController::class, 'activate']);  // ← NUEVA
 Route::post('resend-activation', [ActivationController::class, 'resend']);    // ← NUEVA (opcional)
+// Google OAuth
+Route::get('auth/google', [GoogleAuthController::class, 'redirectToGoogle']);
+Route::get('auth/google/callback', [GoogleAuthController::class, 'handleGoogleCallback']);
 
 // ==================== RUTAS PROTEGIDAS (requieren autenticación) ====================
 Route::middleware('auth:sanctum')->group(function () {

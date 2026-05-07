@@ -26,6 +26,16 @@ export interface ActivateAccountResponse {
   };
 }
 
+export interface GoogleLoginResponse {
+  success: boolean;
+  message: string;
+  data: {
+    user: User;
+    token: string;
+    token_type: string;
+  };
+}
+
 export interface LoginResponse {
   success: boolean;
   message: string;
@@ -55,6 +65,25 @@ export const authService = {
       const message = error.response?.data?.message || 'Credenciales incorrectas';
       throw new Error(message);
     }
+  },
+
+  async loginWithGoogle(): Promise<void> {
+    try {
+      const response = await api.get('/auth/google');
+      const { url } = response.data.data;
+      // Redirigir a Google
+      window.location.href = url;
+    } catch (error: any) {
+      const message = error.response?.data?.message || 'Error al iniciar con Google';
+      throw new Error(message);
+    }
+  },
+
+  async handleGoogleCallback(token: string, userData: any): Promise<User> {
+    localStorage.setItem('token', token);
+    localStorage.setItem('userRole', userData.rol);
+    localStorage.setItem('user', JSON.stringify(userData));
+    return userData;
   },
 
   async register(userData: RegisterData): Promise<RegisterResponse> {

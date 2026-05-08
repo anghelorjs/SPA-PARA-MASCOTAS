@@ -23,7 +23,7 @@ export const Login = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
-  const [error, setError] = useState('');
+  const [error, setError] = useState<{ message: string; remainingAttempts?: number } | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [captcha, setCaptcha] = useState('');
   const [captchaError, setCaptchaError] = useState('');
@@ -31,18 +31,21 @@ export const Login = () => {
     authService.loginWithGoogle();
   };
   const [captchaId, setCaptchaId] = useState('');
+  
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setError('');
+    console.log('Formulario enviado, evitando recarga');
+    setError(null);
     setCaptchaError('');
     setIsLoading(true);
+    
     try {
       const response = await login({ 
         email, 
         password, 
-        captcha_id: captchaId,  // ← Enviar captcha_id
-        captcha                  // ← Enviar captcha
+        captcha_id: captchaId,
+        captcha
       });
       
       if (response.must_change_password) {
@@ -51,14 +54,23 @@ export const Login = () => {
         navigate(dashboardByRole[response.user.rol], { replace: true });
       }
     } catch (err: any) {
-      if (err.message.toLowerCase().includes('captcha')) {
+      console.log('Error capturado:', err); // ← Debug
+      
+      if (err.message?.toLowerCase().includes('captcha')) {
         setCaptchaError(err.message);
+        // Recargar captcha
+        const refreshBtn = document.querySelector('[title="Recargar captcha"]') as HTMLButtonElement;
+        refreshBtn?.click();
       } else {
-        setError(err.message);
+        // Extraer intentos restantes del mensaje de error
+        const match = err.message?.match(/Te quedan (\d+) intentos/);
+        const remainingAttempts = match ? parseInt(match[1]) : undefined;
+        
+        setError({
+          message: err.message || 'Credenciales incorrectas',
+          remainingAttempts
+        });
       }
-      // Recargar captcha
-      const refreshBtn = document.querySelector('[title="Recargar captcha"]') as HTMLButtonElement;
-      refreshBtn?.click();
     } finally {
       setIsLoading(false);
     }
@@ -77,7 +89,16 @@ export const Login = () => {
       <div style={styles.card}>
         <h2 style={styles.title}>Login</h2>
 
-        {error && <div style={styles.errorBox}>{error}</div>}
+        {error && (
+          <div style={styles.errorBox}>
+            <p>{error.message}</p>
+            {error.remainingAttempts !== undefined && (
+              <div style={styles.attemptsWarning}>
+                ⚠️ Te quedan <strong>{error.remainingAttempts}</strong> intentos antes de que la cuenta se bloquee.
+              </div>
+            )}
+          </div>
+        )}
 
         <form onSubmit={handleSubmit} style={styles.form}>
           <div style={styles.inputWrapper}>
@@ -325,5 +346,12 @@ const styles: Record<string, React.CSSProperties> = {
     color: '#7ec8f5',
     fontSize: '12px',
     textDecoration: 'none',
+  },
+
+  attemptsWarning: {
+    marginTop: '8px',
+    fontSize: '12px',
+    color: '#f59e0b',
+    fontWeight: 500,
   },
 };

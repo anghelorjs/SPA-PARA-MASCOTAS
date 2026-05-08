@@ -33,11 +33,18 @@ api.interceptors.response.use(
     }
 
     if (error.response?.status === 401) {
-      // Token expirado o inválido
-      localStorage.removeItem('token');
-      localStorage.removeItem('userRole');
-      localStorage.removeItem('user');
-      window.location.href = '/login';
+      // Esto redirige a login SOLO si es un error de autenticación
+      // Pero NO debería recargar la página si es un error de credenciales incorrectas
+      // Solo si el token es inválido
+      const isAuthError = error.response?.data?.message?.includes('token') || 
+                          error.response?.data?.message?.includes('autenticado');
+      
+      if (isAuthError) {
+        localStorage.removeItem('token');
+        localStorage.removeItem('userRole');
+        localStorage.removeItem('user');
+        window.location.href = '/login';
+      }
     }
     return Promise.reject(error);
   }

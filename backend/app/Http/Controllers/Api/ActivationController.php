@@ -17,7 +17,6 @@ class ActivationController extends ApiController
             'token' => 'required|string'
         ]);
         
-        // Buscar usuario por token de activación
         $user = User::where('activation_token', $request->token)
             ->where('activation_token_expires_at', '>', now())
             ->first();
@@ -26,7 +25,13 @@ class ActivationController extends ApiController
             return $this->errorResponse('Token inválido o expirado. Por favor, contacta al administrador.', 400);
         }
         
-        $user->activateAccount();
+        // Activar cuenta: email_verified_at, must_change_password, Y activo = true
+        $user->email_verified_at = now();
+        $user->must_change_password = true;
+        $user->activo = true;  // ← AGREGAR: activar el usuario
+        $user->activation_token = null;
+        $user->activation_token_expires_at = null;
+        $user->save();
         
         return $this->successResponse([
             'email' => $user->email,

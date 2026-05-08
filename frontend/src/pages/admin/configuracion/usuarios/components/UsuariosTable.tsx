@@ -137,6 +137,7 @@ export const UsuariosTable = ({
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap">
                   <div className="flex flex-col gap-1">
+                    {/* Estado Activo/Inactivo */}
                     <span
                       className={`px-2 py-1 text-xs rounded-full w-fit ${
                         usuario.activo
@@ -146,7 +147,8 @@ export const UsuariosTable = ({
                     >
                       {usuario.activo ? 'Activo' : 'Inactivo'}
                     </span>
-                    {/* Mostrar si el email está verificado (para recepcionistas/groomers) */}
+                    
+                    {/* Estado de verificación de email (solo para recepcionistas/groomers) */}
                     {(usuario.rol === 'recepcionista' || usuario.rol === 'groomer') && (
                       <span
                         className={`px-2 py-1 text-xs rounded-full w-fit ${
@@ -155,7 +157,7 @@ export const UsuariosTable = ({
                             : 'bg-yellow-100 text-yellow-800'
                         }`}
                       >
-                        {usuario.email_verified_at ? 'Verificado' : 'Pendiente'}
+                        {usuario.email_verified_at ? 'Email verificado' : 'Email pendiente'}
                       </span>
                     )}
                   </div>

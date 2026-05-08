@@ -9,6 +9,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\DB;
 use App\Http\Controllers\Api\CaptchaController;
+use Carbon\Carbon;
 
 class AuthController extends ApiController
 {
@@ -54,17 +55,46 @@ class AuthController extends ApiController
             // Incrementar intentos fallidos
             if ($user) {
                 $user->login_attempts++;
+                $remainingAttempts = 5 - $user->login_attempts;
+                $user->save();
                 
                 // Si llega a 5 intentos, bloquear por 15 minutos
                 if ($user->login_attempts >= 5) {
                     $user->locked_until = Carbon::now()->addMinutes(15);
-                    $user->login_attempts = 0; // Reiniciar contador
+                    $user->login_attempts = 0;
                     $user->save();
-                    return $this->errorResponse('Demasiados intentos fallidos. Cuenta bloqueada por 15 minutos.', 403);
+                    return $this->errorResponse(
+                        'Demasiados intentos fallidos. Cuenta bloqueada por 15 minutos.', 
+                        403
+                    );
                 }
-                $user->save();
+                
+                // Devolver intentos restantes
+                return $this->errorResponse(
+                    "Credenciales incorrectas. Te quedan {$remainingAttempts} intentos antes de que la cuenta se bloquee.", 
+                    401
+                );
             }
             return $this->errorResponse('Credenciales incorrectas', 401);
+        }
+
+        // Verificar si el usuario está activo
+        if (!$user->activo) {
+            if (!$user->email_verified_at && in_array($user->rol, ['recepcionista', 'groomer'])) {
+                return $this->errorResponse(
+                    'Tu cuenta no está activada. Revisa tu correo electrónico para activarla.', 
+                    403
+                );
+            }
+            return $this->errorResponse('Usuario desactivado. Contacta al administrador.', 403);
+        }
+
+        // Verificar si el email está verificado (para recepcionistas/groomers)
+        if (!$user->email_verified_at && in_array($user->rol, ['recepcionista', 'groomer'])) {
+            return $this->errorResponse(
+                'Debes activar tu cuenta primero. Revisa tu correo.', 
+                403
+            );
         }
 
         // Login exitoso - reiniciar contador de intentos

@@ -118,7 +118,7 @@ class UsuarioController extends ApiController
                 'passwordHash' => Hash::make($plainPassword),
                 'telefono' => $request->telefono,
                 'rol' => $request->rol,
-                'activo' => true,
+                'activo' => false,
                 'email_verified_at' => null,
                 'must_change_password' => true,
             ]);
@@ -151,6 +151,7 @@ class UsuarioController extends ApiController
                         'preferencias' => null,
                         'canalContacto' => $request->canalContacto ?? 'whatsapp'
                     ]);
+                    $user->activo = true;
                     $user->email_verified_at = now();
                     $user->must_change_password = false;
                     $user->save();

@@ -13,6 +13,12 @@ export interface PerfilData {
   canalContacto?: string;
 }
 
+export interface ResendCredentialsResponse {
+  success: boolean;
+  message: string;
+  data: null;
+}
+
 export interface Usuario {
   idUsuario: number;
   nombre: string;
@@ -21,6 +27,7 @@ export interface Usuario {
   telefono: string | null;
   rol: 'administrador' | 'recepcionista' | 'groomer' | 'cliente';
   activo: boolean;
+  email_verified_at?: string | null;
   creadoEn: string;
   created_at: string;
   updated_at: string;
@@ -130,5 +137,17 @@ export const adminUsuariosService = {
   async getRoles(): Promise<Role[]> {
     const response = await api.get('/admin/configuracion/roles');
     return response.data.data;
+  },
+
+  /**
+   * Reenviar credenciales a un usuario
+   */
+  async resendCredentials(userId: number): Promise<void> {
+    const response = await api.post<ResendCredentialsResponse>('/admin/configuracion/usuarios/resend-credentials', {
+      user_id: userId
+    });
+    if (!response.data.success) {
+      throw new Error(response.data.message);
+    }
   },
 };

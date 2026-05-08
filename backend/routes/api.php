@@ -3,6 +3,8 @@
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\GoogleAuthController;
+use App\Http\Controllers\Api\CaptchaController;
+use App\Http\Controllers\Api\ForgotPasswordController;
 
 // ==================== ADMINISTRADOR ====================
 // Dashboard y Perfil
@@ -62,6 +64,7 @@ use App\Http\Controllers\Api\Cliente\CatalogoController as ClienteCatalogoContro
 use App\Http\Controllers\Api\Cliente\HistorialController as ClienteHistorialController;
 use App\Http\Controllers\Api\Cliente\PerfilController as ClientePerfilController;
 use App\Http\Controllers\Api\ActivationController;
+use App\Http\Controllers\Api\ResendCredentialsController;
 
 // ==================== RUTAS PÚBLICAS ====================
 Route::post('login', [AuthController::class, 'login']);
@@ -71,6 +74,12 @@ Route::post('resend-activation', [ActivationController::class, 'resend']);    //
 // Google OAuth
 Route::get('auth/google', [GoogleAuthController::class, 'redirectToGoogle']);
 Route::get('auth/google/callback', [GoogleAuthController::class, 'handleGoogleCallback']);
+// Captcha
+Route::get('captcha', [CaptchaController::class, 'generate']);
+
+// Recuperación de contraseña
+Route::post('forgot-password', [ForgotPasswordController::class, 'sendResetLink']);
+Route::post('reset-password', [ForgotPasswordController::class, 'resetPassword']);
 
 // ==================== RUTAS PROTEGIDAS (requieren autenticación) ====================
 Route::middleware('auth:sanctum')->group(function () {
@@ -85,6 +94,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::prefix('admin')->middleware('role:administrador')->group(function () {
         
         // Dashboard
+        Route::post('configuracion/usuarios/resend-credentials', [ResendCredentialsController::class, 'resend']);
         Route::get('dashboard', [DashboardController::class, 'index']);
         
         // ========== AGENDA ==========

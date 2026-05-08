@@ -8,6 +8,8 @@ import { UsuarioFormModal } from '../components/UsuarioFormModal';
 import { ResetPasswordModal } from '../components/ResetPasswordModal';
 import Pagination from '../../../../../components/common/Pagination';
 import type { CreateUsuarioData, UpdateUsuarioData, Usuario } from '../services/admin.usuarios.service';
+import { adminUsuariosService } from '../services/admin.usuarios.service';
+import { useToast } from '../../../../../hooks/useToast';
 
 export const UsuariosPage = () => {
   const {
@@ -29,6 +31,22 @@ export const UsuariosPage = () => {
   const [resetModalOpen, setResetModalOpen] = useState(false);
   const [selectedUsuario, setSelectedUsuario] = useState<Usuario | null>(null);
   const [isEditing, setIsEditing] = useState(false);
+  const { showToast } = useToast();
+
+  const handleResendCredentials = async (usuario: Usuario) => {
+    const confirmResend = window.confirm(
+      `¿Estás seguro de que deseas reenviar las credenciales a "${usuario.nombre} ${usuario.apellido}"?`
+    );
+    if (!confirmResend) return;
+
+    try {
+      await adminUsuariosService.resendCredentials(usuario.idUsuario);
+      showToast(`Credenciales reenviadas exitosamente a ${usuario.email}`, 'success');
+    } catch (error: any) {
+      showToast(error.message || 'Error al reenviar credenciales', 'error');
+    }
+  };
+
 
   const handleNewUser = () => {
     setSelectedUsuario(null);
@@ -96,6 +114,7 @@ export const UsuariosPage = () => {
         onEdit={handleEdit}
         onResetPassword={handleResetPassword}
         onToggleActive={handleToggleActive}
+        onResendCredentials={handleResendCredentials}
       />
 
       {lastPage > 1 && (

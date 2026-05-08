@@ -18,6 +18,17 @@ const roleDisplayNames: Record<string, string> = {
   cliente: 'Cliente',
 };
 
+const resendCredentials = async (id: number) => {
+  try {
+    await adminUsuariosService.resendCredentials(id);
+    showToast('Credenciales reenviadas exitosamente', 'success');
+    return true;
+  } catch (error: unknown) {
+    showToast(getErrorMessage(error, 'Error al reenviar credenciales'), 'error');
+    return false;
+  }
+};
+
 export const useUsuarios = () => {
   const [usuarios, setUsuarios] = useState<Usuario[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -188,5 +199,6 @@ export const useUsuarios = () => {
     changePage,
     changeFiltros,
     loadUsuarios,
+    resendCredentials,
   };
 };

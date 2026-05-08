@@ -69,6 +69,8 @@ export interface LoginResponseData {
 export interface LoginData {
   email: string;
   password: string;
+  captcha_id: string;  // ← Cambiado
+  captcha: string;
 }
 
 export interface RegisterData {

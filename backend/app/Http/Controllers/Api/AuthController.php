@@ -8,9 +8,15 @@ use App\Rules\StrongPassword;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\DB;
+use App\Http\Controllers\Api\CaptchaController;
 
 class AuthController extends ApiController
 {
+    private function validateCaptcha($captchaId, $captchaInput)
+    {
+        $captchaController = new CaptchaController();
+        return $captchaController->validateCaptcha($captchaId, $captchaInput);
+    }
     /**
      * Login de usuario
      */
@@ -19,13 +25,52 @@ class AuthController extends ApiController
         $request->validate([
             'email' => 'required|email',
             'password' => 'required|string',
+            'captcha_id' => 'required|string',
+            'captcha' => 'required|string',
         ]);
+
+        // Validar captcha
+        if (!$this->validateCaptcha($request->captcha_id, $request->captcha)) {
+            return $this->errorResponse('Código captcha inválido', 422);
+        }
 
         $user = User::where('email', $request->email)->first();
 
+        // Verificar si el usuario existe y está bloqueado
+        if ($user && $user->locked_until && Carbon::parse($user->locked_until)->isFuture()) {
+            $minutesRemaining = ceil(Carbon::now()->diffInMinutes($user->locked_until));
+            return $this->errorResponse("Demasiados intentos fallidos. Cuenta bloqueada por {$minutesRemaining} minutos.", 403);
+        }
+
+        // Si existía bloqueo expirado, reiniciar intentos
+        if ($user && $user->locked_until && Carbon::parse($user->locked_until)->isPast()) {
+            $user->login_attempts = 0;
+            $user->locked_until = null;
+            $user->save();
+        }
+
+        // Verificar credenciales
         if (!$user || !Hash::check($request->password, $user->passwordHash)) {
+            // Incrementar intentos fallidos
+            if ($user) {
+                $user->login_attempts++;
+                
+                // Si llega a 5 intentos, bloquear por 15 minutos
+                if ($user->login_attempts >= 5) {
+                    $user->locked_until = Carbon::now()->addMinutes(15);
+                    $user->login_attempts = 0; // Reiniciar contador
+                    $user->save();
+                    return $this->errorResponse('Demasiados intentos fallidos. Cuenta bloqueada por 15 minutos.', 403);
+                }
+                $user->save();
+            }
             return $this->errorResponse('Credenciales incorrectas', 401);
         }
+
+        // Login exitoso - reiniciar contador de intentos
+        $user->login_attempts = 0;
+        $user->locked_until = null;
+        $user->save();
 
         if (!$user->activo) {
             return $this->errorResponse('Usuario desactivado', 403);
@@ -217,4 +262,6 @@ class AuthController extends ApiController
             'token_type' => 'Bearer',
         ], 'Contraseña actualizada exitosamente');
     }
+
+    
 }

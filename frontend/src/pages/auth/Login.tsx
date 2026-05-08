@@ -7,6 +7,7 @@ import { useAuth } from '../../hooks/useAuth';
 import type { UserRole } from '../../services/types/auth';
 import fondoLogin from '../../assets/fondo_login.png';
 import { authService } from '../../services/auth/authService';
+import { CaptchaInput } from '../../components/common/CaptchaInput';
 
 const dashboardByRole: Record<UserRole, string> = {
   administrador: '/admin/dashboard',
@@ -16,6 +17,7 @@ const dashboardByRole: Record<UserRole, string> = {
 };
 
 export const Login = () => {
+  
   const { login } = useAuth();
   const navigate = useNavigate();
   const [email, setEmail] = useState('');
@@ -23,17 +25,25 @@ export const Login = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
-
+  const [captcha, setCaptcha] = useState('');
+  const [captchaError, setCaptchaError] = useState('');
   const handleGoogleLogin = () => {
     authService.loginWithGoogle();
   };
+  const [captchaId, setCaptchaId] = useState('');
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
+    setCaptchaError('');
     setIsLoading(true);
     try {
-      const response = await login({ email, password });
+      const response = await login({ 
+        email, 
+        password, 
+        captcha_id: captchaId,  // ← Enviar captcha_id
+        captcha                  // ← Enviar captcha
+      });
       
       if (response.must_change_password) {
         navigate('/force-change-password', { replace: true });
@@ -41,11 +51,19 @@ export const Login = () => {
         navigate(dashboardByRole[response.user.rol], { replace: true });
       }
     } catch (err: any) {
-      setError(err.message);
+      if (err.message.toLowerCase().includes('captcha')) {
+        setCaptchaError(err.message);
+      } else {
+        setError(err.message);
+      }
+      // Recargar captcha
+      const refreshBtn = document.querySelector('[title="Recargar captcha"]') as HTMLButtonElement;
+      refreshBtn?.click();
     } finally {
       setIsLoading(false);
     }
   };
+
 
   return (
     <div style={styles.page}>
@@ -100,6 +118,15 @@ export const Login = () => {
             </button>
           </div>
 
+          <div style={styles.captchaContainer}>
+            <CaptchaInput
+              value={captcha}
+              onChange={setCaptcha}
+              onCaptchaIdChange={setCaptchaId}
+              error={captchaError}
+            />
+          </div>
+
           <button
             type="submit"
             disabled={isLoading}
@@ -121,6 +148,11 @@ export const Login = () => {
         <div style={styles.footerText}>
           ¿No tienes una cuenta?{' '}
           <Link to="/register" style={styles.footerLink}>Registrate</Link>
+        </div>
+        <div style={styles.forgotPassword}>
+          <Link to="/forgot-password" style={styles.forgotLink}>
+            ¿Olvidaste tu contraseña?
+          </Link>
         </div>
       </div>
     </div>
@@ -265,7 +297,7 @@ const styles: Record<string, React.CSSProperties> = {
     marginTop: '20px',
     textAlign: 'center',
     fontSize: '13px',
-    color: 'rgba(255,255,255,0.75)',
+    color: '#000000',
   },
   footerLink: {
     color: '#7ec8f5',
@@ -280,5 +312,18 @@ const styles: Record<string, React.CSSProperties> = {
     padding: '10px 14px',
     fontSize: '13px',
     marginBottom: '12px',
+  },
+  captchaContainer: {
+    marginTop: '8px',
+  },
+  forgotPassword: {
+    //TOP
+    textAlign: 'center',
+    marginTop: '2px',
+  },
+  forgotLink: {
+    color: '#7ec8f5',
+    fontSize: '12px',
+    textDecoration: 'none',
   },
 };

@@ -1,5 +1,5 @@
 // src/pages/admin/configuracion/usuarios/components/UsuariosTable.tsx
-import { PencilIcon, KeyIcon, UserMinusIcon } from '@heroicons/react/24/outline';
+import { PencilIcon, KeyIcon, UserMinusIcon, EnvelopeIcon } from '@heroicons/react/24/outline';
 import type { Usuario } from '../services/admin.usuarios.service';
 
 interface UsuariosTableProps {
@@ -8,6 +8,7 @@ interface UsuariosTableProps {
   onEdit: (usuario: Usuario) => void;
   onResetPassword: (usuario: Usuario) => void;
   onToggleActive: (usuario: Usuario) => void;
+  onResendCredentials?: (usuario: Usuario) => void;
 }
 
 const rolLabels: Record<string, string> = {
@@ -30,14 +31,24 @@ export const UsuariosTable = ({
   onEdit,
   onResetPassword,
   onToggleActive,
+  onResendCredentials,
 }: UsuariosTableProps) => {
-  // Manejador con confirmación
+  // Manejador con confirmación para activar/desactivar
   const handleToggleActiveClick = (usuario: Usuario) => {
     const action = usuario.activo ? 'desactivar' : 'activar';
     const confirmMessage = `¿Estás seguro de que deseas ${action} al usuario "${usuario.nombre} ${usuario.apellido}"?`;
     
     if (window.confirm(confirmMessage)) {
       onToggleActive(usuario);
+    }
+  };
+
+  // Manejador para reenviar credenciales
+  const handleResendCredentialsClick = (usuario: Usuario) => {
+    const confirmMessage = `¿Estás seguro de que deseas reenviar las credenciales a "${usuario.nombre} ${usuario.apellido}"?`;
+    
+    if (window.confirm(confirmMessage)) {
+      onResendCredentials?.(usuario);
     }
   };
 
@@ -78,7 +89,7 @@ export const UsuariosTable = ({
                 Rol
               </th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Estado
+                Estado / Verificación
               </th>
               <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
                 Acciones
@@ -125,15 +136,29 @@ export const UsuariosTable = ({
                   )}
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap">
-                  <span
-                    className={`px-2 py-1 text-xs rounded-full ${
-                      usuario.activo
-                        ? 'bg-green-100 text-green-800'
-                        : 'bg-red-100 text-red-800'
-                    }`}
-                  >
-                    {usuario.activo ? 'Activo' : 'Inactivo'}
-                  </span>
+                  <div className="flex flex-col gap-1">
+                    <span
+                      className={`px-2 py-1 text-xs rounded-full w-fit ${
+                        usuario.activo
+                          ? 'bg-green-100 text-green-800'
+                          : 'bg-red-100 text-red-800'
+                      }`}
+                    >
+                      {usuario.activo ? 'Activo' : 'Inactivo'}
+                    </span>
+                    {/* Mostrar si el email está verificado (para recepcionistas/groomers) */}
+                    {(usuario.rol === 'recepcionista' || usuario.rol === 'groomer') && (
+                      <span
+                        className={`px-2 py-1 text-xs rounded-full w-fit ${
+                          usuario.email_verified_at
+                            ? 'bg-green-100 text-green-800'
+                            : 'bg-yellow-100 text-yellow-800'
+                        }`}
+                      >
+                        {usuario.email_verified_at ? 'Verificado' : 'Pendiente'}
+                      </span>
+                    )}
+                  </div>
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap text-right">
                   <div className="flex justify-end gap-2">
@@ -146,7 +171,6 @@ export const UsuariosTable = ({
                     </button>
                     <button
                       onClick={() => {
-                        // Confirmación para resetear contraseña
                         const confirmReset = window.confirm(
                           `¿Estás seguro de que deseas resetear la contraseña de "${usuario.nombre} ${usuario.apellido}"?`
                         );
@@ -159,6 +183,16 @@ export const UsuariosTable = ({
                     >
                       <KeyIcon className="h-4 w-4" />
                     </button>
+                    {/* Botón de reenviar credenciales - solo para recepcionistas/groomers no verificados */}
+                    {(usuario.rol === 'recepcionista' || usuario.rol === 'groomer') && !usuario.email_verified_at && onResendCredentials && (
+                      <button
+                        onClick={() => handleResendCredentialsClick(usuario)}
+                        className="p-1.5 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
+                        title="Reenviar credenciales"
+                      >
+                        <EnvelopeIcon className="h-4 w-4" />
+                      </button>
+                    )}
                     <button
                       onClick={() => handleToggleActiveClick(usuario)}
                       className={`p-1.5 rounded-lg transition-colors ${

@@ -9,6 +9,8 @@ import { useToast } from './hooks/useToast';
 import { ActivateAccount } from "./pages/auth/ActivateAccount";
 import { ForceChangePassword } from "./pages/auth/ForceChangePassword";
 import { GoogleCallback } from "./pages/auth/GoogleCallback";
+import { ForgotPassword } from "./pages/auth/ForgotPassword";
+import { ResetPassword } from "./pages/auth/ResetPassword";
 
 // Pages de Auth
 import { Login } from "./pages/auth/Login";
@@ -100,6 +102,8 @@ const AppRoutes = () => {
       <Route path="/activar-cuenta" element={<ActivateAccount />} />
       <Route path="/force-change-password" element={<ForceChangePassword />} />
       <Route path="/auth/google/callback" element={<GoogleCallback />} />
+      <Route path="/forgot-password" element={<ForgotPassword />} />
+      <Route path="/reset-password" element={<ResetPassword />} />
 
       {/* Ruta raíz - redirige según rol */}
       <Route path="/" element={<NavigateToDashboard />} />

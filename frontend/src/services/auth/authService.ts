@@ -42,6 +42,18 @@ export interface LoginResponse {
   data: LoginResponseData;
 }
 
+export interface ForgotPasswordResponse {
+  success: boolean;
+  message: string;
+  data: null;
+}
+
+export interface ResetPasswordResponse {
+  success: boolean;
+  message: string;
+  data: null;
+}
+
 export const authService = {
   async login(credentials: LoginData): Promise<LoginResponseData> {
     try {
@@ -201,6 +213,44 @@ export const authService = {
       return true;
     } catch {
       return false;
+    }
+  },
+
+  async forgotPassword(email: string): Promise<void> {
+    try {
+      const response = await api.post<ForgotPasswordResponse>('/forgot-password', { email });
+      if (!response.data.success) {
+        throw new Error(response.data.message);
+      }
+    } catch (error: any) {
+      const message = error.response?.data?.message || 'Error al enviar el enlace de recuperación';
+      throw new Error(message);
+    }
+  },
+
+  async resetPassword(email: string, token: string, password: string, password_confirmation: string): Promise<void> {
+    try {
+      const response = await api.post<ResetPasswordResponse>('/reset-password', {
+        email,
+        token,
+        password,
+        password_confirmation
+      });
+      if (!response.data.success) {
+        throw new Error(response.data.message);
+      }
+    } catch (error: any) {
+      const message = error.response?.data?.message || 'Error al restablecer la contraseña';
+      throw new Error(message);
+    }
+  },
+
+  async getCaptcha(): Promise<string> {
+    try {
+      const response = await api.get('/captcha', { responseType: 'blob' });
+      return URL.createObjectURL(response.data);
+    } catch (error: any) {
+      throw new Error('Error al cargar el captcha');
     }
   },
 };

@@ -42,6 +42,9 @@ use App\Http\Controllers\Api\Admin\Configuracion\NegocioController;
 use App\Http\Controllers\Api\Admin\Configuracion\UsuarioController;
 use App\Http\Controllers\Api\Admin\Configuracion\NotificacionController;
 
+// Logs
+use App\Http\Controllers\Api\Admin\Configuracion\LogController;
+
 // ==================== RECEPCIONISTA ====================
 use App\Http\Controllers\Api\Recepcionista\DashboardController as RecepcionistaDashboardController;
 use App\Http\Controllers\Api\Recepcionista\AgendaController as RecepcionistaAgendaController;
@@ -215,6 +218,11 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::post('configuracion/usuarios/{id}/reset-password', [UsuarioController::class, 'resetPassword']);
         Route::delete('configuracion/usuarios/{id}', [UsuarioController::class, 'destroy']);
         Route::get('configuracion/roles', [UsuarioController::class, 'roles']);
+
+        // ========== TRAZABILIDAD (LOGS) ==========
+        Route::get('configuracion/logs', [LogController::class, 'index']);
+        Route::get('configuracion/logs/{id}', [LogController::class, 'show']);
+        Route::get('configuracion/logs-stats', [LogController::class, 'stats']);
         
         // Notificaciones del Sistema
         Route::get('configuracion/notificaciones', [NotificacionController::class, 'index']);

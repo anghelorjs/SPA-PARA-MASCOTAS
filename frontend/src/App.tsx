@@ -37,6 +37,7 @@ const MovimientosAdmin = () => <div className="p-6"><h1 className="text-2xl font
 const ReportesAdmin = () => <div className="p-6"><h1 className="text-2xl font-bold">Reportes</h1><p className="mt-4 text-gray-600">Generación de reportes del sistema.</p></div>;
 const ConfiguracionNegocio = () => <div className="p-6"><h1 className="text-2xl font-bold">Datos del Negocio</h1><p className="mt-4 text-gray-600">Configuración de la empresa.</p></div>;
 import { UsuariosPage } from "./pages/admin/configuracion/usuarios/pages/UsuariosPage";
+import { LogsPage } from "./pages/admin/configuracion/logs/pages/LogsPage";
 const ConfiguracionNotificaciones = () => <div className="p-6"><h1 className="text-2xl font-bold">Notificaciones del Sistema</h1><p className="mt-4 text-gray-600">Historial y envío de notificaciones.</p></div>;
 import { PerfilAdmin } from "./pages/admin/perfil/pages/PerfilAdmin";
 
@@ -131,6 +132,7 @@ const AppRoutes = () => {
         <Route path="admin/reportes" element={<ReportesAdmin />} />
         <Route path="admin/configuracion/negocio" element={<ConfiguracionNegocio />} />
         <Route path="admin/configuracion/usuarios" element={<UsuariosPage />} />
+        <Route path="admin/configuracion/logs" element={<LogsPage />} />
         <Route path="admin/configuracion/notificaciones" element={<ConfiguracionNotificaciones />} />
         <Route path="admin/perfil" element={<PerfilAdmin />} />
 

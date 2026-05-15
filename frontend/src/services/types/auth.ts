@@ -98,3 +98,11 @@ export interface LogoutResponse {
   message: string;
   data: null;
 }
+
+export type CitaEstado = 
+  | 'programada' 
+  | 'confirmada' 
+  | 'en_curso' 
+  | 'completada' 
+  | 'cancelada' 
+  | 'pendiente_confirmacion'; // ← NUEVO

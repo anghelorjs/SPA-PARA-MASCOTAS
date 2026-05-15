@@ -69,6 +69,7 @@ use App\Http\Controllers\Api\Cliente\PerfilController as ClientePerfilController
 use App\Http\Controllers\Api\ActivationController;
 use App\Http\Controllers\Api\ResendCredentialsController;
 
+
 // ==================== RUTAS PÚBLICAS ====================
 Route::post('login', [AuthController::class, 'login']);
 Route::post('register', [AuthController::class, 'register']);
@@ -360,6 +361,7 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::get('citas/{id}', [ClienteCitaController::class, 'show']);
         Route::post('citas', [ClienteCitaController::class, 'store']);
         Route::post('citas/{id}/cancelar', [ClienteCitaController::class, 'cancel']);
+        Route::post('citas/{id}/confirmar', [ClienteCitaController::class, 'confirmarCitaCliente']);
         
         // Agendado de citas (pasos)
         Route::get('agendado/mascotas', [ClienteCitaController::class, 'getMascotas']);

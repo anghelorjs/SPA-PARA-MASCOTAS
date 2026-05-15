@@ -7,6 +7,7 @@ export interface NotificacionData {
   mensaje: string;
   fecha: string;
   leida: boolean;
+  cita_id?: number | null;
 }
 
 export interface MascotaResumenData {
@@ -81,5 +82,13 @@ export const clientePerfilService = {
    */
   async marcarNotificacion(notificacionId: number): Promise<void> {
     await api.post(`/cliente/perfil/notificaciones/${notificacionId}/leer`);
+  },
+
+  /**
+   * Confirmar cita desde notificación
+   */
+  async confirmarCita(citaId: number): Promise<any> {
+    const response = await api.post(`/cliente/citas/${citaId}/confirmar`);
+    return response.data.data;
   },
 };

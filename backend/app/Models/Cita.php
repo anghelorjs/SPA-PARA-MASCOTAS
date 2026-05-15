@@ -5,6 +5,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Carbon\Carbon;
 
 class Cita extends Model
 {
@@ -22,13 +23,15 @@ class Cita extends Model
         'fechaHoraFin',
         'duracionCalculadaMin',
         'estado',
-        'observaciones'
+        'observaciones',
+        'confirmacion_expira_at', // ← NUEVO
     ];
 
     protected $casts = [
         'fechaHoraInicio' => 'datetime',
         'fechaHoraFin' => 'datetime',
-        'duracionCalculadaMin' => 'integer'
+        'duracionCalculadaMin' => 'integer',
+        'confirmacion_expira_at' => 'datetime', // ← NUEVO
     ];
 
     // Relaciones
@@ -65,7 +68,7 @@ class Cita extends Model
     // Scopes útiles
     public function scopeProgramadas($query)
     {
-        return $query->whereIn('estado', ['programada', 'confirmada']);
+        return $query->whereIn('estado', ['programada', 'confirmada', 'pendiente_confirmacion']);
     }
 
     public function scopePorGroomer($query, $idGroomer)
@@ -76,6 +79,12 @@ class Cita extends Model
     public function scopePorFecha($query, $fecha)
     {
         return $query->whereDate('fechaHoraInicio', $fecha);
+    }
+
+    public function scopePendientesConfirmacion($query)
+    {
+        return $query->where('estado', 'pendiente_confirmacion')
+                     ->where('confirmacion_expira_at', '>', now());
     }
 
     // Métodos útiles
@@ -101,5 +110,13 @@ class Cita extends Model
     {
         $this->estado = 'completada';
         $this->save();
+    }
+
+    // NUEVO: Verificar si está pendiente de confirmación
+    public function estaPendienteConfirmacion(): bool
+    {
+        return $this->estado === 'pendiente_confirmacion' 
+            && $this->confirmacion_expira_at 
+            && $this->confirmacion_expira_at > now();
     }
 }

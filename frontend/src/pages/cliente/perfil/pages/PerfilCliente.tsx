@@ -15,6 +15,7 @@ export const PerfilCliente = () => {
     updatePerfil,
     changePassword,
     marcarNotificacion,
+    confirmarCita,
   } = usePerfilCliente();
 
   if (isLoading) {
@@ -68,6 +69,9 @@ export const PerfilCliente = () => {
         <NotificacionesList
           notificaciones={perfil.notificaciones}
           onMarcarLeida={marcarNotificacion}
+          onConfirmarCita={async (citaId) => {
+            await confirmarCita(citaId);
+          }}
         />
       </div>
     </div>

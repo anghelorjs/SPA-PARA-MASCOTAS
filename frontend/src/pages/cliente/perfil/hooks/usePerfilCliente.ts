@@ -81,6 +81,18 @@ export const usePerfilCliente = () => {
     }
   };
 
+  const confirmarCita = async (citaId: number) => {
+    try {
+      await clientePerfilService.confirmarCita(citaId);
+      showToast('Cita confirmada exitosamente', 'success');
+      await loadPerfil(); // Recargar para actualizar notificaciones
+      return true;
+    } catch (error: any) {
+      showToast(error.message || 'Error al confirmar cita', 'error');
+      return false;
+    }
+  };
+
   useEffect(() => {
     loadPerfil();
   }, [loadPerfil]);
@@ -94,5 +106,6 @@ export const usePerfilCliente = () => {
     changePassword,
     marcarNotificacion,
     loadPerfil,
+    confirmarCita,
   };
 };

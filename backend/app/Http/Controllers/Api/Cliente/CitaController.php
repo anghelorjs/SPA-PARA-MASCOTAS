@@ -388,4 +388,67 @@ class CitaController extends ApiController
         
         return $this->successResponse(null, 'Cita cancelada correctamente');
     }
+
+    /**
+     * Confirmar cita por el cliente (desde notificación)
+     */
+    public function confirmarCitaCliente($id)
+    {
+        $user = Auth::user();
+        $cliente = $user->cliente;
+        
+        if (!$cliente) {
+            return $this->errorResponse('Cliente no encontrado', 404);
+        }
+        
+        $cita = Cita::with(['mascota'])
+            ->whereHas('mascota', function($q) use ($cliente) {
+                $q->where('idCliente', $cliente->idCliente);
+            })
+            ->find($id);
+        
+        if (!$cita) {
+            return $this->errorResponse('Cita no encontrada', 404);
+        }
+        
+        // Verificar que esté pendiente de confirmación
+        if (!$cita->estaPendienteConfirmacion()) {
+            return $this->errorResponse('Esta cita no está pendiente de confirmación', 400);
+        }
+        
+        DB::beginTransaction();
+        
+        try {
+            // Confirmar la cita
+            $cita->confirmar();
+            
+            // Crear notificación de éxito
+            Notificacion::create([
+                'idCliente'  => $cliente->idCliente,
+                'idCita'     => $cita->idCita,
+                'tipo'       => 'confirmacion',
+                'canal'      => $cliente->canalContacto ?? 'whatsapp',
+                'mensaje'    => "✅ Tu cita para {$cita->mascota->nombre} el {$cita->fechaHoraInicio->format('d/m/Y H:i')} ha sido confirmada. ¡Te esperamos!",
+                'fechaEnvio' => now(),
+                'entregada'  => false,
+            ]);
+            
+            // Marcar la notificación original como leída
+            $notificacionOriginal = Notificacion::where('idCita', $cita->idCita)
+                ->where('tipo', 'pendiente_confirmacion')
+                ->first();
+            if ($notificacionOriginal) {
+                $notificacionOriginal->entregada = true;
+                $notificacionOriginal->save();
+            }
+            
+            DB::commit();
+            
+            return $this->successResponse($cita, 'Cita confirmada exitosamente');
+            
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return $this->errorResponse('Error al confirmar cita: ' . $e->getMessage(), 500);
+        }
+    }
 }

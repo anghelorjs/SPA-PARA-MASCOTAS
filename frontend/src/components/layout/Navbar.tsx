@@ -1,8 +1,11 @@
 // src/components/layout/Navbar.tsx
+// Agregar import y estado para notificaciones reales:
+
 import { useState, useRef, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { FiBell, FiSearch, FiLogOut, FiUser, FiChevronDown } from "react-icons/fi";
 import { useAuth } from "../../hooks/useAuth";
+import { clientePerfilService } from "../../pages/cliente/perfil/services/cliente.perfil.service";
 
 interface NavbarProps { sidebarCollapsed: boolean; }
 
@@ -12,12 +15,6 @@ const roleLabels: Record<string, string> = {
   groomer: "Groomer",
   cliente: "Cliente",
 };
-
-const NOTIFS = [
-  { title: "Cita confirmada", desc: "Luna — Baño completo hoy a las 10:00", time: "hace 5 min", dot: "#4ade80" },
-  { title: "Stock crítico", desc: "Champú Antipulgas: 2 unidades restantes", time: "hace 1 h", dot: "#f87171" },
-  { title: "Recordatorio", desc: "Rocky — Cita mañana a las 14:30", time: "hace 2 h", dot: "#60a5fa" },
-];
 
 // Función para obtener el path correcto del perfil según el rol
 const getPerfilPath = (role: string): string => {
@@ -40,8 +37,30 @@ export default function Navbar({ sidebarCollapsed }: NavbarProps) {
   const navigate = useNavigate();
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const [notifOpen, setNotifOpen] = useState(false);
+  const [notificaciones, setNotificaciones] = useState<any[]>([]);
+  const [notificacionesNoLeidas, setNotificacionesNoLeidas] = useState(0);
   const dropdownRef = useRef<HTMLDivElement>(null);
   const notifRef = useRef<HTMLDivElement>(null);
+
+  // Cargar notificaciones reales del cliente
+  const loadNotificaciones = async () => {
+    if (user?.rol !== 'cliente') return;
+    try {
+      const perfil = await clientePerfilService.getPerfil();
+      setNotificaciones(perfil.notificaciones.slice(0, 5));
+      const noLeidas = perfil.notificaciones.filter(n => !n.leida).length;
+      setNotificacionesNoLeidas(noLeidas);
+    } catch (error) {
+      console.error('Error loading notificaciones:', error);
+    }
+  };
+
+  useEffect(() => {
+    loadNotificaciones();
+    // Recargar cada 30 segundos
+    const interval = setInterval(loadNotificaciones, 30000);
+    return () => clearInterval(interval);
+  }, [user]);
 
   useEffect(() => {
     const handler = (e: MouseEvent) => {
@@ -62,6 +81,19 @@ export default function Navbar({ sidebarCollapsed }: NavbarProps) {
   const fullName = [user?.nombre, user?.apellido].filter(Boolean).join(" ") || "Usuario";
   const initials = [user?.nombre, user?.apellido].filter(Boolean).map(s => s![0].toUpperCase()).join("") || "U";
   const perfilPath = getPerfilPath(role);
+  const isCliente = role === 'cliente';
+
+  const tipoIconos: Record<string, string> = {
+    confirmacion: '✅',
+    recordatorio: '⏰',
+    listo_para_recoger: '🐕',
+    encuesta: '📝',
+    cancelacion: '❌',
+    reprogramacion: '🔄',
+    pendiente_confirmacion: '⏳',
+  };
+
+  const getNotifIcon = (tipo: string) => tipoIconos[tipo] || '🔔';
 
   return (
     <header
@@ -70,7 +102,6 @@ export default function Navbar({ sidebarCollapsed }: NavbarProps) {
     >
       {/* ── Izquierda ───────────────────────────────────────────────── */}
       <div className="flex items-center gap-4">
-        {/* Buscador */}
         <div className="relative">
           <FiSearch className="absolute left-3 top-1/2 -translate-y-1/2 text-white/40 text-sm" />
           <input
@@ -84,45 +115,83 @@ export default function Navbar({ sidebarCollapsed }: NavbarProps) {
       {/* ── Derecha ─────────────────────────────────────────────────── */}
       <div className="flex items-center gap-3">
 
-        {/* Notificaciones */}
+        {/* Notificaciones - con datos reales para clientes */}
         <div className="relative" ref={notifRef}>
           <button
             onClick={() => setNotifOpen(p => !p)}
             className="w-[38px] h-[38px] flex items-center justify-center rounded-lg bg-transparent text-white/70 text-lg relative transition-all duration-150 hover:bg-white/10 hover:text-white"
           >
             <FiBell />
-            <span className="absolute top-2 right-2 w-2 h-2 bg-red-400 rounded-full border-2 border-[#1e3a5f]" />
+            {notificacionesNoLeidas > 0 && (
+              <span className="absolute -top-1 -right-1 w-5 h-5 bg-red-500 text-white text-xs rounded-full flex items-center justify-center">
+                {notificacionesNoLeidas > 9 ? '9+' : notificacionesNoLeidas}
+              </span>
+            )}
           </button>
 
           {notifOpen && (
-            <div className="absolute right-0 top-12 w-72 bg-[#1e3a5f] border border-white/10 rounded-xl shadow-2xl z-60 overflow-hidden">
+            <div className="absolute right-0 top-12 w-80 bg-[#1e3a5f] border border-white/10 rounded-xl shadow-2xl z-60 overflow-hidden">
               <div className="px-4 py-3 border-b border-white/10 flex items-center justify-between">
                 <p className="text-white font-semibold text-sm m-0">Notificaciones</p>
-                <span className="text-[11px] text-white/40 bg-white/8 px-2 py-0.5 rounded-full">3 nuevas</span>
+                {isCliente && (
+                  <button
+                    onClick={() => {
+                      setNotifOpen(false);
+                      navigate('/cliente/perfil');
+                    }}
+                    className="text-xs text-blue-400 hover:text-blue-300"
+                  >
+                    Ver todas
+                  </button>
+                )}
               </div>
-              {NOTIFS.map((n, i) => (
-                <div
-                  key={i}
-                  className={`flex gap-3 px-4 py-3 cursor-pointer transition-all duration-150 hover:bg-white/10 ${
-                    i < NOTIFS.length - 1 ? 'border-b border-white/10' : ''
-                  }`}
-                >
-                  <span
-                    className="w-2 h-2 rounded-full mt-1 flex-shrink-0"
-                    style={{ backgroundColor: n.dot }}
-                  />
-                  <div>
-                    <p className="text-white text-xs font-medium m-0 leading-tight">{n.title}</p>
-                    <p className="text-white/50 text-[11px] mt-0.5 m-0 leading-tight">{n.desc}</p>
-                    <p className="text-white/30 text-[10px] mt-0.5 m-0">{n.time}</p>
+              <div className="max-h-80 overflow-y-auto">
+                {isCliente && notificaciones.length > 0 ? (
+                  notificaciones.map((n) => (
+                    <div
+                      key={n.id}
+                      className={`px-4 py-3 border-b border-white/10 cursor-pointer transition-all duration-150 hover:bg-white/10 ${
+                        !n.leida ? 'bg-white/5' : ''
+                      }`}
+                      onClick={() => {
+                        setNotifOpen(false);
+                        navigate('/cliente/perfil');
+                      }}
+                    >
+                      <div className="flex gap-3">
+                        <span className="text-lg">{getNotifIcon(n.tipo)}</span>
+                        <div className="flex-1 min-w-0">
+                          <p className="text-white text-xs font-medium m-0 line-clamp-2">
+                            {n.mensaje}
+                          </p>
+                          <p className="text-white/40 text-[10px] mt-1">{n.fecha}</p>
+                        </div>
+                        {!n.leida && (
+                          <div className="w-2 h-2 bg-blue-400 rounded-full mt-1" />
+                        )}
+                      </div>
+                    </div>
+                  ))
+                ) : (
+                  <div className="px-4 py-8 text-center">
+                    <FiBell className="h-8 w-8 text-white/30 mx-auto mb-2" />
+                    <p className="text-white/50 text-sm">No hay notificaciones</p>
                   </div>
-                </div>
-              ))}
-              <div className="px-4 py-2.5 border-t border-white/10">
-                <button className="w-full bg-transparent border-none cursor-pointer text-blue-400 text-xs text-center hover:text-blue-300 transition-colors">
-                  Ver todas las notificaciones
-                </button>
+                )}
               </div>
+              {isCliente && notificaciones.length > 0 && (
+                <div className="px-4 py-2.5 border-t border-white/10">
+                  <button
+                    onClick={() => {
+                      setNotifOpen(false);
+                      navigate('/cliente/perfil');
+                    }}
+                    className="w-full bg-transparent border-none cursor-pointer text-blue-400 text-xs text-center hover:text-blue-300 transition-colors"
+                  >
+                    Ver todas las notificaciones
+                  </button>
+                </div>
+              )}
             </div>
           )}
         </div>
@@ -159,7 +228,7 @@ export default function Navbar({ sidebarCollapsed }: NavbarProps) {
               <button
                 onClick={() => {
                   setDropdownOpen(false);
-                  navigate(perfilPath);  // ✅ CORREGIDO: usa la ruta correcta
+                  navigate(perfilPath);
                 }}
                 className="flex items-center gap-2.5 w-full px-4 py-2.5 bg-transparent text-white/75 text-xs transition-all duration-150 hover:bg-white/10 hover:text-white cursor-pointer border-none"
               >

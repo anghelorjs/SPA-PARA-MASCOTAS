@@ -28,6 +28,17 @@ class Notificacion extends Model
         'entregada' => 'boolean'
     ];
 
+    // Tipos válidos de notificaciones
+    const TIPOS = [
+        'confirmacion',
+        'recordatorio',
+        'listo_para_recoger',
+        'encuesta',
+        'cancelacion',
+        'reprogramacion',
+        'pendiente_confirmacion', // ← NUEVO
+    ];
+
     // Relaciones
     public function cliente()
     {

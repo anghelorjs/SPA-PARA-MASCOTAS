@@ -12,7 +12,6 @@
   - [📋 Tabla de Contenidos](#-tabla-de-contenidos)
   - [🚀 Descripción General](#-descripción-general)
     - [🎯 Objetivos del Sistema](#-objetivos-del-sistema)
-  - [🏗️ Arquitectura del Sistema](#️-arquitectura-del-sistema)
     - [🔐 Seguridad Implementada](#-seguridad-implementada)
   - [📦 Módulos Desarrollados](#-módulos-desarrollados)
     - [👑 Módulo Administrador](#-módulo-administrador)
@@ -39,47 +38,6 @@
 - **Generar reportes ejecutivos** para la toma de decisiones
 
 ---
-
-## 🏗️ Arquitectura del Sistema
-┌─────────────────────────────────────────────────────────────────────────────┐
-│ ARQUITECTURA SPA MASCOTAS │
-├─────────────────────────────────────────────────────────────────────────────┤
-│ │
-│ ┌─────────────────────────────────────────────────────────────────────┐ │
-│ │ FRONTEND (React + Vite) │ │
-│ │ ┌─────────┐ ┌─────────┐ ┌─────────┐ ┌─────────┐ ┌─────────┐ │ │
-│ │ │ Admin │ │ Recep. │ │ Groomer │ │ Cliente │ │ Shared │ │ │
-│ │ │ Modules │ │ Modules │ │ Modules │ │ Modules │ │ Comp. │ │ │
-│ │ └─────────┘ └─────────┘ └─────────┘ └─────────┘ └─────────┘ │ │
-│ └─────────────────────────────────────────────────────────────────────┘ │
-│ │ │
-│ │ HTTP/REST (API) + JWT │
-│ ▼ │
-│ ┌─────────────────────────────────────────────────────────────────────┐ │
-│ │ BACKEND (Laravel 11 + Sanctum) │ │
-│ │ ┌─────────────────────────────────────────────────────────────┐ │ │
-│ │ │ API RESTful Layer │ │ │
-│ │ │ ┌──────────┐ ┌──────────┐ ┌──────────┐ ┌──────────┐ │ │ │
-│ │ │ │ Admin │ │Recepcion.│ │ Groomer │ │ Cliente │ │ │ │
-│ │ │ │ Cont. │ │ Cont. │ │ Cont. │ │ Cont. │ │ │ │
-│ │ │ └──────────┘ └──────────┘ └──────────┘ └──────────┘ │ │ │
-│ │ └─────────────────────────────────────────────────────────────┘ │ │
-│ │ ┌─────────────────────────────────────────────────────────────┐ │ │
-│ │ │ Business Logic Layer │ │ │
-│ │ │ • Validaciones • Reglas de negocio • Cálculos de precio │ │ │
-│ │ │ • Gestión de disponibilidad • Ocupación de groomers │ │ │
-│ │ └─────────────────────────────────────────────────────────────┘ │ │
-│ │ ┌─────────────────────────────────────────────────────────────┐ │ │
-│ │ │ Data Access Layer (Eloquent) │ │ │
-│ │ └─────────────────────────────────────────────────────────────┘ │ │
-│ └─────────────────────────────────────────────────────────────────────┘ │
-│ │ │
-│ ▼ │
-│ ┌─────────────────────────────────────────────────────────────────────┐ │
-│ │ DATABASE (MySQL) │ │
-│ │ 28 tablas normalizadas con relaciones Eloquent │ │
-│ └─────────────────────────────────────────────────────────────────────┘ │
-│ │
 └─────────────────────────────────────────────────────────────────────────────┘
 
 

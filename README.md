@@ -37,9 +37,6 @@
 - **Centralizar la información** de clientes, mascotas, productos y ventas
 - **Generar reportes ejecutivos** para la toma de decisiones
 
----
-└─────────────────────────────────────────────────────────────────────────────┘
-
 
 ### 🔐 Seguridad Implementada
 

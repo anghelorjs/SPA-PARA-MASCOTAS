@@ -1,4 +1,3 @@
-// src/App.tsx
 import { Routes, Route, Navigate } from "react-router-dom";
 import { useAuth } from "./hooks/useAuth";
 import { AuthProvider } from "./contexts/AuthContext";

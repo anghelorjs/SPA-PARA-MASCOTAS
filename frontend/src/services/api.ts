@@ -1,4 +1,3 @@
-// src/services/api.ts
 import axios from 'axios';
 
 const api = axios.create({
@@ -9,7 +8,6 @@ const api = axios.create({
   },
 });
 
-// Interceptor para agregar token a todas las peticiones
 api.interceptors.request.use(
   (config) => {
     const token = localStorage.getItem('token');
@@ -23,7 +21,6 @@ api.interceptors.request.use(
   }
 );
 
-// Interceptor para manejar errores de autenticación
 api.interceptors.response.use(
   (response) => response,
   (error) => {
@@ -33,9 +30,6 @@ api.interceptors.response.use(
     }
 
     if (error.response?.status === 401) {
-      // Esto redirige a login SOLO si es un error de autenticación
-      // Pero NO debería recargar la página si es un error de credenciales incorrectas
-      // Solo si el token es inválido
       const isAuthError = error.response?.data?.message?.includes('token') || 
                           error.response?.data?.message?.includes('autenticado');
       

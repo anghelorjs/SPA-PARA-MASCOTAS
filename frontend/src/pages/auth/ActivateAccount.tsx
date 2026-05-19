@@ -1,4 +1,3 @@
-// src/pages/auth/ActivateAccount.tsx
 import { useState, useEffect } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { authService } from '../../services/auth/authService';

@@ -1,4 +1,3 @@
-// src/hooks/useToast.tsx (versión mejorada con componente visual)
 import { useState, useCallback } from 'react';
 import { CheckCircleIcon, XCircleIcon, InformationCircleIcon, ExclamationTriangleIcon } from '@heroicons/react/24/outline';
 

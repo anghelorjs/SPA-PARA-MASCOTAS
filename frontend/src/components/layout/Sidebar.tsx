@@ -1,4 +1,3 @@
-// src/components/layout/Sidebar.tsx
 import { useState, useRef } from "react";
 import { NavLink, useNavigate } from "react-router-dom";
 import {

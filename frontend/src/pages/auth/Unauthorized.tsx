@@ -1,4 +1,3 @@
-// src/pages/auth/Unauthorized.tsx
 import { Link } from 'react-router-dom';
 
 export const Unauthorized = () => {

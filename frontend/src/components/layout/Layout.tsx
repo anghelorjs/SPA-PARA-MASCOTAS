@@ -1,4 +1,3 @@
-// src/components/layout/Layout.tsx
 import { useState, useEffect } from "react";
 import { Outlet, useNavigate } from "react-router-dom";
 import Sidebar from "./Sidebar";

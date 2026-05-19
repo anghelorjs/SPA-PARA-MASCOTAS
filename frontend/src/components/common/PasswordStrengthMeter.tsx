@@ -1,4 +1,3 @@
-// src/components/common/PasswordStrengthMeter.tsx
 import { useEffect, useState } from 'react';
 
 interface PasswordStrengthMeterProps {

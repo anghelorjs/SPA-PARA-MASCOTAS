@@ -1,4 +1,3 @@
-// src/components/common/CaptchaInput.tsx - Versión simplificada
 import { useState, useEffect } from 'react';
 import { FiRefreshCw } from 'react-icons/fi';
 import api from '../../services/api';

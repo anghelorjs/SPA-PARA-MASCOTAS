@@ -1,4 +1,3 @@
-// src/pages/auth/ResetPassword.tsx
 import { useState, useEffect } from 'react';
 import { useNavigate, useSearchParams, Link } from 'react-router-dom';
 import { FiLock, FiEye, FiEyeOff, FiArrowLeft } from 'react-icons/fi';

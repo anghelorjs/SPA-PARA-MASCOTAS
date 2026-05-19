@@ -1,11 +1,10 @@
-// src/components/common/InactivityModal.tsx
 import { useEffect, useState } from 'react';
 
 interface InactivityModalProps {
   isOpen: boolean;
   onClose: () => void;
   onLogout: () => void;
-  timeRemaining?: number; // segundos restantes para mostrar
+  timeRemaining?: number; 
 }
 
 export const InactivityModal = ({ 

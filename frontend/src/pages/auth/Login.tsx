@@ -1,4 +1,3 @@
-// src/pages/auth/Login.tsx
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { FiMail, FiLock, FiEye, FiEyeOff } from 'react-icons/fi';

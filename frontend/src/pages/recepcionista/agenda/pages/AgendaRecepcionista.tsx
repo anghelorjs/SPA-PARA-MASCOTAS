@@ -1,4 +1,3 @@
-// src/pages/recepcionista/agenda/pages/AgendaRecepcionista.tsx
 import { useState } from 'react';
 import { PlusIcon } from '@heroicons/react/24/outline';
 import { CalendarioRecepcion } from '../components/CalendarioRecepcion';

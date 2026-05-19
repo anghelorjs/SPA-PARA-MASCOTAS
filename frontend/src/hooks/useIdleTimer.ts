@@ -1,11 +1,10 @@
-// src/hooks/useIdleTimer.ts
 import { useEffect, useState, useCallback, useRef } from 'react';
 import { useAuth } from './useAuth';
 
 interface UseIdleTimerOptions {
-  timeout?: number; // Tiempo en milisegundos (por defecto 30 minutos = 1800000)
+  timeout?: number; 
   onIdle?: () => void;
-  events?: string[]; // Eventos a monitorear
+  events?: string[]; 
 }
 
 export const useIdleTimer = ({ 

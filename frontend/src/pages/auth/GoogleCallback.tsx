@@ -1,4 +1,3 @@
-// src/pages/auth/GoogleCallback.tsx
 import { useEffect } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { authService } from '../../services/auth/authService';

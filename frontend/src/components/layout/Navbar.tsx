@@ -1,6 +1,3 @@
-// src/components/layout/Navbar.tsx
-// Agregar import y estado para notificaciones reales:
-
 import { useState, useRef, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { FiBell, FiSearch, FiLogOut, FiUser, FiChevronDown } from "react-icons/fi";

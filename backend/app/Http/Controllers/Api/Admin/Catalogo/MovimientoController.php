@@ -1,5 +1,4 @@
 <?php
-// app/Http/Controllers/Api/Admin/Catalogo/MovimientoController.php
 
 namespace App\Http\Controllers\Api\Admin\Catalogo;
 

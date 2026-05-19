@@ -1,5 +1,4 @@
 <?php
-// app/Http/Controllers/Api/Admin/Catalogo/InsumoController.php
 
 namespace App\Http\Controllers\Api\Admin\Catalogo;
 

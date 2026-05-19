@@ -73,8 +73,8 @@ use App\Http\Controllers\Api\ResendCredentialsController;
 // ==================== RUTAS PÚBLICAS ====================
 Route::post('login', [AuthController::class, 'login']);
 Route::post('register', [AuthController::class, 'register']);
-Route::post('activate-account', [ActivationController::class, 'activate']);  // ← NUEVA
-Route::post('resend-activation', [ActivationController::class, 'resend']);    // ← NUEVA (opcional)
+Route::post('activate-account', [ActivationController::class, 'activate']);  
+Route::post('resend-activation', [ActivationController::class, 'resend']);    
 // Google OAuth
 Route::get('auth/google', [GoogleAuthController::class, 'redirectToGoogle']);
 Route::get('auth/google/callback', [GoogleAuthController::class, 'handleGoogleCallback']);
@@ -92,7 +92,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('logout', [AuthController::class, 'logout']);
     Route::get('me', [AuthController::class, 'me']);
     Route::post('change-password', [AuthController::class, 'changePassword']);
-    Route::post('force-change-password', [AuthController::class, 'forceChangePassword']); // ← NUEVA
+    Route::post('force-change-password', [AuthController::class, 'forceChangePassword']); 
     
     // ==================== ADMINISTRADOR ====================
     Route::prefix('admin')->middleware('role:administrador')->group(function () {

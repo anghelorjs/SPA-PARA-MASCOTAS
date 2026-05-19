@@ -1,5 +1,4 @@
 <?php
-// app/Http/Middleware/LogActivity.php
 
 namespace App\Http\Middleware;
 

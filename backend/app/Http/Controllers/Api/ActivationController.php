@@ -1,5 +1,4 @@
 <?php
-// app/Http/Controllers/Api/ActivationController.php
 
 namespace App\Http\Controllers\Api;
 

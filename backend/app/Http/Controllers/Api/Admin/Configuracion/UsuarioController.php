@@ -1,5 +1,4 @@
 <?php
-// app/Http/Controllers/Api/Admin/Configuracion/UsuarioController.php
 
 namespace App\Http\Controllers\Api\Admin\Configuracion;
 

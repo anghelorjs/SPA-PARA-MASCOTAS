@@ -1,5 +1,4 @@
 <?php
-// app/Http/Controllers/Api/Groomer/DashboardController.php
 
 namespace App\Http\Controllers\Api\Groomer;
 

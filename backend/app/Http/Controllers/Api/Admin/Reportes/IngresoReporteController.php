@@ -1,5 +1,4 @@
 <?php
-// app/Http/Controllers/Api/Admin/Reportes/IngresoReporteController.php
 
 namespace App\Http\Controllers\Api\Admin\Reportes;
 

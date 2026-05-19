@@ -1,5 +1,4 @@
 <?php
-// app/Mail/PasswordResetMail.php
 
 namespace App\Mail;
 

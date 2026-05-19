@@ -1,5 +1,4 @@
 <?php
-// app/Models/ChecklistItem.php
 
 namespace App\Models;
 

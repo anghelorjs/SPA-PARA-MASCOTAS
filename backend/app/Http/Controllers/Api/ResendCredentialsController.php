@@ -1,5 +1,4 @@
 <?php
-// app/Http/Controllers/Api/ResendCredentialsController.php
 
 namespace App\Http\Controllers\Api;
 

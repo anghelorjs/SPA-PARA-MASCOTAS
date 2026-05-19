@@ -1,5 +1,4 @@
 <?php
-// app/Http/Controllers/Api/Recepcionista/NotificacionController.php
 
 namespace App\Http\Controllers\Api\Recepcionista;
 

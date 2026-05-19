@@ -1,5 +1,4 @@
 <?php
-// app/Http/Controllers/Api/Admin/Clientes/ClienteController.php
 
 namespace App\Http\Controllers\Api\Admin\Clientes;
 

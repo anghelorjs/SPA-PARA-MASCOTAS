@@ -1,5 +1,4 @@
 <?php
-// app/Models/Cita.php
 
 namespace App\Models;
 

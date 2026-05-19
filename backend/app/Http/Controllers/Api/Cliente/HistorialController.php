@@ -1,5 +1,4 @@
 <?php
-// app/Http/Controllers/Api/Cliente/HistorialController.php
 
 namespace App\Http\Controllers\Api\Cliente;
 

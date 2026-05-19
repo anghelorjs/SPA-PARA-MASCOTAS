@@ -1,5 +1,4 @@
 <?php
-// app/Models/Administrador.php
 
 namespace App\Models;
 

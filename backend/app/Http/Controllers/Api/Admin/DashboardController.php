@@ -1,5 +1,4 @@
 <?php
-// app/Http/Controllers/Api/Admin/DashboardController.php
 
 namespace App\Http\Controllers\Api\Admin;
 

@@ -1,5 +1,4 @@
 <?php
-// app/Http/Controllers/Api/Groomer/PerfilController.php
 
 namespace App\Http\Controllers\Api\Groomer;
 

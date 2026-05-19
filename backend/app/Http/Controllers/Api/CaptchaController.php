@@ -1,5 +1,4 @@
 <?php
-// app/Http/Controllers/Api/CaptchaController.php - Versión simplificada
 
 namespace App\Http\Controllers\Api;
 

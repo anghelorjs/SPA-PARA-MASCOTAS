@@ -1,5 +1,4 @@
 <?php
-// app/Http/Controllers/Api/Groomer/AgendaController.php
 
 namespace App\Http\Controllers\Api\Groomer;
 

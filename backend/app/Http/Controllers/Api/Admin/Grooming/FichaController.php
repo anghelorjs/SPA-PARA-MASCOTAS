@@ -1,5 +1,4 @@
 <?php
-// app/Http/Controllers/Api/Admin/Grooming/FichaController.php
 
 namespace App\Http\Controllers\Api\Admin\Grooming;
 

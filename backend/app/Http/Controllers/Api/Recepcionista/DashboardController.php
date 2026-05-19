@@ -1,5 +1,4 @@
 <?php
-// app/Http/Controllers/Api/Recepcionista/DashboardController.php
 
 namespace App\Http\Controllers\Api\Recepcionista;
 

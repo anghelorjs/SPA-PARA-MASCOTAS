@@ -1,5 +1,4 @@
 <?php
-// app/Http/Controllers/Api/GoogleAuthController.php
 
 namespace App\Http\Controllers\Api;
 

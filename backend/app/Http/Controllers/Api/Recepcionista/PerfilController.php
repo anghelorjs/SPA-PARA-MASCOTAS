@@ -1,5 +1,4 @@
 <?php
-// app/Http/Controllers/Api/Recepcionista/PerfilController.php
 
 namespace App\Http\Controllers\Api\Recepcionista;
 

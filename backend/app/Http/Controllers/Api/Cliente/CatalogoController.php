@@ -1,5 +1,4 @@
 <?php
-// app/Http/Controllers/Api/Cliente/CatalogoController.php
 
 namespace App\Http\Controllers\Api\Cliente;
 

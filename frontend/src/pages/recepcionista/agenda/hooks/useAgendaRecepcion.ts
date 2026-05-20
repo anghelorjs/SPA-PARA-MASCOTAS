@@ -71,9 +71,11 @@ export const useAgendaRecepcion = () => {
         setIsLoadingSlots(true);
         const slots = await recepcionistaAgendaService.getSlotsLibres(fechaSlot, idServicio, idMascota);
         setSlotsDisponibles(slots);
+        return slots;
       } catch (error: unknown) {
         showToast(getErrorMessage(error, 'Error al cargar horarios disponibles'), 'error');
         setSlotsDisponibles([]);
+        return [];
       } finally {
         setIsLoadingSlots(false);
       }

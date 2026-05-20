@@ -11,6 +11,7 @@ interface Paso4SlotProps {
   isLoading: boolean;
   duracionServicio?: number;
   groomerInicial?: number;
+  error?: string | null;
 }
 
 export const Paso4Slot = ({
@@ -21,6 +22,7 @@ export const Paso4Slot = ({
   isLoading,
   duracionServicio,
   groomerInicial,
+  error,
 }: Paso4SlotProps) => {
   const fechaFormateada = formatLocalDate(fecha, {
     weekday: 'long',
@@ -73,17 +75,17 @@ export const Paso4Slot = ({
     );
   }
 
-  // Agrupar slots por groomer
-  const slotsPorGroomer = slots.reduce((acc, slot) => {
-    if (!acc[slot.groomer_id]) {
-      acc[slot.groomer_id] = {
-        groomer_nombre: slot.groomer_nombre,
-        slots: [],
-      };
+  // Agrupar por hora evita que un horario se vea como una sola opcion ambigua.
+  // Cada boton conserva el groomer_id real que se enviara al backend.
+  const slotsPorHora = slots.reduce((acc, slot) => {
+    if (!acc[slot.hora_inicio]) {
+      acc[slot.hora_inicio] = [];
     }
-    acc[slot.groomer_id].slots.push(slot);
+    acc[slot.hora_inicio].push(slot);
     return acc;
-  }, {} as Record<number, { groomer_nombre: string; slots: SlotDisponible[] }>);
+  }, {} as Record<string, SlotDisponible[]>);
+
+  const horasOrdenadas = Object.keys(slotsPorHora).sort((a, b) => a.localeCompare(b));
 
   return (
     <div className="space-y-4">
@@ -94,34 +96,49 @@ export const Paso4Slot = ({
         </p>
       </div>
 
-      <div className="space-y-4 max-h-96 overflow-y-auto">
-        {Object.entries(slotsPorGroomer)
-          .sort(([a], [b]) => {
-            if (!groomerInicial) return Number(a) - Number(b);
-            if (Number(a) === groomerInicial) return -1;
-            if (Number(b) === groomerInicial) return 1;
-            return Number(a) - Number(b);
-          })
-          .map(([, groomer]) => (
-          <div key={groomer.groomer_nombre} className="border rounded-lg p-3">
+      {error && (
+        <div className="bg-amber-50 border border-amber-200 rounded-lg p-3">
+          <p className="text-sm text-amber-700">{error}</p>
+        </div>
+      )}
+
+      <div className="space-y-3 max-h-96 overflow-y-auto">
+        {horasOrdenadas.map((hora) => {
+          const opciones = [...slotsPorHora[hora]].sort((a, b) => {
+            if (!groomerInicial) return a.groomer_nombre.localeCompare(b.groomer_nombre);
+            if (a.groomer_id === groomerInicial) return -1;
+            if (b.groomer_id === groomerInicial) return 1;
+            return a.groomer_nombre.localeCompare(b.groomer_nombre);
+          });
+
+          return (
+          <div key={hora} className="border rounded-lg p-3">
             <p className="font-medium text-gray-900 mb-2 flex items-center gap-2">
-              <UserIcon className="h-4 w-4 text-gray-400" />
-              {groomer.groomer_nombre}
+              <ClockIcon className="h-4 w-4 text-gray-400" />
+              {hora}
+              <span className="text-xs font-normal text-gray-400">
+                {opciones.length === 1 ? '1 groomer disponible' : `${opciones.length} groomers disponibles`}
+              </span>
             </p>
-            <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
-              {groomer.slots.map((slot, idx) => (
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+              {opciones.map((slot) => (
                 <button
-                  key={idx}
+                  key={`${slot.groomer_id}-${slot.hora_inicio}`}
                   onClick={() => onSelectSlot(slot)}
-                  className="p-2 text-sm border rounded-lg hover:bg-blue-50 hover:border-blue-500 transition-all text-center"
+                  className="p-2 text-sm border rounded-lg hover:bg-blue-50 hover:border-blue-500 transition-all text-left"
                 >
-                  <ClockIcon className="h-3 w-3 inline mr-1 text-gray-400" />
-                  {slot.hora_inicio}
+                  <span className="flex items-center gap-2">
+                    <UserIcon className="h-3 w-3 text-gray-400 shrink-0" />
+                    <span className="min-w-0">
+                      <span className="block font-medium text-gray-800 truncate">{slot.groomer_nombre}</span>
+                      <span className="block text-xs text-gray-400">{slot.hora_inicio} - {slot.hora_fin}</span>
+                    </span>
+                  </span>
                 </button>
               ))}
             </div>
           </div>
-        ))}
+        )})}
       </div>
     </div>
   );

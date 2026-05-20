@@ -35,7 +35,8 @@ class PerfilController extends ApiController
                     'tipo' => $notificacion->tipo,
                     'mensaje' => $notificacion->mensaje,
                     'fecha' => $notificacion->created_at->format('d/m/Y H:i'),
-                    'leida' => $notificacion->entregada
+                    'leida' => $notificacion->entregada,
+                    'cita_id' => $notificacion->idCita,
                 ];
             });
         

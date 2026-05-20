@@ -46,6 +46,10 @@ export const CalendarioRecepcion = ({
     }
   }, [currentDate]);
 
+  useEffect(() => {
+    setCurrentDate(fecha);
+  }, [fecha]);
+
   const handleDateSelect = (selectInfo: DateSelectArg) => {
     const startDate = selectInfo.start;
     onSlotClick(startDate);
@@ -89,6 +93,11 @@ export const CalendarioRecepcion = ({
     }
   };
 
+  const handleDateInputChange = (nextDate: string) => {
+    setCurrentDate(nextDate);
+    onFechaChange(nextDate);
+  };
+
   if (isLoading) {
     return (
       <div className="bg-white rounded-lg shadow p-8">
@@ -125,10 +134,18 @@ export const CalendarioRecepcion = ({
           </button>
         </div>
 
-        <div className="flex items-center gap-4">
-          <span className="text-sm text-gray-500">
+        <div className="flex flex-wrap items-center justify-end gap-3">
+          <span className="text-sm text-gray-500 min-w-[180px] text-right">
             {formatLocalDate(currentDate, { day: 'numeric', month: 'long', year: 'numeric' })}
           </span>
+
+          <input
+            type="date"
+            value={currentDate}
+            onChange={(e) => handleDateInputChange(e.target.value)}
+            className="px-3 py-1.5 text-sm border rounded-lg focus:ring-2 focus:ring-blue-500"
+            aria-label="Seleccionar fecha de agenda"
+          />
           
           {/* Filtro por groomer */}
           <select

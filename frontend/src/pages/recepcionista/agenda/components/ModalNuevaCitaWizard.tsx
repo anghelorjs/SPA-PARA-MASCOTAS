@@ -38,6 +38,7 @@ export const ModalNuevaCitaWizard = ({
   const [observaciones, setObservaciones] = useState('');
   const [showNuevoClienteModal, setShowNuevoClienteModal] = useState(false);
   const [showNuevaMascotaModal, setShowNuevaMascotaModal] = useState(false);
+  const [disponibilidadError, setDisponibilidadError] = useState<string | null>(null);
 
   const {
     selectedCliente, selectedMascota, selectedServicio, selectedSlot,
@@ -58,6 +59,7 @@ export const ModalNuevaCitaWizard = ({
       limpiarWizard();
       setCurrentStep(1);
       setObservaciones('');
+      setDisponibilidadError(null);
     }
   }, [isOpen, limpiarWizard]);
 
@@ -85,6 +87,7 @@ export const ModalNuevaCitaWizard = ({
     if (selectedServicio && selectedMascota && fechaInicial) {
       loadSlotsDisponibles(selectedServicio.id, selectedMascota.id, fechaInicial);
       setSelectedSlot(null);
+      setDisponibilidadError(null);
     }
   }, [selectedServicio, selectedMascota, fechaInicial, loadSlotsDisponibles, setSelectedSlot]);
 
@@ -100,6 +103,20 @@ export const ModalNuevaCitaWizard = ({
 
   const handleConfirmar = async () => {
     if (!selectedCliente || !selectedMascota || !selectedServicio || !selectedSlot || !fechaInicial) return;
+    const slotsActualizados = await loadSlotsDisponibles(selectedServicio.id, selectedMascota.id, fechaInicial);
+    const slotSigueLibre = slotsActualizados.some((slot) =>
+      slot.groomer_id === selectedSlot.groomer_id &&
+      slot.hora_inicio === selectedSlot.hora_inicio &&
+      slot.hora_fin === selectedSlot.hora_fin
+    );
+
+    if (!slotSigueLibre) {
+      setDisponibilidadError('Ese groomer ya no esta disponible en ese horario. Selecciona una opcion libre actualizada.');
+      setSelectedSlot(null);
+      setCurrentStep(4);
+      return;
+    }
+
     const fechaHoraCompleta = `${fechaInicial} ${selectedSlot.hora_inicio}`;
     const result = await crearCita({
       idCliente: selectedCliente.id,
@@ -278,12 +295,16 @@ export const ModalNuevaCitaWizard = ({
             {currentStep === 4 && (
               <Paso4Slot
                 slots={slotsDisponibles}
-                onSelectSlot={setSelectedSlot}
+                onSelectSlot={(slot) => {
+                  setDisponibilidadError(null);
+                  setSelectedSlot(slot);
+                }}
                 selectedSlot={selectedSlot}
                 fecha={fechaInicial || toDateInputValue(new Date())}
                 isLoading={isLoadingSlots}
                 duracionServicio={selectedServicio?.duracion_minutos}
                 groomerInicial={groomerInicial}
+                error={disponibilidadError}
               />
             )}
             {currentStep === 5 && selectedCliente && selectedMascota && selectedServicio && selectedSlot && (

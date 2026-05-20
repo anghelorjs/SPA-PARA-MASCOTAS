@@ -65,7 +65,7 @@ export const AgendaRecepcionista = () => {
         </div>
         <button
           onClick={() => {
-            setSlotFecha(toDateInputValue(new Date()));
+            setSlotFecha(fecha);
             setSlotGroomerId(undefined);
             setModalNuevaCitaOpen(true);
           }}

@@ -139,7 +139,7 @@ export const Paso5Confirmacion = ({
 
       {/* Texto explicativo */}
       <p className="text-xs text-gray-400 text-center">
-        La cita se creará con estado "pendiente_confirmacion". 
+        La cita se creará con estado "pendiente de confirmación". 
         El cliente recibirá una notificación para confirmarla en las próximas 24 horas.
       </p>
     </div>

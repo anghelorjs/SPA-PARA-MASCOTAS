@@ -19,6 +19,35 @@ class Groomer extends Model
         'maxServiciosSimultaneos'
     ];
 
+    public const DIAS_DISPONIBILIDAD_DEFAULT = [1, 2, 3, 4, 5, 6];
+    public const HORA_INICIO_DEFAULT = '09:00:00';
+    public const HORA_FIN_DEFAULT = '18:00:00';
+
+    protected static function booted(): void
+    {
+        static::created(function (Groomer $groomer) {
+            $groomer->crearDisponibilidadDefault();
+        });
+    }
+
+    public function crearDisponibilidadDefault(): void
+    {
+        if ($this->disponibilidades()->where('esBloqueo', false)->exists()) {
+            return;
+        }
+
+        foreach (self::DIAS_DISPONIBILIDAD_DEFAULT as $dia) {
+            Disponibilidad::create([
+                'idGroomer' => $this->idGroomer,
+                'diaSemana' => $dia,
+                'horaInicio' => self::HORA_INICIO_DEFAULT,
+                'horaFin' => self::HORA_FIN_DEFAULT,
+                'esBloqueo' => false,
+                'motivoBloqueo' => null,
+            ]);
+        }
+    }
+
     // Relaciones
     public function user()
     {
@@ -46,15 +75,8 @@ class Groomer extends Model
         $fechaHoraFin = (clone $fechaHoraInicio)->addMinutes($duracionMinutos);
         
         $citasSolapadas = $this->citas()
-            ->where('estado', '!=', 'cancelada')
-            ->where(function($query) use ($fechaHoraInicio, $fechaHoraFin) {
-                $query->whereBetween('fechaHoraInicio', [$fechaHoraInicio, $fechaHoraFin])
-                      ->orWhereBetween('fechaHoraFin', [$fechaHoraInicio, $fechaHoraFin])
-                      ->orWhere(function($q) use ($fechaHoraInicio, $fechaHoraFin) {
-                          $q->where('fechaHoraInicio', '<=', $fechaHoraInicio)
-                            ->where('fechaHoraFin', '>=', $fechaHoraFin);
-                      });
-            })
+            ->activas()
+            ->solapadas($fechaHoraInicio, $fechaHoraFin)
             ->count();
             
         return $citasSolapadas < $this->maxServiciosSimultaneos;

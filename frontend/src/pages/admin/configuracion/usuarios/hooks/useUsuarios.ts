@@ -18,17 +18,6 @@ const roleDisplayNames: Record<string, string> = {
   cliente: 'Cliente',
 };
 
-const resendCredentials = async (id: number) => {
-  try {
-    await adminUsuariosService.resendCredentials(id);
-    showToast('Credenciales reenviadas exitosamente', 'success');
-    return true;
-  } catch (error: unknown) {
-    showToast(getErrorMessage(error, 'Error al reenviar credenciales'), 'error');
-    return false;
-  }
-};
-
 export const useUsuarios = () => {
   const [usuarios, setUsuarios] = useState<Usuario[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -42,6 +31,17 @@ export const useUsuarios = () => {
     search: '',
   });
   const { showToast } = useToast();
+
+  const resendCredentials = async (id: number) => {
+    try {
+      await adminUsuariosService.resendCredentials(id);
+      showToast('Credenciales reenviadas exitosamente', 'success');
+      return true;
+    } catch (error: unknown) {
+      showToast(getErrorMessage(error, 'Error al reenviar credenciales'), 'error');
+      return false;
+    }
+  };
 
   // Cargar roles
   const loadRoles = useCallback(async () => {
@@ -107,6 +107,7 @@ export const useUsuarios = () => {
       if (data.rol !== undefined) updates.push(`rol a ${roleDisplayNames[data.rol] || data.rol}`);
       if (data.especialidad !== undefined) updates.push('especialidad');
       if (data.maxServiciosSimultaneos !== undefined) updates.push('máx. servicios simultáneos');
+      if (data.disponibilidades !== undefined) updates.push('horario semanal');
       if (data.turno !== undefined) updates.push('turno');
       if (data.direccion !== undefined) updates.push('dirección');
       if (data.canalContacto !== undefined) updates.push('canal de contacto');

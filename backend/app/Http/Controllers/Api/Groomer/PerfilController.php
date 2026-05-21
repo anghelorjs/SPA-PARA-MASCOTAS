@@ -30,7 +30,8 @@ class PerfilController extends ApiController
             'telefono' => $user->telefono,
             'rol' => $user->rol,
             'especialidad' => $groomer->especialidad,
-            'max_servicios_simultaneos' => $groomer->maxServiciosSimultaneos
+            'max_servicios_simultaneos' => $groomer->maxServiciosSimultaneos,
+            'disponibilidades' => $this->formatDisponibilidades($groomer)
         ], 'Perfil obtenido correctamente');
     }
 
@@ -65,7 +66,8 @@ class PerfilController extends ApiController
                 'email' => $user->email,
                 'telefono' => $user->telefono,
                 'especialidad' => $groomer->especialidad,
-                'max_servicios_simultaneos' => $groomer->maxServiciosSimultaneos
+                'max_servicios_simultaneos' => $groomer->maxServiciosSimultaneos,
+                'disponibilidades' => $this->formatDisponibilidades($groomer)
             ], 'Perfil actualizado correctamente');
             
         } catch (\Exception $e) {
@@ -94,5 +96,28 @@ class PerfilController extends ApiController
         $user->save();
         
         return $this->successResponse(null, 'Contraseña actualizada correctamente');
+    }
+
+    private function formatDisponibilidades($groomer)
+    {
+        return $groomer->disponibilidades()
+            ->where('esBloqueo', false)
+            ->orderBy('diaSemana')
+            ->get()
+            ->map(function ($disp) {
+                return [
+                    'id' => $disp->idDisponibilidad,
+                    'diaSemana' => $disp->diaSemana,
+                    'diaNombre' => $this->getDiaNombre($disp->diaSemana),
+                    'horaInicio' => substr((string) $disp->horaInicio, 0, 5),
+                    'horaFin' => substr((string) $disp->horaFin, 0, 5),
+                ];
+            });
+    }
+
+    private function getDiaNombre($dia)
+    {
+        $dias = ['Domingo', 'Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado'];
+        return $dias[$dia] ?? 'Desconocido';
     }
 }

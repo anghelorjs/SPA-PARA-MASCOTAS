@@ -45,6 +45,7 @@ export const PerfilGroomer = () => {
             telefono: perfil.telefono,
             especialidad: perfil.especialidad,
             max_servicios_simultaneos: perfil.max_servicios_simultaneos,
+            disponibilidades: perfil.disponibilidades,
           }}
           onSave={updatePerfil}
           isSaving={isSaving}

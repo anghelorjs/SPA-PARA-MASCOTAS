@@ -138,6 +138,11 @@ class AgendaController extends ApiController
         $slots    = [];
 
         foreach ($groomers as $groomer) {
+            if ($groomer->disponibilidades->where('esBloqueo', false)->isEmpty()) {
+                $groomer->crearDisponibilidadDefault();
+                $groomer->load('disponibilidades');
+            }
+
             $disponibilidad = $groomer->disponibilidades
                 ->where('diaSemana', $fecha->dayOfWeek)
                 ->where('esBloqueo', false)
@@ -145,34 +150,19 @@ class AgendaController extends ApiController
 
             if (!$disponibilidad) continue;
 
-            $horaInicio = Carbon::parse($disponibilidad->horaInicio);
-            $horaFin    = Carbon::parse($disponibilidad->horaFin);
+            $horaInicio = $fecha->copy()->setTimeFromTimeString(Carbon::parse($disponibilidad->horaInicio)->format('H:i:s'));
+            $horaFin    = $fecha->copy()->setTimeFromTimeString(Carbon::parse($disponibilidad->horaFin)->format('H:i:s'));
 
             while ($horaInicio->copy()->addMinutes($duracion) <= $horaFin) {
                 $slotInicio = $horaInicio->copy();
                 $slotFin    = $slotInicio->copy()->addMinutes($duracion);
 
-                $ocupado = Cita::where('idGroomer', $groomer->idGroomer)
-                    ->whereDate('fechaHoraInicio', $fecha)
-                    ->where(function ($q) use ($slotInicio, $slotFin) {
-                        $q->where(function ($q2) use ($slotInicio, $slotFin) {
-                            // cita empieza dentro del slot
-                            $q2->where('fechaHoraInicio', '>=', $slotInicio)
-                               ->where('fechaHoraInicio', '<',  $slotFin);
-                        })->orWhere(function ($q2) use ($slotInicio, $slotFin) {
-                            // cita termina dentro del slot
-                            $q2->where('fechaHoraFin', '>', $slotInicio)
-                               ->where('fechaHoraFin', '<=', $slotFin);
-                        })->orWhere(function ($q2) use ($slotInicio, $slotFin) {
-                            // cita envuelve el slot
-                            $q2->where('fechaHoraInicio', '<=', $slotInicio)
-                               ->where('fechaHoraFin', '>=', $slotFin);
-                        });
-                    })
-                    ->whereNotIn('estado', ['cancelada', 'completada'])
-                    ->exists();
+                $citasSolapadas = Cita::where('idGroomer', $groomer->idGroomer)
+                    ->activas()
+                    ->solapadas($slotInicio, $slotFin)
+                    ->count();
 
-                if (!$ocupado) {
+                if ($citasSolapadas < $groomer->maxServiciosSimultaneos) {
                     $slots[] = [
                         'groomer_id'     => $groomer->idGroomer,
                         'groomer_nombre' => $groomer->user->nombre . ' ' . $groomer->user->apellido,
@@ -280,21 +270,11 @@ class AgendaController extends ApiController
         $duracion    = $servicio->getDuracionForRango($mascota->idRango);
         $fechaFin    = $fechaInicio->copy()->addMinutes($duracion);
 
+        $groomer = Groomer::find($request->idGroomer);
         $ocupado = Cita::where('idGroomer', $request->idGroomer)
-            ->where(function ($q) use ($fechaInicio, $fechaFin) {
-                $q->where(function ($q2) use ($fechaInicio, $fechaFin) {
-                    $q2->where('fechaHoraInicio', '>=', $fechaInicio)
-                    ->where('fechaHoraInicio', '<',  $fechaFin);
-                })->orWhere(function ($q2) use ($fechaInicio, $fechaFin) {
-                    $q2->where('fechaHoraFin', '>', $fechaInicio)
-                    ->where('fechaHoraFin', '<=', $fechaFin);
-                })->orWhere(function ($q2) use ($fechaInicio, $fechaFin) {
-                    $q2->where('fechaHoraInicio', '<=', $fechaInicio)
-                    ->where('fechaHoraFin', '>=', $fechaFin);
-                });
-            })
-            ->whereNotIn('estado', ['cancelada', 'completada'])
-            ->exists();
+            ->activas()
+            ->solapadas($fechaInicio, $fechaFin)
+            ->count() >= ($groomer->maxServiciosSimultaneos ?? 1);
 
         if ($ocupado) {
             return $this->errorResponse('El horario seleccionado ya no está disponible', 400);
@@ -413,22 +393,12 @@ class AgendaController extends ApiController
         $duracion    = $cita->duracionCalculadaMin;
         $fechaFin    = $fechaInicio->copy()->addMinutes($duracion);
 
+        $groomer = Groomer::find($request->idGroomer);
         $ocupado = Cita::where('idGroomer', $request->idGroomer)
             ->where('idCita', '!=', $id)
-            ->where(function ($q) use ($fechaInicio, $fechaFin) {
-                $q->where(function ($q2) use ($fechaInicio, $fechaFin) {
-                    $q2->where('fechaHoraInicio', '>=', $fechaInicio)
-                       ->where('fechaHoraInicio', '<',  $fechaFin);
-                })->orWhere(function ($q2) use ($fechaInicio, $fechaFin) {
-                    $q2->where('fechaHoraFin', '>', $fechaInicio)
-                       ->where('fechaHoraFin', '<=', $fechaFin);
-                })->orWhere(function ($q2) use ($fechaInicio, $fechaFin) {
-                    $q2->where('fechaHoraInicio', '<=', $fechaInicio)
-                       ->where('fechaHoraFin', '>=', $fechaFin);
-                });
-            })
-            ->whereNotIn('estado', ['cancelada', 'completada'])
-            ->exists();
+            ->activas()
+            ->solapadas($fechaInicio, $fechaFin)
+            ->count() >= ($groomer->maxServiciosSimultaneos ?? 1);
 
         if ($ocupado) {
             return $this->errorResponse('El horario seleccionado no está disponible', 400);

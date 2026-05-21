@@ -80,6 +80,18 @@ class Cita extends Model
         return $query->whereDate('fechaHoraInicio', $fecha);
     }
 
+    public function scopeActivas($query)
+    {
+        return $query->whereNotIn('estado', ['cancelada', 'completada']);
+    }
+
+    public function scopeSolapadas($query, $fechaHoraInicio, $fechaHoraFin)
+    {
+        return $query
+            ->where('fechaHoraInicio', '<', $fechaHoraFin)
+            ->where('fechaHoraFin', '>', $fechaHoraInicio);
+    }
+
     public function scopePendientesConfirmacion($query)
     {
         return $query->where('estado', 'pendiente_confirmacion')

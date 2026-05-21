@@ -7,6 +7,7 @@ use App\Models\User;
 use App\Models\Administrador;
 use App\Models\Recepcionista;
 use App\Models\Groomer;
+use App\Models\Disponibilidad;
 use App\Models\Cliente;
 use App\Mail\WelcomeActivationMail;
 use Illuminate\Http\Request;
@@ -15,6 +16,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
+use Illuminate\Validation\ValidationException;
 
 
 class UsuarioController extends ApiController
@@ -24,7 +26,7 @@ class UsuarioController extends ApiController
      */
     public function index(Request $request)
     {
-        $query = User::with(['administrador', 'recepcionista', 'groomer', 'cliente']);
+        $query = User::with(['administrador', 'recepcionista', 'groomer.disponibilidades', 'cliente']);
         
         if ($request->has('rol')) {
             $query->where('rol', $request->rol);
@@ -59,6 +61,12 @@ class UsuarioController extends ApiController
                     break;
                 case 'groomer':
                     $user->perfil_datos = $user->groomer;
+                    if ($user->perfil_datos) {
+                        $user->perfil_datos->disponibilidades = $user->groomer->disponibilidades
+                            ->where('esBloqueo', false)
+                            ->values()
+                            ->map(fn($disp) => $this->formatDisponibilidad($disp));
+                    }
                     break;
                 case 'cliente':
                     $user->perfil_datos = $user->cliente;
@@ -76,7 +84,7 @@ class UsuarioController extends ApiController
      */
     public function show($id)
     {
-        $user = User::with(['administrador', 'recepcionista', 'groomer', 'cliente'])->find($id);
+        $user = User::with(['administrador', 'recepcionista', 'groomer.disponibilidades', 'cliente'])->find($id);
         
         if (!$user) {
             return $this->errorResponse('Usuario no encontrado', 404);
@@ -100,10 +108,18 @@ class UsuarioController extends ApiController
             'turno' => 'nullable|in:matutino,vespertino,completo',
             'especialidad' => 'nullable|string|max:100',
             'maxServiciosSimultaneos' => 'nullable|integer|min:1|max:5',
+            'disponibilidades' => 'nullable|array',
+            'disponibilidades.*.diaSemana' => 'required_with:disponibilidades|integer|min:0|max:6',
+            'disponibilidades.*.horaInicio' => 'required_with:disponibilidades|date_format:H:i',
+            'disponibilidades.*.horaFin' => 'required_with:disponibilidades|date_format:H:i',
             'direccion' => 'nullable|string',
             'canalContacto' => 'nullable|in:whatsapp,telegram,email,sms',
         ]);
         
+        if ($request->rol === 'groomer' && $request->has('disponibilidades')) {
+            $this->validateDisponibilidades($request->disponibilidades);
+        }
+
         DB::beginTransaction();
         
         try {
@@ -137,11 +153,14 @@ class UsuarioController extends ApiController
                     ]);
                     break;
                 case 'groomer':
-                    Groomer::create([
+                    $groomer = Groomer::create([
                         'idUsuario' => $user->idUsuario,
                         'especialidad' => $request->especialidad,
                         'maxServiciosSimultaneos' => $request->maxServiciosSimultaneos ?? 1
                     ]);
+                    if ($request->has('disponibilidades')) {
+                        $this->syncDisponibilidadesGroomer($groomer, $request->disponibilidades);
+                    }
                     break;
                 case 'cliente':
                     Cliente::create([
@@ -221,11 +240,19 @@ class UsuarioController extends ApiController
             'rol' => 'sometimes|in:administrador,recepcionista,groomer,cliente',
             'especialidad' => 'nullable|string', // para groomer
             'maxServiciosSimultaneos' => 'nullable|integer|min:1|max:5', // para groomer
+            'disponibilidades' => 'nullable|array',
+            'disponibilidades.*.diaSemana' => 'required_with:disponibilidades|integer|min:0|max:6',
+            'disponibilidades.*.horaInicio' => 'required_with:disponibilidades|date_format:H:i',
+            'disponibilidades.*.horaFin' => 'required_with:disponibilidades|date_format:H:i',
             'turno' => 'nullable|in:matutino,vespertino,completo', // para recepcionista
             'direccion' => 'nullable|string', // para cliente
             'canalContacto' => 'nullable|in:whatsapp,telegram,email,sms' // para cliente
         ]);
         
+        if ($request->has('disponibilidades')) {
+            $this->validateDisponibilidades($request->disponibilidades);
+        }
+
         DB::beginTransaction();
         
         try {
@@ -239,6 +266,9 @@ class UsuarioController extends ApiController
                 if ($request->has('especialidad')) $user->groomer->especialidad = $request->especialidad;
                 if ($request->has('maxServiciosSimultaneos')) $user->groomer->maxServiciosSimultaneos = $request->maxServiciosSimultaneos;
                 $user->groomer->save();
+                if ($request->has('disponibilidades')) {
+                    $this->syncDisponibilidadesGroomer($user->groomer, $request->disponibilidades);
+                }
             }
             
             if ($user->rol === 'recepcionista' && $user->recepcionista) {
@@ -317,5 +347,42 @@ class UsuarioController extends ApiController
         ];
         
         return $this->successResponse($roles, 'Roles obtenidos correctamente');
+    }
+
+    private function syncDisponibilidadesGroomer(Groomer $groomer, array $disponibilidades): void
+    {
+        $groomer->disponibilidades()->where('esBloqueo', false)->delete();
+
+        foreach ($disponibilidades as $disp) {
+            Disponibilidad::create([
+                'idGroomer' => $groomer->idGroomer,
+                'diaSemana' => $disp['diaSemana'],
+                'horaInicio' => $disp['horaInicio'],
+                'horaFin' => $disp['horaFin'],
+                'esBloqueo' => false,
+                'motivoBloqueo' => null,
+            ]);
+        }
+    }
+
+    private function validateDisponibilidades(array $disponibilidades): void
+    {
+        foreach ($disponibilidades as $disp) {
+            if (($disp['horaInicio'] ?? '') >= ($disp['horaFin'] ?? '')) {
+                throw ValidationException::withMessages([
+                    'disponibilidades' => 'Cada disponibilidad debe tener una hora de inicio menor a la hora de fin.',
+                ]);
+            }
+        }
+    }
+
+    private function formatDisponibilidad(Disponibilidad $disp): array
+    {
+        return [
+            'id' => $disp->idDisponibilidad,
+            'diaSemana' => $disp->diaSemana,
+            'horaInicio' => substr((string) $disp->horaInicio, 0, 5),
+            'horaFin' => substr((string) $disp->horaFin, 0, 5),
+        ];
     }
 }

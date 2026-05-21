@@ -10,6 +10,15 @@ export interface PerfilGroomerData {
   rol: string;
   especialidad: string | null;
   max_servicios_simultaneos: number;
+  disponibilidades: DisponibilidadGroomerData[];
+}
+
+export interface DisponibilidadGroomerData {
+  id: number;
+  diaSemana: number;
+  diaNombre: string;
+  horaInicio: string;
+  horaFin: string;
 }
 
 export interface UpdatePerfilData {
@@ -42,6 +51,7 @@ export const groomerPerfilService = {
     telefono: string | null;
     especialidad: string | null;
     max_servicios_simultaneos: number;
+    disponibilidades: DisponibilidadGroomerData[];
   }> {
     const response = await api.put('/groomer/perfil', data);
     return response.data.data;

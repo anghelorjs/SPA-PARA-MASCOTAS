@@ -4,7 +4,6 @@
 namespace Database\Seeders;
 
 use App\Models\Cita;
-use App\Models\Disponibilidad;
 use App\Models\Groomer;
 use Illuminate\Database\Seeder;
 
@@ -12,21 +11,11 @@ class CitaSeeder extends Seeder
 {
     public function run(): void
     {
-        // Crear disponibilidades para groomers
+        // Crear disponibilidades por defecto para groomers que aun no tengan horario.
         $groomers = Groomer::all();
         
         foreach ($groomers as $groomer) {
-            $dias = [0, 1, 2, 3, 4]; // Lunes a Viernes
-            foreach ($dias as $dia) {
-                Disponibilidad::create([
-                    'idGroomer' => $groomer->idGroomer,
-                    'diaSemana' => $dia,
-                    'horaInicio' => '09:00:00',
-                    'horaFin' => '18:00:00',
-                    'esBloqueo' => false,
-                    'motivoBloqueo' => null
-                ]);
-            }
+            $groomer->crearDisponibilidadDefault();
         }
 
     }

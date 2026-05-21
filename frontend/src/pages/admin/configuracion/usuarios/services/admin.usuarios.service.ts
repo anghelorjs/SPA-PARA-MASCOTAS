@@ -9,8 +9,16 @@ export interface PerfilData {
   turno?: string;
   especialidad?: string;
   maxServiciosSimultaneos?: number;
+  disponibilidades?: DisponibilidadGroomerData[];
   direccion?: string;
   canalContacto?: string;
+}
+
+export interface DisponibilidadGroomerData {
+  id?: number;
+  diaSemana: number;
+  horaInicio: string;
+  horaFin: string;
 }
 
 export interface ResendCredentialsResponse {
@@ -52,6 +60,7 @@ export interface CreateUsuarioData {
   turno?: string; // para recepcionista
   especialidad?: string; // para groomer
   maxServiciosSimultaneos?: number; // para groomer
+  disponibilidades?: DisponibilidadGroomerData[]; // para groomer
   direccion?: string; // para cliente
   canalContacto?: string; // para cliente
 }
@@ -64,6 +73,7 @@ export interface UpdateUsuarioData {
   rol?: string;
   especialidad?: string;
   maxServiciosSimultaneos?: number;
+  disponibilidades?: DisponibilidadGroomerData[];
   turno?: string;
   direccion?: string;
   canalContacto?: string;

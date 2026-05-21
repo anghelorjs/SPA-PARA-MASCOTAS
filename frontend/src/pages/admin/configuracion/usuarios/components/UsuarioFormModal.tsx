@@ -1,6 +1,6 @@
 // src/pages/admin/configuracion/usuarios/components/UsuarioFormModal.tsx
 import { useState, useEffect } from 'react';
-import { XMarkIcon } from '@heroicons/react/24/outline';
+import { ClockIcon, XMarkIcon } from '@heroicons/react/24/outline';
 import type { Usuario, Role, CreateUsuarioData, UpdateUsuarioData } from '../services/admin.usuarios.service';
 
 interface UsuarioFormModalProps {
@@ -25,6 +25,24 @@ const canalesContacto = [
   { value: 'sms', label: 'SMS' },
 ];
 
+const diasSemana = [
+  { value: 1, label: 'Lun' },
+  { value: 2, label: 'Mar' },
+  { value: 3, label: 'Mié' },
+  { value: 4, label: 'Jue' },
+  { value: 5, label: 'Vie' },
+  { value: 6, label: 'Sáb' },
+  { value: 0, label: 'Dom' },
+];
+
+const disponibilidadDefault = diasSemana
+  .filter(dia => dia.value !== 0)
+  .map(dia => ({
+    diaSemana: dia.value,
+    horaInicio: '09:00',
+    horaFin: '18:00',
+  }));
+
 // Valores por defecto
 const defaultFormData: CreateUsuarioData = {
   nombre: '',
@@ -35,6 +53,7 @@ const defaultFormData: CreateUsuarioData = {
   turno: 'matutino',
   especialidad: '',
   maxServiciosSimultaneos: 1,
+  disponibilidades: disponibilidadDefault,
   direccion: '',
   canalContacto: 'whatsapp',
 };
@@ -48,6 +67,9 @@ export const UsuarioFormModal = ({ isOpen, onClose, onSave, usuario, roles, isEd
     if (isOpen) {
       if (usuario && isEditing) {
         const perfilDatos = usuario.perfil_datos || {};
+        const disponibilidades = perfilDatos.disponibilidades?.length
+          ? perfilDatos.disponibilidades
+          : disponibilidadDefault;
         setFormData({
           nombre: usuario.nombre || '',
           apellido: usuario.apellido || '',
@@ -57,6 +79,7 @@ export const UsuarioFormModal = ({ isOpen, onClose, onSave, usuario, roles, isEd
           turno: perfilDatos.turno || 'matutino',
           especialidad: perfilDatos.especialidad || '',
           maxServiciosSimultaneos: perfilDatos.maxServiciosSimultaneos || 1,
+          disponibilidades,
           direccion: perfilDatos.direccion || '',
           canalContacto: perfilDatos.canalContacto || 'whatsapp',
         });
@@ -75,6 +98,45 @@ export const UsuarioFormModal = ({ isOpen, onClose, onSave, usuario, roles, isEd
     }
   };
 
+  const handleRolChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    const { value } = e.target;
+    setFormData(prev => ({
+      ...prev,
+      rol: value,
+      disponibilidades: value === 'groomer' && (!prev.disponibilidades || prev.disponibilidades.length === 0)
+        ? disponibilidadDefault
+        : prev.disponibilidades,
+    }));
+    if (errors.rol) {
+      setErrors(prev => ({ ...prev, rol: '' }));
+    }
+  };
+
+  const toggleDiaDisponibilidad = (diaSemana: number) => {
+    setFormData(prev => {
+      const actuales = prev.disponibilidades || [];
+      const existe = actuales.some(d => d.diaSemana === diaSemana);
+      return {
+        ...prev,
+        disponibilidades: existe
+          ? actuales.filter(d => d.diaSemana !== diaSemana)
+          : [...actuales, { diaSemana, horaInicio: '09:00', horaFin: '18:00' }]
+              .sort((a, b) => a.diaSemana - b.diaSemana),
+      };
+    });
+    setErrors(prev => ({ ...prev, disponibilidades: '' }));
+  };
+
+  const updateDisponibilidadDia = (diaSemana: number, field: 'horaInicio' | 'horaFin', value: string) => {
+    setFormData(prev => ({
+      ...prev,
+      disponibilidades: (prev.disponibilidades || []).map(d =>
+        d.diaSemana === diaSemana ? { ...d, [field]: value } : d
+      ),
+    }));
+    setErrors(prev => ({ ...prev, disponibilidades: '' }));
+  };
+
   const validate = () => {
     const newErrors: { [key: string]: string } = {};
     
@@ -83,6 +145,17 @@ export const UsuarioFormModal = ({ isOpen, onClose, onSave, usuario, roles, isEd
     if (!formData.email) newErrors.email = 'El email es requerido';
     else if (!/\S+@\S+\.\S+/.test(formData.email)) newErrors.email = 'Email inválido';
     if (!formData.rol) newErrors.rol = 'El rol es requerido';
+    if (formData.rol === 'groomer') {
+      const disponibilidades = formData.disponibilidades || [];
+      if (disponibilidades.length === 0) {
+        newErrors.disponibilidades = 'Selecciona al menos un día de atención';
+      }
+      disponibilidades.forEach(d => {
+        if (!d.horaInicio || !d.horaFin || d.horaInicio >= d.horaFin) {
+          newErrors.disponibilidades = 'Cada día debe tener hora de inicio menor a la hora de fin';
+        }
+      });
+    }
     
     // ❌ NO hay validación de contraseña - el backend la genera automáticamente
     
@@ -181,7 +254,7 @@ export const UsuarioFormModal = ({ isOpen, onClose, onSave, usuario, roles, isEd
                 <select
                   name="rol"
                   value={formData.rol}
-                  onChange={handleChange}
+                  onChange={handleRolChange}
                   className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 ${errors.rol ? 'border-red-500' : 'border-gray-300'}`}
                 >
                   <option value="">Seleccionar rol</option>
@@ -265,6 +338,65 @@ export const UsuarioFormModal = ({ isOpen, onClose, onSave, usuario, roles, isEd
                       Define cuántas mascotas puede atender simultáneamente.
                       Valor por defecto: 1 (recomendado para la mayoría).
                     </p>
+                  </div>
+                  <div className="border border-gray-200 rounded-lg p-3 bg-gray-50">
+                    <div className="flex items-center gap-2 mb-3">
+                      <ClockIcon className="h-4 w-4 text-gray-500" />
+                      <div>
+                        <p className="text-sm font-medium text-gray-700">Horario semanal</p>
+                        <p className="text-xs text-gray-500">Define los días y horas en que este groomer podrá recibir citas.</p>
+                      </div>
+                    </div>
+
+                    <div className="grid grid-cols-7 gap-1 mb-3">
+                      {diasSemana.map(dia => {
+                        const activo = (formData.disponibilidades || []).some(d => d.diaSemana === dia.value);
+                        return (
+                          <button
+                            key={dia.value}
+                            type="button"
+                            onClick={() => toggleDiaDisponibilidad(dia.value)}
+                            className={`px-2 py-1.5 text-xs font-medium rounded border transition-colors ${
+                              activo
+                                ? 'bg-blue-600 text-white border-blue-600'
+                                : 'bg-white text-gray-600 border-gray-300 hover:bg-gray-100'
+                            }`}
+                          >
+                            {dia.label}
+                          </button>
+                        );
+                      })}
+                    </div>
+
+                    <div className="space-y-2 max-h-48 overflow-y-auto pr-1">
+                      {diasSemana
+                        .map(dia => ({
+                          ...dia,
+                          disponibilidad: (formData.disponibilidades || []).find(d => d.diaSemana === dia.value),
+                        }))
+                        .filter(dia => dia.disponibilidad)
+                        .map(dia => (
+                          <div key={dia.value} className="grid grid-cols-[52px_1fr_1fr] items-center gap-2">
+                            <span className="text-xs font-medium text-gray-600">{dia.label}</span>
+                            <input
+                              type="time"
+                              value={dia.disponibilidad!.horaInicio}
+                              onChange={e => updateDisponibilidadDia(dia.value, 'horaInicio', e.target.value)}
+                              className="px-2 py-1.5 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                            />
+                            <input
+                              type="time"
+                              value={dia.disponibilidad!.horaFin}
+                              onChange={e => updateDisponibilidadDia(dia.value, 'horaFin', e.target.value)}
+                              className="px-2 py-1.5 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                            />
+                          </div>
+                        ))}
+                    </div>
+
+                    {errors.disponibilidades && (
+                      <p className="mt-2 text-xs text-red-500">{errors.disponibilidades}</p>
+                    )}
                   </div>
                 </>
               )}

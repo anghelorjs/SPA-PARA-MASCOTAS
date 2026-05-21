@@ -217,30 +217,31 @@ class CitaController extends ApiController
         $slots = [];
         
         foreach ($groomers as $groomer) {
+            if ($groomer->disponibilidades->where('esBloqueo', false)->isEmpty()) {
+                $groomer->crearDisponibilidadDefault();
+                $groomer->load('disponibilidades');
+            }
+
             $disponibilidad = $groomer->disponibilidades
                 ->where('diaSemana', $fecha->dayOfWeek)
                 ->where('esBloqueo', false)
                 ->first();
             
             if ($disponibilidad) {
-                $horaInicio = Carbon::parse($disponibilidad->horaInicio);
-                $horaFin = Carbon::parse($disponibilidad->horaFin);
+                $horaInicio = $fecha->copy()->setTimeFromTimeString(Carbon::parse($disponibilidad->horaInicio)->format('H:i:s'));
+                $horaFin = $fecha->copy()->setTimeFromTimeString(Carbon::parse($disponibilidad->horaFin)->format('H:i:s'));
                 
                 while ($horaInicio->copy()->addMinutes($duracion) <= $horaFin) {
                     $slotInicio = $horaInicio->copy();
                     $slotFin = $slotInicio->copy()->addMinutes($duracion);
                     
                     // Verificar si el groomer está disponible
-                    $citaExistente = Cita::where('idGroomer', $groomer->idGroomer)
-                        ->whereDate('fechaHoraInicio', $fecha)
-                        ->where(function($q) use ($slotInicio, $slotFin) {
-                            $q->whereBetween('fechaHoraInicio', [$slotInicio, $slotFin])
-                              ->orWhereBetween('fechaHoraFin', [$slotInicio, $slotFin]);
-                        })
-                        ->whereNotIn('estado', ['cancelada', 'completada'])
-                        ->exists();
+                    $citasSolapadas = Cita::where('idGroomer', $groomer->idGroomer)
+                        ->activas()
+                        ->solapadas($slotInicio, $slotFin)
+                        ->count();
                     
-                    if (!$citaExistente) {
+                    if ($citasSolapadas < $groomer->maxServiciosSimultaneos) {
                         $slots[] = [
                             'id_groomer' => $groomer->idGroomer,
                             'groomer_nombre' => $groomer->user->nombre . ' ' . $groomer->user->apellido,
@@ -289,13 +290,11 @@ class CitaController extends ApiController
         $fechaHoraFin = $fechaHoraInicio->copy()->addMinutes($duracion);
         
         // Verificar que el slot esté libre
+        $groomer = Groomer::find($request->idGroomer);
         $citaExistente = Cita::where('idGroomer', $request->idGroomer)
-            ->where(function($q) use ($fechaHoraInicio, $fechaHoraFin) {
-                $q->whereBetween('fechaHoraInicio', [$fechaHoraInicio, $fechaHoraFin])
-                  ->orWhereBetween('fechaHoraFin', [$fechaHoraInicio, $fechaHoraFin]);
-            })
-            ->whereNotIn('estado', ['cancelada', 'completada'])
-            ->exists();
+            ->activas()
+            ->solapadas($fechaHoraInicio, $fechaHoraFin)
+            ->count() >= ($groomer->maxServiciosSimultaneos ?? 1);
         
         if ($citaExistente) {
             return $this->errorResponse('El horario seleccionado ya no está disponible', 400);

@@ -1,6 +1,7 @@
 // src/pages/groomer/perfil/components/PerfilForm.tsx
 import { useState, useEffect } from 'react';
 import { PencilIcon, CheckIcon, XMarkIcon } from '@heroicons/react/24/outline';
+import type { DisponibilidadGroomerData } from '../services/groomer.perfil.service';
 
 interface PerfilFormProps {
   initialData: {
@@ -10,6 +11,7 @@ interface PerfilFormProps {
     telefono: string | null;
     especialidad: string | null;
     max_servicios_simultaneos: number;
+    disponibilidades: DisponibilidadGroomerData[];
   };
   onSave: (data: { telefono?: string }) => Promise<boolean>;
   isSaving: boolean;
@@ -78,6 +80,22 @@ export const PerfilForm = ({ initialData, onSave, isSaving }: PerfilFormProps) =
             <label className="block text-sm font-medium text-gray-500">Máx. Servicios Simultáneos</label>
             <p className="mt-1 text-gray-900">{initialData.max_servicios_simultaneos}</p>
           </div>
+        </div>
+        <div className="mt-6 border-t pt-4">
+          <h4 className="text-sm font-semibold text-gray-800 mb-3">Horario semanal</h4>
+          {initialData.disponibilidades.length > 0 ? (
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+              {initialData.disponibilidades.map((disp) => (
+                <div key={disp.id || disp.diaSemana} className="flex justify-between items-center bg-gray-50 border border-gray-200 rounded-lg px-3 py-2">
+                  <span className="text-sm font-medium text-gray-700">{disp.diaNombre}</span>
+                  <span className="text-sm text-gray-600">{disp.horaInicio} - {disp.horaFin}</span>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <p className="text-sm text-gray-500">No tienes horario asignado.</p>
+          )}
+          <p className="mt-2 text-xs text-gray-400">Este horario es definido por el administrador.</p>
         </div>
       </div>
     );

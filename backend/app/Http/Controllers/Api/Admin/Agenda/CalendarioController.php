@@ -196,14 +196,12 @@ class CalendarioController extends ApiController
         $fechaFin = $fechaInicio->copy()->addMinutes($duracion);
         
         // Verificar disponibilidad
+        $groomer = Groomer::find($request->idGroomer);
         $citaExistente = Cita::where('idGroomer', $request->idGroomer)
             ->where('idCita', '!=', $id)
-            ->where(function($q) use ($fechaInicio, $fechaFin) {
-                $q->whereBetween('fechaHoraInicio', [$fechaInicio, $fechaFin])
-                  ->orWhereBetween('fechaHoraFin', [$fechaInicio, $fechaFin]);
-            })
-            ->whereNotIn('estado', ['cancelada', 'completada'])
-            ->exists();
+            ->activas()
+            ->solapadas($fechaInicio, $fechaFin)
+            ->count() >= ($groomer->maxServiciosSimultaneos ?? 1);
         
         if ($citaExistente) {
             return $this->errorResponse('El horario seleccionado no está disponible', 400);
@@ -263,14 +261,19 @@ class CalendarioController extends ApiController
         $slots = [];
         
         foreach ($groomers as $groomer) {
+            if ($groomer->disponibilidades->where('esBloqueo', false)->isEmpty()) {
+                $groomer->crearDisponibilidadDefault();
+                $groomer->load('disponibilidades');
+            }
+
             $disponibilidad = $groomer->disponibilidades
                 ->where('diaSemana', $fecha->dayOfWeek)
                 ->where('esBloqueo', false)
                 ->first();
             
             if ($disponibilidad) {
-                $horaInicio = Carbon::parse($disponibilidad->horaInicio);
-                $horaFin = Carbon::parse($disponibilidad->horaFin);
+                $horaInicio = $fecha->copy()->setTimeFromTimeString(Carbon::parse($disponibilidad->horaInicio)->format('H:i:s'));
+                $horaFin = $fecha->copy()->setTimeFromTimeString(Carbon::parse($disponibilidad->horaFin)->format('H:i:s'));
                 $intervalo = 30; // minutos entre slots
                 
                 while ($horaInicio->copy()->addMinutes($duracion) <= $horaFin) {
@@ -278,16 +281,12 @@ class CalendarioController extends ApiController
                     $slotFin = $slotInicio->copy()->addMinutes($duracion);
                     
                     // Verificar si el groomer está disponible
-                    $citaExistente = Cita::where('idGroomer', $groomer->idGroomer)
-                        ->whereDate('fechaHoraInicio', $fecha)
-                        ->where(function($q) use ($slotInicio, $slotFin) {
-                            $q->whereBetween('fechaHoraInicio', [$slotInicio, $slotFin])
-                              ->orWhereBetween('fechaHoraFin', [$slotInicio, $slotFin]);
-                        })
-                        ->whereNotIn('estado', ['cancelada', 'completada'])
-                        ->exists();
+                    $citasSolapadas = Cita::where('idGroomer', $groomer->idGroomer)
+                        ->activas()
+                        ->solapadas($slotInicio, $slotFin)
+                        ->count();
                     
-                    if (!$citaExistente) {
+                    if ($citasSolapadas < $groomer->maxServiciosSimultaneos) {
                         $slots[] = [
                             'groomer_id' => $groomer->idGroomer,
                             'groomer_nombre' => $groomer->user->nombre . ' ' . $groomer->user->apellido,

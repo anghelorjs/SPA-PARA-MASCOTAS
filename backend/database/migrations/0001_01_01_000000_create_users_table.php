@@ -17,6 +17,11 @@ return new class extends Migration
             $table->string('telefono')->nullable();
             $table->enum('rol', ['administrador', 'recepcionista', 'groomer', 'cliente']);
             $table->boolean('activo')->default(true);
+            
+            // ⭐ CAMPOS PARA BLOQUEO POR INTENTOS FALLIDOS ⭐
+            $table->integer('login_attempts')->default(0);
+            $table->timestamp('locked_until')->nullable();
+            
             $table->timestamp('creadoEn')->useCurrent();
             $table->timestamps();
         });

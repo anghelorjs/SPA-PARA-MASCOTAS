@@ -34,181 +34,314 @@ export const CalendarioRecepcion = ({
 }: CalendarioRecepcionProps) => {
   const calendarRef = useRef<FullCalendar | null>(null);
   const [currentDate, setCurrentDate] = useState(fecha);
+
   const calendarEvents = useMemo<EventInput[]>(
     () => citas.map((cita) => ({ ...cita, id: String(cita.id) })),
     [citas],
   );
 
   useEffect(() => {
-    if (calendarRef.current) {
-      const calendarApi = calendarRef.current.getApi();
-      calendarApi.gotoDate(currentDate);
-    }
+    if (calendarRef.current) calendarRef.current.getApi().gotoDate(currentDate);
   }, [currentDate]);
 
-  useEffect(() => {
-    setCurrentDate(fecha);
-  }, [fecha]);
+  useEffect(() => { setCurrentDate(fecha); }, [fecha]);
 
-  const handleDateSelect = (selectInfo: DateSelectArg) => {
-    const startDate = selectInfo.start;
-    onSlotClick(startDate);
-  };
+  const handleDateSelect = (info: DateSelectArg) => onSlotClick(info.start);
+  const handleEventClick = (info: EventClickArg) => onCitaClick(parseInt(info.event.id));
 
-  const handleEventClick = (clickInfo: EventClickArg) => {
-    const citaId = clickInfo.event.id;
-    onCitaClick(parseInt(citaId));
-  };
-
-  const handlePrev = () => {
-    if (calendarRef.current) {
-      const calendarApi = calendarRef.current.getApi();
-      calendarApi.prev();
-      const newDate = calendarApi.getDate();
-      const nextDate = toDateInputValue(newDate);
-      setCurrentDate(nextDate);
-      onFechaChange(nextDate);
-    }
-  };
-
-  const handleNext = () => {
-    if (calendarRef.current) {
-      const calendarApi = calendarRef.current.getApi();
-      calendarApi.next();
-      const newDate = calendarApi.getDate();
-      const nextDate = toDateInputValue(newDate);
-      setCurrentDate(nextDate);
-      onFechaChange(nextDate);
-    }
-  };
-
-  const handleToday = () => {
-    if (calendarRef.current) {
-      const calendarApi = calendarRef.current.getApi();
-      calendarApi.today();
-      const newDate = calendarApi.getDate();
-      const nextDate = toDateInputValue(newDate);
-      setCurrentDate(nextDate);
-      onFechaChange(nextDate);
-    }
-  };
-
-  const handleDateInputChange = (nextDate: string) => {
-    setCurrentDate(nextDate);
-    onFechaChange(nextDate);
+  const nav = (dir: 'prev' | 'next' | 'today') => {
+    if (!calendarRef.current) return;
+    const api = calendarRef.current.getApi();
+    api[dir]();
+    const next = toDateInputValue(api.getDate());
+    setCurrentDate(next);
+    onFechaChange(next);
   };
 
   if (isLoading) {
     return (
-      <div className="bg-white rounded-lg shadow p-8">
-        <div className="flex justify-center">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
-        </div>
-        <p className="text-center mt-2 text-gray-500">Cargando calendario...</p>
+      <div className="cal-card" style={{ textAlign: 'center', padding: '48px' }}>
+        <style>{styles}</style>
+        <div className="cal-spinner" />
+        <p style={{ color: '#64748b', fontSize: '14px', marginTop: '12px' }}>Cargando agenda…</p>
       </div>
     );
   }
 
   return (
-    <div className="bg-white rounded-lg shadow p-4">
-      {/* Barra de herramientas */}
-      <div className="flex flex-col sm:flex-row justify-between items-center gap-4 mb-4 pb-4 border-b">
-        <div className="flex gap-2">
-          <button
-            onClick={handlePrev}
-            className="px-3 py-1.5 text-sm border rounded-lg hover:bg-gray-50 transition-colors"
-          >
-            ← Anterior
+    <div className="cal-card">
+      <style>{styles}</style>
+
+      {/* Toolbar */}
+      <div className="cal-toolbar">
+        <div className="cal-nav-group">
+          <button className="cal-btn-ghost" onClick={() => nav('prev')} title="Anterior">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M15 18l-6-6 6-6"/></svg>
           </button>
-          <button
-            onClick={handleToday}
-            className="px-3 py-1.5 text-sm border rounded-lg hover:bg-gray-50 transition-colors"
-          >
-            Hoy
-          </button>
-          <button
-            onClick={handleNext}
-            className="px-3 py-1.5 text-sm border rounded-lg hover:bg-gray-50 transition-colors"
-          >
-            Siguiente →
+          <button className="cal-btn-today" onClick={() => nav('today')}>Hoy</button>
+          <button className="cal-btn-ghost" onClick={() => nav('next')} title="Siguiente">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M9 18l6-6-6-6"/></svg>
           </button>
         </div>
 
-        <div className="flex flex-wrap items-center justify-end gap-3">
-          <span className="text-sm text-gray-500 min-w-[180px] text-right">
-            {formatLocalDate(currentDate, { day: 'numeric', month: 'long', year: 'numeric' })}
-          </span>
+        <span className="cal-date-label">
+          {formatLocalDate(currentDate, { day: 'numeric', month: 'long', year: 'numeric' })}
+        </span>
 
+        <div className="cal-controls">
           <input
             type="date"
             value={currentDate}
-            onChange={(e) => handleDateInputChange(e.target.value)}
-            className="px-3 py-1.5 text-sm border rounded-lg focus:ring-2 focus:ring-blue-500"
-            aria-label="Seleccionar fecha de agenda"
+            onChange={(e) => { setCurrentDate(e.target.value); onFechaChange(e.target.value); }}
+            className="cal-input"
+            aria-label="Seleccionar fecha"
           />
-          
-          {/* Filtro por groomer */}
           <select
             value={groomerFiltro || ''}
             onChange={(e) => onGroomerFiltroChange(e.target.value ? parseInt(e.target.value) : undefined)}
-            className="px-3 py-1.5 text-sm border rounded-lg focus:ring-2 focus:ring-blue-500"
+            className="cal-input cal-select"
           >
             <option value="">Todos los groomers</option>
-            {groomers.map(groomer => (
-              <option key={groomer.id} value={groomer.id}>{groomer.nombre}</option>
-            ))}
+            {groomers.map(g => <option key={g.id} value={g.id}>{g.nombre}</option>)}
           </select>
         </div>
       </div>
 
-      {/* Calendario */}
-      <FullCalendar
-        ref={calendarRef}
-        plugins={[dayGridPlugin, timeGridPlugin, interactionPlugin]}
-        headerToolbar={false}
-        initialView="timeGridDay"
-        initialDate={currentDate}
-        locale={esLocale}
-        height="auto"
-        slotMinTime="08:00:00"
-        slotMaxTime="20:00:00"
-        slotDuration="00:30:00"
-        allDaySlot={false}
-        nowIndicator={true}
-        selectable={true}
-        selectMirror={true}
-        dayMaxEvents={true}
-        weekends={true}
-        events={calendarEvents}
-        eventClick={handleEventClick}
-        select={handleDateSelect}
-        eventContent={(eventInfo) => {
-          const estado = eventInfo.event.extendedProps.estado;
-          const estadoLabel: Record<string, string> = {
-            programada: 'Programada',
-            confirmada: 'Confirmada',
-            en_curso: 'En curso',
-            completada: 'Completada',
-            cancelada: 'Cancelada',
-          };
-          return (
-            <div className="p-1 text-xs">
-              <div className="font-medium truncate">{eventInfo.event.title}</div>
-              <div className="text-[10px] opacity-80">{estadoLabel[estado] || estado}</div>
-            </div>
-          );
-        }}
-        slotLabelFormat={{
-          hour: 'numeric',
-          minute: '2-digit',
-          hour12: false,
-        }}
-        titleFormat={{
-          year: 'numeric',
-          month: 'long',
-          day: 'numeric',
-        }}
-      />
+      {/* Calendar */}
+      <div className="cal-body">
+        <FullCalendar
+          ref={calendarRef}
+          plugins={[dayGridPlugin, timeGridPlugin, interactionPlugin]}
+          headerToolbar={false}
+          initialView="timeGridDay"
+          initialDate={currentDate}
+          locale={esLocale}
+          height="auto"
+          slotMinTime="07:00:00"
+          slotMaxTime="21:00:00"
+          slotDuration="00:30:00"
+          slotLabelInterval="01:00:00"
+          allDaySlot={false}
+          nowIndicator={true}
+          selectable={true}
+          selectMirror={true}
+          dayMaxEvents={true}
+          weekends={true}
+          events={calendarEvents}
+          eventClick={handleEventClick}
+          select={handleDateSelect}
+          eventContent={(info) => {
+            const estado: string = info.event.extendedProps.estado;
+            const labels: Record<string, string> = {
+              programada: 'Programada', confirmada: 'Confirmada',
+              en_curso: 'En curso', completada: 'Completada', cancelada: 'Cancelada',
+            };
+            return (
+              <div className={`cal-event cal-event--${estado}`}>
+                <div className="cal-event-title">{info.event.title}</div>
+                <div className="cal-event-badge">{labels[estado] || estado}</div>
+              </div>
+            );
+          }}
+          slotLabelFormat={{ hour: 'numeric', minute: '2-digit', hour12: false }}
+        />
+      </div>
     </div>
   );
 };
+
+const styles = `
+  .cal-card {
+    background: #ffffff;
+    border-radius: 12px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.08), 0 4px 16px rgba(0,0,0,0.06);
+    overflow: hidden;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  }
+
+  /* ── Spinner ── */
+  .cal-spinner {
+    width: 32px; height: 32px;
+    border: 3px solid #e2e8f0;
+    border-top-color: #3b82f6;
+    border-radius: 50%;
+    animation: cal-spin 0.75s linear infinite;
+    margin: 0 auto;
+  }
+  @keyframes cal-spin { to { transform: rotate(360deg); } }
+
+  /* ── Toolbar ── */
+  .cal-toolbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 10px;
+    padding: 14px 20px;
+    border-bottom: 1px solid #e8edf5;
+    background: #f8fafd;
+  }
+
+  .cal-nav-group { display: flex; align-items: center; gap: 4px; }
+
+  .cal-btn-ghost {
+    display: flex; align-items: center; justify-content: center;
+    width: 32px; height: 32px;
+    border: 1px solid #d1dae8;
+    border-radius: 8px;
+    background: white;
+    color: #475569;
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+  .cal-btn-ghost:hover { background: #eff4ff; border-color: #3b82f6; color: #3b82f6; }
+
+  .cal-btn-today {
+    height: 32px; padding: 0 14px;
+    border: 1px solid #d1dae8;
+    border-radius: 8px;
+    background: white;
+    color: #334155;
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.15s;
+    font-family: inherit;
+  }
+  .cal-btn-today:hover { background: #eff4ff; border-color: #3b82f6; color: #3b82f6; }
+
+  .cal-date-label {
+    font-size: 15px;
+    font-weight: 600;
+    color: #1e293b;
+    flex: 1;
+    text-align: center;
+    letter-spacing: -0.01em;
+  }
+
+  .cal-controls { display: flex; gap: 8px; }
+
+  .cal-input {
+    height: 32px;
+    padding: 0 10px;
+    border: 1px solid #d1dae8;
+    border-radius: 8px;
+    background: white;
+    color: #334155;
+    font-size: 13px;
+    font-family: inherit;
+    outline: none;
+    cursor: pointer;
+    transition: border-color 0.15s, box-shadow 0.15s;
+  }
+  .cal-input:focus { border-color: #3b82f6; box-shadow: 0 0 0 3px rgba(59,130,246,0.12); }
+  .cal-select { min-width: 160px; }
+
+  /* ── Calendar body ── */
+  .cal-body { padding: 0 4px 4px; }
+
+  .cal-body .fc { font-family: inherit; }
+
+  /* Slots — tamaño moderado, similar al original */
+  .cal-body .fc-timegrid-slot { height: 40px !important; }
+  .cal-body .fc-timegrid-slot-minor { border-top: 1px dashed #f1f5f9 !important; }
+
+  .cal-body .fc-timegrid-slot-label {
+    font-size: 11px;
+    font-weight: 600;
+    color: #94a3b8;
+    letter-spacing: 0.03em;
+    padding-right: 10px;
+  }
+
+  .cal-body .fc-col-header-cell {
+    padding: 10px 0;
+    font-size: 12px;
+    font-weight: 700;
+    color: #64748b;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    background: #f8fafd;
+    border: none;
+  }
+
+  .cal-body .fc-scrollgrid { border: none !important; }
+  .cal-body .fc-scrollgrid td,
+  .cal-body .fc-scrollgrid th { border-color: #e8edf5 !important; }
+
+  .cal-body .fc-timegrid-now-indicator-line {
+    border-color: #3b82f6 !important;
+    border-width: 2px !important;
+  }
+  .cal-body .fc-timegrid-now-indicator-arrow {
+    border-top-color: #3b82f6 !important;
+    border-bottom-color: #3b82f6 !important;
+  }
+
+  .cal-body .fc-highlight { background: rgba(59,130,246,0.07) !important; }
+
+  /* ── Events ── */
+  .cal-body .fc-event {
+    border: none !important;
+    background: transparent !important;
+    box-shadow: none !important;
+    padding: 1px 2px;
+    cursor: pointer;
+  }
+
+  .cal-event {
+    height: 100%;
+    padding: 4px 8px;
+    border-radius: 6px;
+    border-left: 3px solid #3b82f6;
+    background: #eff6ff;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: 2px;
+    transition: filter 0.12s;
+  }
+  .cal-event:hover { filter: brightness(0.95); }
+
+  .cal-event-title {
+    font-size: 11px;
+    font-weight: 600;
+    color: #1e40af;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    line-height: 1.3;
+  }
+  .cal-event-badge {
+    font-size: 10px;
+    color: #3b82f6;
+    opacity: 0.85;
+    line-height: 1;
+  }
+
+  /* Estado: programada */
+  .cal-event--programada { background: #eff6ff; border-left-color: #3b82f6; }
+  .cal-event--programada .cal-event-title { color: #1e40af; }
+  .cal-event--programada .cal-event-badge { color: #3b82f6; }
+
+  /* Estado: confirmada */
+  .cal-event--confirmada { background: #f0fdf4; border-left-color: #22c55e; }
+  .cal-event--confirmada .cal-event-title { color: #15803d; }
+  .cal-event--confirmada .cal-event-badge { color: #22c55e; }
+
+  /* Estado: en_curso */
+  .cal-event--en_curso { background: #fffbeb; border-left-color: #f59e0b; }
+  .cal-event--en_curso .cal-event-title { color: #92400e; }
+  .cal-event--en_curso .cal-event-badge { color: #f59e0b; }
+
+  /* Estado: completada */
+  .cal-event--completada { background: #f8fafc; border-left-color: #94a3b8; opacity: 0.85; }
+  .cal-event--completada .cal-event-title { color: #475569; }
+  .cal-event--completada .cal-event-badge { color: #94a3b8; }
+
+  /* Estado: cancelada */
+  .cal-event--cancelada { background: #fff1f2; border-left-color: #f43f5e; opacity: 0.7; }
+  .cal-event--cancelada .cal-event-title { color: #9f1239; }
+  .cal-event--cancelada .cal-event-badge { color: #f43f5e; }
+`;

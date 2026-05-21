@@ -55,9 +55,10 @@ import { PerfilRecepcionista } from "./pages/recepcionista/perfil/pages/PerfilRe
 // GROOMER
 // ========================
 const DashboardGroomer = () => <div className="p-6"><h1 className="text-2xl font-bold">Dashboard Groomer</h1><p className="mt-4 text-gray-600">Bienvenido al panel del groomer.</p></div>;
-const AgendaGroomer = () => <div className="p-6"><h1 className="text-2xl font-bold">Mi Agenda</h1><p className="mt-4 text-gray-600">Lista de tus citas del día.</p></div>;
+import { MiAgendaGroomer } from "./pages/groomer/agenda/pages/MiAgendaGroomer";
 const FichasGroomerHoy = () => <div className="p-6"><h1 className="text-2xl font-bold">Fichas de Hoy</h1><p className="mt-4 text-gray-600">Fichas de grooming del día.</p></div>;
 const FichasGroomerTodas = () => <div className="p-6"><h1 className="text-2xl font-bold">Todas las Fichas</h1><p className="mt-4 text-gray-600">Historial de fichas de grooming.</p></div>;
+const FichaDetalleGroomer = () => <div className="p-6"><h1 className="text-2xl font-bold">Ficha de Grooming</h1><p className="mt-4 text-gray-600">Detalle de la ficha de grooming.</p></div>;
 import { PerfilGroomer } from "./pages/groomer/perfil/pages/PerfilGroomer";
 // ========================
 // CLIENTE
@@ -150,9 +151,10 @@ const AppRoutes = () => {
         {/* GROOMER */}
         {/* ===================================== */}
         <Route path="groomer/dashboard" element={<DashboardGroomer />} />
-        <Route path="groomer/agenda" element={<AgendaGroomer />} />
+        <Route path="groomer/agenda" element={<MiAgendaGroomer />} />
         <Route path="groomer/fichas/hoy" element={<FichasGroomerHoy />} />
         <Route path="groomer/fichas/todas" element={<FichasGroomerTodas />} />
+        <Route path="groomer/fichas/:fichaId" element={<FichaDetalleGroomer />} />
         <Route path="groomer/perfil" element={<PerfilGroomer />} />
 
         {/* ===================================== */}

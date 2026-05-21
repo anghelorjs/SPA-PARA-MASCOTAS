@@ -22,26 +22,32 @@ class AgendaController extends ApiController
         $user = Auth::user();
         $groomer = $user->groomer;
         $fecha = $request->get('fecha', now()->toDateString());
-        
+        $page = $request->get('page', 1);
+        $perPage = $request->get('per_page', 15);
+
         if (!$groomer) {
             return $this->errorResponse('Groomer no encontrado', 404);
         }
-        
-        $query = Cita::with(['mascota.cliente.user', 'servicio', 'fichaGrooming'])
+
+        $query = Cita::with(['mascota.cliente.user', 'mascota.rangoPeso', 'servicio', 'fichaGrooming'])
             ->where('idGroomer', $groomer->idGroomer)
             ->whereDate('fechaHoraInicio', $fecha);
-        
+
         // Filtro por estado
         if ($request->has('estado') && $request->estado !== 'todas') {
-            $query->where('estado', $request->estado);
+            $estados = explode(',', $request->estado);
+            $query->whereIn('estado', $estados);
         }
-        
-        $citas = $query->orderBy('fechaHoraInicio', 'asc')->get();
-        
+
+        $query->orderBy('fechaHoraInicio', 'asc');
+
+        // Paginar
+        $paginated = $query->paginate($perPage, ['*'], 'page', $page);
+
         // Obtener historial de mascotas para las citas
-        $citasConHistorial = $citas->map(function($cita) {
+        $citasConHistorial = $paginated->getCollection()->map(function($cita) {
             $mascota = $cita->mascota;
-            
+
             // Historial de fichas anteriores de esta mascota
             $historialFichas = FichaGrooming::with(['cita.servicio'])
                 ->where('idMascota', $mascota->idMascota)
@@ -65,7 +71,7 @@ class AgendaController extends ApiController
                         })
                     ];
                 });
-            
+
             $estados = [
                 'programada' => ['texto' => 'Programada', 'color' => '#3b82f6'],
                 'confirmada' => ['texto' => 'Confirmada', 'color' => '#10b981'],
@@ -73,9 +79,9 @@ class AgendaController extends ApiController
                 'completada' => ['texto' => 'Completada', 'color' => '#6b7280'],
                 'cancelada' => ['texto' => 'Cancelada', 'color' => '#ef4444']
             ];
-            
+
             $rangoNombre = $mascota->rangoPeso ? $mascota->rangoPeso->nombre : 'No asignado';
-            
+
             return [
                 'id' => $cita->idCita,
                 'hora_inicio' => $cita->fechaHoraInicio->format('H:i'),
@@ -106,8 +112,24 @@ class AgendaController extends ApiController
                 'ficha_abierta' => $cita->fichaGrooming && !$cita->fichaGrooming->fechaCierre ? true : false
             ];
         });
-        
-        return $this->successResponse($citasConHistorial, 'Citas obtenidas correctamente');
+
+        $response = [
+            'current_page' => $paginated->currentPage(),
+            'data' => $citasConHistorial,
+            'first_page_url' => $paginated->url(1),
+            'from' => $paginated->firstItem(),
+            'last_page' => $paginated->lastPage(),
+            'last_page_url' => $paginated->url($paginated->lastPage()),
+            'links' => [],
+            'next_page_url' => $paginated->nextPageUrl(),
+            'path' => $paginated->path(),
+            'per_page' => $paginated->perPage(),
+            'prev_page_url' => $paginated->previousPageUrl(),
+            'to' => $paginated->lastItem(),
+            'total' => $paginated->total()
+        ];
+
+        return $this->successResponse($response, 'Citas obtenidas correctamente');
     }
     
     /**

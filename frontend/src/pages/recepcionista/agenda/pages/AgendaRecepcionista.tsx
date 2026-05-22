@@ -99,6 +99,7 @@ export const AgendaRecepcionista = () => {
         onCancelar={cancelarCita}
         onReprogramar={handleReprogramar}
         onVerFicha={handleVerFicha}
+        onPagoRegistrado={loadCitas}
       />
 
       <ModalNuevaCitaWizard

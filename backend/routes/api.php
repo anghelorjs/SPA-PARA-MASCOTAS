@@ -250,10 +250,12 @@ Route::middleware('auth:sanctum')->group(function () {
         
         // Agenda - Calendario y Citas
         Route::get('agenda/citas', [RecepcionistaAgendaController::class, 'citas']);
+        Route::get('agenda/citas/{id}', [RecepcionistaAgendaController::class, 'detalleCita']);
         Route::post('agenda/slots-libres', [RecepcionistaAgendaController::class, 'slotsLibres']);
         Route::post('agenda/citas', [RecepcionistaAgendaController::class, 'crearCita']);
         Route::post('agenda/citas/{id}/confirmar', [RecepcionistaAgendaController::class, 'confirmarCita']);
         Route::post('agenda/citas/{id}/cancelar', [RecepcionistaAgendaController::class, 'cancelarCita']);
+        Route::post('agenda/citas/{id}/pagar', [RecepcionistaAgendaController::class, 'registrarPago']);
         Route::put('agenda/citas/{id}/reprogramar', [RecepcionistaAgendaController::class, 'reprogramarCita']);
         
         // Agenda - Búsquedas para Nueva Cita

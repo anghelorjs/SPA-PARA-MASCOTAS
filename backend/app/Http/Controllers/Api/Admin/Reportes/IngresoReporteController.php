@@ -26,16 +26,17 @@ class IngresoReporteController extends ApiController
         $fechaDesde = Carbon::parse($request->fecha_desde);
         $fechaHasta = Carbon::parse($request->fecha_hasta);
 
-        // ========== VENTAS (PRODUCTOS) ==========
+        // ========== VENTAS PAGADAS ==========
         $ventas = Venta::with(['detalleVentas.variante.producto'])
             ->whereBetween('fecha', [$fechaDesde, $fechaHasta])
             ->where('estado', 'pagado')
             ->get();
 
-        // ========== SERVICIOS (CITAS COMPLETADAS) ==========
+        // ========== SERVICIOS COBRADOS ==========
         $citasQuery = Cita::with(['servicio', 'mascota'])
             ->whereBetween('fechaHoraInicio', [$fechaDesde, $fechaHasta])
-            ->where('estado', 'completada');
+            ->where('estado', 'completada')
+            ->where('pagado', true);
         
         if ($request->has('groomer_id')) {
             $citasQuery->where('idGroomer', $request->groomer_id);
@@ -44,9 +45,15 @@ class IngresoReporteController extends ApiController
         $citas = $citasQuery->get();
 
         // ========== TOTALES ==========
-        $ingresosProductos = $ventas->sum('total');
-        $ingresosServicios = $citas->sum(function($cita) {
-            return $cita->servicio->getPrecioForRango($cita->mascota->idRango);
+        $ingresosProductos = $ventas->sum(function($venta) {
+            return $venta->detalleVentas
+                ->where('tipo', 'producto')
+                ->sum('subtotal');
+        });
+        $ingresosServicios = $ventas->sum(function($venta) {
+            return $venta->detalleVentas
+                ->where('tipo', 'servicio')
+                ->sum('subtotal');
         });
         $totalIngresos = $ingresosProductos + $ingresosServicios;
 
@@ -73,14 +80,20 @@ class IngresoReporteController extends ApiController
         }
 
         $ingresosDiarios = collect($diasEnRango)->map(function($fecha) use ($fechaDesde, $fechaHasta, $ventas, $citas) {
-            $ingresosProductosDia = $ventas->filter(function($venta) use ($fecha) {
+            $ventasDia = $ventas->filter(function($venta) use ($fecha) {
                 return $venta->fecha->format('Y-m-d') === $fecha;
-            })->sum('total');
-            
-            $ingresosServiciosDia = $citas->filter(function($cita) use ($fecha) {
-                return $cita->fechaHoraInicio->format('Y-m-d') === $fecha;
-            })->sum(function($cita) {
-                return $cita->servicio->getPrecioForRango($cita->mascota->idRango);
+            });
+
+            $ingresosProductosDia = $ventasDia->sum(function($venta) {
+                return $venta->detalleVentas
+                    ->where('tipo', 'producto')
+                    ->sum('subtotal');
+            });
+
+            $ingresosServiciosDia = $ventasDia->sum(function($venta) {
+                return $venta->detalleVentas
+                    ->where('tipo', 'servicio')
+                    ->sum('subtotal');
             });
             
             return [
@@ -98,11 +111,12 @@ class IngresoReporteController extends ApiController
         ];
 
         // ========== DESGLOSE POR MEDIO DE PAGO ==========
-        $ingresosPorMedioPago = $ventas->groupBy('medioPago')->map(function($items, $medio) {
+        $ingresosPorMedioPago = $ventas->groupBy('medioPago')->map(function($items, $medio) use ($totalIngresos) {
+            $totalMedio = $items->sum('total');
             return [
                 'medio' => $medio,
-                'total' => $items->sum('total'),
-                'porcentaje' => round(($items->sum('total') / $items->first()->fecha ?: 1) * 100, 2)
+                'total' => $totalMedio,
+                'porcentaje' => $totalIngresos > 0 ? round(($totalMedio / $totalIngresos) * 100, 2) : 0
             ];
         })->values();
 

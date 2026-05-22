@@ -11,6 +11,7 @@ import {
 } from '@heroicons/react/24/outline';
 import { recepcionistaAgendaService } from '../services/recepcionista.agenda.service';
 import type { CitaDetalle } from '../services/recepcionista.agenda.service';
+import { ModalCobroServicio } from './ModalCobroServicio';
 
 interface ModalCitaDetalleProps {
   isOpen: boolean;
@@ -20,6 +21,7 @@ interface ModalCitaDetalleProps {
   onCancelar: (id: number) => Promise<unknown>;
   onReprogramar: (id: number) => void;
   onVerFicha: (fichaId: number) => void;
+  onPagoRegistrado?: () => void;
 }
 
 const formatPrecio = (precio: number | string | null | undefined): string => {
@@ -43,11 +45,13 @@ export const ModalCitaDetalle = ({
   onCancelar,
   onReprogramar,
   onVerFicha,
+  onPagoRegistrado,
 }: ModalCitaDetalleProps) => {
   const [cita, setCita] = useState<CitaDetalle | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [isConfirming, setIsConfirming] = useState(false);
   const [isCancelling, setIsCancelling] = useState(false);
+  const [modalCobroOpen, setModalCobroOpen] = useState(false);
 
   const loadDetalleCita = useCallback(async () => {
     if (!citaId) return;
@@ -99,17 +103,20 @@ export const ModalCitaDetalle = ({
   const puedeCancelar = cita ? ['programada', 'confirmada'].includes(cita.estado) : false;
   const puedeReprogramar = cita ? ['programada', 'confirmada'].includes(cita.estado) : false;
   const puedeVerFicha = Boolean(cita?.tiene_ficha);
+  const puedeCobrar = cita?.estado === 'completada' && !cita.pagado;
+  const estaPagada = Boolean(cita?.pagado);
 
   return createPortal(
-    <div
-      className="fixed inset-0 z-50 flex items-center justify-center p-4"
-      style={{ backgroundColor: 'rgba(0, 0, 0, 0.5)', backdropFilter: 'blur(4px)' }}
-      onClick={onClose}
-    >
+    <>
       <div
-        className="relative bg-white rounded-xl shadow-2xl w-full max-w-md overflow-hidden"
-        onClick={(e) => e.stopPropagation()}
+        className="fixed inset-0 z-50 flex items-center justify-center p-4"
+        style={{ backgroundColor: 'rgba(0, 0, 0, 0.5)', backdropFilter: 'blur(4px)' }}
+        onClick={onClose}
       >
+        <div
+          className="relative bg-white rounded-xl shadow-2xl w-full max-w-md overflow-hidden"
+          onClick={(e) => e.stopPropagation()}
+        >
         {/* Header */}
         <div className="bg-white px-6 py-4 border-b border-gray-200">
           <div className="flex justify-between items-center">
@@ -133,9 +140,16 @@ export const ModalCitaDetalle = ({
             <div className="space-y-4">
               {/* Estado + ID */}
               <div className="flex justify-between items-center">
-                <span className={`px-2 py-1 text-xs rounded-full font-medium ${ESTADO_COLORES[cita.estado] ?? 'bg-gray-100 text-gray-800'}`}>
-                  {cita.estado?.toUpperCase()}
-                </span>
+                <div className="flex flex-wrap items-center gap-2">
+                  <span className={`px-2 py-1 text-xs rounded-full font-medium ${ESTADO_COLORES[cita.estado] ?? 'bg-gray-100 text-gray-800'}`}>
+                    {cita.estado?.toUpperCase()}
+                  </span>
+                  {estaPagada && (
+                    <span className="px-2 py-1 text-xs rounded-full font-medium bg-green-100 text-green-800">
+                      Pagado
+                    </span>
+                  )}
+                </div>
                 <span className="text-xs text-gray-400">ID: {cita.id}</span>
               </div>
 
@@ -186,6 +200,11 @@ export const ModalCitaDetalle = ({
                   <p className="text-sm font-semibold text-green-600">
                     Bs. {formatPrecio(cita.precio)}
                   </p>
+                  {estaPagada && (
+                    <p className="text-xs text-gray-500">
+                      Metodo: {cita.pago_metodo} {cita.pago_fecha ? `- ${cita.pago_fecha}` : ''}
+                    </p>
+                  )}
                 </div>
               </div>
 
@@ -240,6 +259,15 @@ export const ModalCitaDetalle = ({
               Ver ficha grooming
             </button>
           )}
+          {puedeCobrar && (
+            <button
+              onClick={() => setModalCobroOpen(true)}
+              className="px-4 py-2 bg-green-600 text-sm font-medium text-white rounded-lg hover:bg-green-700 transition-colors"
+            >
+              <span className="mr-1 inline-block h-2 w-2 rounded-full bg-green-200" />
+              Cobrar servicio
+            </button>
+          )}
           <button
             onClick={onClose}
             className="px-4 py-2 border border-gray-300 bg-white text-sm font-medium text-gray-700 rounded-lg hover:bg-gray-50 transition-colors"
@@ -248,7 +276,17 @@ export const ModalCitaDetalle = ({
           </button>
         </div>
       </div>
-    </div>,
+      </div>
+      <ModalCobroServicio
+        isOpen={modalCobroOpen}
+        cita={cita}
+        onClose={() => setModalCobroOpen(false)}
+        onPagoRegistrado={(citaActualizada) => {
+          setCita(citaActualizada);
+          onPagoRegistrado?.();
+        }}
+      />
+    </>,
     document.body
   );
 };

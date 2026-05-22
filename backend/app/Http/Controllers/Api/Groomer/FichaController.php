@@ -687,16 +687,4 @@ class FichaController extends ApiController
         return $ficha;
     }
 
-    private function publicUrl(?string $path): ?string
-    {
-        if (!$path) {
-            return null;
-        }
-
-        if (preg_match('/^https?:\/\//i', $path)) {
-            return $path;
-        }
-
-        return request()->getSchemeAndHttpHost() . '/' . ltrim($path, '/');
-    }
 }

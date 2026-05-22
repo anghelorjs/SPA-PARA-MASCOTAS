@@ -11,6 +11,10 @@ use App\Models\Mascota;
 use App\Models\RangoPeso;
 use App\Models\Notificacion;
 use App\Models\User;
+use App\Models\Venta;
+use App\Models\DetalleVenta;
+use App\Models\Factura;
+use App\Models\Pago;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
@@ -96,26 +100,104 @@ class AgendaController extends ApiController
             return $this->errorResponse('Cita no encontrada', 404);
         }
 
-        return $this->successResponse([
-            'id'           => $cita->idCita,
-            'mascota'      => $cita->mascota->nombre,
-            'cliente'      => $cita->mascota->cliente->user->nombre . ' ' . $cita->mascota->cliente->user->apellido,
-            'cliente_id'   => $cita->mascota->cliente->idCliente,
-            'groomer'      => $cita->groomer->user->nombre . ' ' . $cita->groomer->user->apellido,
-            'groomer_id'   => $cita->idGroomer,
-            'servicio'     => $cita->servicio->nombre,
-            'servicio_id'  => $cita->idServicio,
-            // FIX: mismo formato sin offset para consistencia en el modal
-            'hora_inicio'  => $cita->fechaHoraInicio->format('d/m/Y H:i'),
-            'hora_fin'     => $cita->fechaHoraFin->format('H:i'),
-            'duracion'     => $cita->duracionCalculadaMin,
-            'estado'       => $cita->estado,
-            // FIX: cast a float para que JSON lo serialice como número, no string
-            'precio'       => (float) $cita->servicio->getPrecioForRango($cita->mascota->idRango),
-            'observaciones'=> $cita->observaciones,
-            'tiene_ficha'  => (bool) $cita->fichaGrooming,
-            'id_ficha'     => $cita->fichaGrooming->idFicha ?? null,
-        ], 'Detalle de cita obtenido correctamente');
+        return $this->successResponse($this->formatearDetalleCita($cita), 'Detalle de cita obtenido correctamente');
+
+    }
+
+    /**
+     * Registrar el cobro de una cita completada y reflejarlo como venta de servicio.
+     */
+    public function registrarPago(Request $request, $id)
+    {
+        $request->validate([
+            'medio_pago' => 'required|in:efectivo,qr,transferencia',
+        ]);
+
+        DB::beginTransaction();
+
+        try {
+            $cita = Cita::with(['mascota.cliente.user', 'groomer.user', 'servicio', 'fichaGrooming'])
+                ->lockForUpdate()
+                ->find($id);
+
+            if (!$cita) {
+                DB::rollBack();
+                return $this->errorResponse('Cita no encontrada', 404);
+            }
+
+            if ($cita->estado !== 'completada') {
+                DB::rollBack();
+                return $this->errorResponse('Solo se puede cobrar una cita completada', 400);
+            }
+
+            if ($cita->pagado) {
+                DB::rollBack();
+                return $this->errorResponse('Esta cita ya fue cobrada', 409);
+            }
+
+            $recepcionista = Auth::user()->recepcionista;
+            if (!$recepcionista) {
+                DB::rollBack();
+                return $this->errorResponse('Usuario no es recepcionista', 403);
+            }
+
+            $precio = (float) $cita->servicio->getPrecioForRango($cita->mascota->idRango);
+            $ahora = now();
+
+            $venta = Venta::create([
+                'idCliente' => $cita->mascota->idCliente,
+                'idRecepcionista' => $recepcionista->idRecepcionista,
+                'fecha' => $ahora,
+                'total' => $precio,
+                'medioPago' => $request->medio_pago,
+                'estado' => 'pagado',
+            ]);
+
+            DetalleVenta::create([
+                'idVenta' => $venta->idVenta,
+                'idVariante' => null,
+                'tipo' => 'servicio',
+                'descripcion' => $cita->servicio->nombre,
+                'cantidad' => 1,
+                'precioUnitario' => $precio,
+                'subtotal' => $precio,
+            ]);
+
+            $factura = Factura::create([
+                'idVenta' => $venta->idVenta,
+                'numeroFactura' => 'FAC-' . str_pad($venta->idVenta, 8, '0', STR_PAD_LEFT),
+                'fechaEmision' => $ahora,
+                'montoTotal' => $precio,
+                'estado' => 'emitida',
+            ]);
+
+            Pago::create([
+                'idFactura' => $factura->idFactura,
+                'monto' => $precio,
+                'metodo' => $request->medio_pago,
+                'fechaPago' => $ahora,
+                'referencia' => 'SERV-' . $cita->idCita . '-' . uniqid(),
+            ]);
+
+            $cita->update([
+                'pagado' => true,
+                'pago_metodo' => $request->medio_pago,
+                'pago_fecha' => $ahora,
+            ]);
+
+            DB::commit();
+
+            $cita->refresh()->load(['mascota.cliente.user', 'groomer.user', 'servicio', 'fichaGrooming']);
+
+            return $this->successResponse([
+                'cita' => $this->formatearDetalleCita($cita),
+                'venta_id' => $venta->idVenta,
+                'factura_id' => $factura->idFactura,
+            ], 'Pago registrado correctamente', 201);
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return $this->errorResponse('Error al registrar pago: ' . $e->getMessage(), 500);
+        }
     }
 
     /**
@@ -424,5 +506,30 @@ class AgendaController extends ApiController
             $cita->load(['mascota', 'groomer.user', 'servicio']),
             'Cita reprogramada correctamente'
         );
+    }
+
+    private function formatearDetalleCita(Cita $cita): array
+    {
+        return [
+            'id'           => $cita->idCita,
+            'mascota'      => $cita->mascota->nombre,
+            'cliente'      => $cita->mascota->cliente->user->nombre . ' ' . $cita->mascota->cliente->user->apellido,
+            'cliente_id'   => $cita->mascota->cliente->idCliente,
+            'groomer'      => $cita->groomer->user->nombre . ' ' . $cita->groomer->user->apellido,
+            'groomer_id'   => $cita->idGroomer,
+            'servicio'     => $cita->servicio->nombre,
+            'servicio_id'  => $cita->idServicio,
+            'hora_inicio'  => $cita->fechaHoraInicio->format('d/m/Y H:i'),
+            'hora_fin'     => $cita->fechaHoraFin->format('H:i'),
+            'duracion'     => $cita->duracionCalculadaMin,
+            'estado'       => $cita->estado,
+            'precio'       => (float) $cita->servicio->getPrecioForRango($cita->mascota->idRango),
+            'pagado'       => (bool) $cita->pagado,
+            'pago_metodo'  => $cita->pago_metodo,
+            'pago_fecha'   => $cita->pago_fecha?->format('d/m/Y H:i'),
+            'observaciones'=> $cita->observaciones,
+            'tiene_ficha'  => (bool) $cita->fichaGrooming,
+            'id_ficha'     => $cita->fichaGrooming->idFicha ?? null,
+        ];
     }
 }

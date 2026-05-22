@@ -22,6 +22,9 @@ class Cita extends Model
         'fechaHoraFin',
         'duracionCalculadaMin',
         'estado',
+        'pagado',
+        'pago_metodo',
+        'pago_fecha',
         'observaciones',
         'confirmacion_expira_at', // ← NUEVO
     ];
@@ -30,6 +33,8 @@ class Cita extends Model
         'fechaHoraInicio' => 'datetime',
         'fechaHoraFin' => 'datetime',
         'duracionCalculadaMin' => 'integer',
+        'pagado' => 'boolean',
+        'pago_fecha' => 'datetime',
         'confirmacion_expira_at' => 'datetime', // ← NUEVO
     ];
 

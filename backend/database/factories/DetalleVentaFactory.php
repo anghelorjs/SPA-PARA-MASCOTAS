@@ -20,6 +20,8 @@ class DetalleVentaFactory extends Factory
         return [
             'idVenta' => Venta::factory(),
             'idVariante' => VarianteProducto::factory(),
+            'tipo' => 'producto',
+            'descripcion' => $this->faker->words(3, true),
             'cantidad' => $cantidad,
             'precioUnitario' => $precioUnitario,
             'subtotal' => $cantidad * $precioUnitario,

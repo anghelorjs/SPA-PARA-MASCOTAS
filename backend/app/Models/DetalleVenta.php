@@ -16,6 +16,8 @@ class DetalleVenta extends Model
     protected $fillable = [
         'idVenta',
         'idVariante',
+        'tipo',
+        'descripcion',
         'cantidad',
         'precioUnitario',
         'subtotal'
@@ -39,8 +41,8 @@ class DetalleVenta extends Model
     }
 
     // Mutators
-    public function setSubtotalAttribute()
+    public function setSubtotalAttribute($value)
     {
-        $this->attributes['subtotal'] = $this->cantidad * $this->precioUnitario;
+        $this->attributes['subtotal'] = $value ?? (($this->cantidad ?? 0) * ($this->precioUnitario ?? 0));
     }
 }

@@ -170,6 +170,8 @@ class VentaController extends ApiController
                 DetalleVenta::create([
                     'idVenta' => $venta->idVenta,
                     'idVariante' => $item['idVariante'],
+                    'tipo' => 'producto',
+                    'descripcion' => $variante->producto->nombre . ' - ' . $variante->nombreVariante,
                     'cantidad' => $item['cantidad'],
                     'precioUnitario' => $variante->precio,
                     'subtotal' => $subtotal

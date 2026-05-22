@@ -92,6 +92,16 @@ class HistorialController extends ApiController
                     'estado' => $venta->estado,
                     'estado_color' => $this->getEstadoColor($venta->estado),
                     'items' => $venta->detalleVentas->map(function($detalle) {
+                        if ($detalle->tipo === 'servicio') {
+                            return [
+                                'producto' => $detalle->descripcion ?? 'Servicio',
+                                'variante' => 'Servicio',
+                                'cantidad' => $detalle->cantidad,
+                                'precio' => $detalle->precioUnitario,
+                                'subtotal' => $detalle->subtotal
+                            ];
+                        }
+
                         return [
                             'producto' => $detalle->variante->producto->nombre,
                             'variante' => $detalle->variante->nombreVariante,
@@ -198,8 +208,22 @@ class HistorialController extends ApiController
             'observaciones' => $ficha->observaciones,
             'recomendaciones' => $ficha->recomendaciones,
             'fotos' => [
-                'antes' => $ficha->fotos->where('tipo', 'antes')->values(),
-                'despues' => $ficha->fotos->where('tipo', 'despues')->values()
+                'antes' => $ficha->fotos->where('tipo', 'antes')->map(function($foto) {
+                    return [
+                        'id' => $foto->idFoto,
+                        'url' => $this->publicUrl($foto->urlFoto),
+                        'tipo' => $foto->tipo,
+                        'fecha' => $foto->fechaCarga->format('d/m/Y H:i')
+                    ];
+                })->values(),
+                'despues' => $ficha->fotos->where('tipo', 'despues')->map(function($foto) {
+                    return [
+                        'id' => $foto->idFoto,
+                        'url' => $this->publicUrl($foto->urlFoto),
+                        'tipo' => $foto->tipo,
+                        'fecha' => $foto->fechaCarga->format('d/m/Y H:i')
+                    ];
+                })->values()
             ]
         ], 'Detalle de servicio obtenido correctamente');
     }

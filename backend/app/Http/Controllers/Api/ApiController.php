@@ -52,4 +52,23 @@ class ApiController extends Controller
             ],
         ], 200);
     }
+
+    /**
+     * Convertir ruta relativa a URL pública absoluta
+     */
+    protected function publicUrl(?string $path): ?string
+    {
+        if (!$path) return null;
+
+        // Ya es URL absoluta
+        if (preg_match('/^https?:\/\//i', $path)) return $path;
+
+        // Quitar slashes iniciales y prefijo "storage/" duplicado si existe
+        $clean = ltrim($path, '/');
+        if (str_starts_with($clean, 'storage/')) {
+            $clean = substr($clean, strlen('storage/'));
+        }
+
+        return request()->getSchemeAndHttpHost() . '/storage/' . $clean;
+    }
 }

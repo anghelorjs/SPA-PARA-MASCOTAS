@@ -100,9 +100,18 @@ export interface CitaDetalle {
   duracion: number;
   estado: CitaEstado;
   precio: number;
+  pagado: boolean;
+  pago_metodo: 'efectivo' | 'qr' | 'transferencia' | null;
+  pago_fecha: string | null;
   observaciones: string | null;
   tiene_ficha: boolean;
   id_ficha: number | null;
+}
+
+export interface RegistrarPagoResponse {
+  cita: CitaDetalle;
+  venta_id: number;
+  factura_id: number;
 }
 
 export interface CrearCitaPendienteRequest {
@@ -224,7 +233,15 @@ export const recepcionistaAgendaService = {
    * Obtener detalle de una cita
    */
   async getDetalleCita(id: number): Promise<CitaDetalle> {
-    const response = await api.get<ApiResponse<CitaDetalle>>(`/recepcionista/citas/${id}/detalle`);
+    const response = await api.get<ApiResponse<CitaDetalle>>(`/recepcionista/agenda/citas/${id}`);
+    return response.data.data;
+  },
+
+  async registrarPago(id: number, medioPago: string): Promise<RegistrarPagoResponse> {
+    const response = await api.post<ApiResponse<RegistrarPagoResponse>>(
+      `/recepcionista/agenda/citas/${id}/pagar`,
+      { medio_pago: medioPago },
+    );
     return response.data.data;
   },
 

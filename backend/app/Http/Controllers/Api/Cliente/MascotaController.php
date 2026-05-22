@@ -28,7 +28,7 @@ class MascotaController extends ApiController
         $mascotas = $cliente->mascotas->map(function($mascota) {
             $rangoNombre = $mascota->rangoPeso ? $mascota->rangoPeso->nombre : 'No asignado';
             $fotoPerfil = $mascota->fotos->where('tipo', 'perfil')->first();
-            
+
             return [
                 'id' => $mascota->idMascota,
                 'nombre' => $mascota->nombre,
@@ -37,7 +37,7 @@ class MascotaController extends ApiController
                 'tamanio' => $mascota->tamanio,
                 'peso_kg' => $mascota->pesoKg,
                 'rango_nombre' => $rangoNombre,
-                'foto_perfil_url' => $fotoPerfil ? $fotoPerfil->urlFoto : null,
+                'foto_perfil_url' => $fotoPerfil ? $this->publicUrl($fotoPerfil->urlFoto) : null,
                 'fecha_nacimiento' => $mascota->fechaNacimiento ? $mascota->fechaNacimiento->format('Y-m-d') : null,
                 'temperamento' => $mascota->temperamento,
                 'alergias' => $mascota->alergias,
@@ -86,7 +86,7 @@ class MascotaController extends ApiController
                     'fotos' => $ficha->fotos->map(function($foto) {
                         return [
                             'id' => $foto->idFoto,
-                            'url' => $foto->urlFoto,
+                            'url' => $this->publicUrl($foto->urlFoto),
                             'tipo' => $foto->tipo,
                             'fecha' => $foto->fechaCarga->format('d/m/Y H:i')
                         ];
@@ -112,7 +112,7 @@ class MascotaController extends ApiController
                     'fotos' => $fotos->map(function($foto) {
                         return [
                             'id' => $foto->idFoto,
-                            'url' => $foto->urlFoto,
+                            'url' => $this->publicUrl($foto->urlFoto),
                             'tipo' => $foto->tipo
                         ];
                     })
@@ -316,7 +316,7 @@ class MascotaController extends ApiController
             
             return $this->successResponse([
                 'id' => $foto->idFoto,
-                'url' => $foto->urlFoto
+                'url' => $this->publicUrl($foto->urlFoto)
             ], 'Foto de perfil subida correctamente');
             
         } catch (\Exception $e) {
@@ -352,8 +352,20 @@ class MascotaController extends ApiController
             'servicio' => $ficha->cita->servicio->nombre,
             'mascota' => $ficha->cita->mascota->nombre,
             'fotos' => [
-                'antes' => $ficha->fotos->where('tipo', 'antes')->values(),
-                'despues' => $ficha->fotos->where('tipo', 'despues')->values()
+                'antes' => $ficha->fotos->where('tipo', 'antes')->map(function($foto) {
+                    return [
+                        'id' => $foto->idFoto,
+                        'url' => $this->publicUrl($foto->urlFoto),
+                        'tipo' => $foto->tipo
+                    ];
+                })->values(),
+                'despues' => $ficha->fotos->where('tipo', 'despues')->map(function($foto) {
+                    return [
+                        'id' => $foto->idFoto,
+                        'url' => $this->publicUrl($foto->urlFoto),
+                        'tipo' => $foto->tipo
+                    ];
+                })->values()
             ]
         ], 'Fotos de la sesión obtenidas correctamente');
     }

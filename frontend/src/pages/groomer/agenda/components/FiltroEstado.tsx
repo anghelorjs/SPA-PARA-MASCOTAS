@@ -1,9 +1,9 @@
 // src/pages/groomer/agenda/components/FiltroEstado.tsx
-import { FILTRO_ESTADO_OPTIONS, type FiltroEstado } from '../types';
+import { FILTRO_ESTADO_OPTIONS, type FiltroEstado as FiltroEstadoValue } from '../types';
 
 interface FiltroEstadoProps {
-  currentFilter: FiltroEstado;
-  onFilterChange: (filter: FiltroEstado) => void;
+  currentFilter: FiltroEstadoValue;
+  onFilterChange: (filter: FiltroEstadoValue) => void;
 }
 
 export const FiltroEstado = ({ currentFilter, onFilterChange }: FiltroEstadoProps) => {

@@ -36,7 +36,16 @@ class AgendaController extends ApiController
         // Filtro por estado
         if ($request->has('estado') && $request->estado !== 'todas') {
             $estados = explode(',', $request->estado);
-            $query->whereIn('estado', $estados);
+            if (in_array('completada', $estados, true)) {
+                $query->where(function($q) use ($estados) {
+                    $q->whereIn('estado', $estados)
+                      ->orWhereHas('fichaGrooming', function($fichaQuery) {
+                          $fichaQuery->whereNotNull('fechaCierre');
+                      });
+                });
+            } else {
+                $query->whereIn('estado', $estados);
+            }
         }
 
         $query->orderBy('fechaHoraInicio', 'asc');
@@ -49,7 +58,7 @@ class AgendaController extends ApiController
             $mascota = $cita->mascota;
 
             // Historial de fichas anteriores de esta mascota
-            $historialFichas = FichaGrooming::with(['cita.servicio'])
+            $historialFichas = FichaGrooming::with(['cita.servicio', 'fotos'])
                 ->where('idMascota', $mascota->idMascota)
                 ->whereNotNull('fechaCierre')
                 ->orderBy('fechaCierre', 'desc')
@@ -65,7 +74,7 @@ class AgendaController extends ApiController
                         'fotos' => $ficha->fotos->map(function($foto) {
                             return [
                                 'id' => $foto->idFoto,
-                                'url' => $foto->urlFoto,
+                                'url' => $this->publicUrl($foto->urlFoto),
                                 'tipo' => $foto->tipo
                             ];
                         })
@@ -81,6 +90,10 @@ class AgendaController extends ApiController
             ];
 
             $rangoNombre = $mascota->rangoPeso ? $mascota->rangoPeso->nombre : 'No asignado';
+            $estado = $cita->fichaGrooming && $cita->fichaGrooming->fechaCierre
+                ? 'completada'
+                : $cita->estado;
+            $estadoInfo = $estados[$estado] ?? ['texto' => ucfirst(str_replace('_', ' ', $estado)), 'color' => '#6b7280'];
 
             return [
                 'id' => $cita->idCita,
@@ -104,9 +117,9 @@ class AgendaController extends ApiController
                     'id' => $cita->servicio->idServicio,
                     'nombre' => $cita->servicio->nombre
                 ],
-                'estado' => $cita->estado,
-                'estado_texto' => $estados[$cita->estado]['texto'],
-                'estado_color' => $estados[$cita->estado]['color'],
+                'estado' => $estado,
+                'estado_texto' => $estadoInfo['texto'],
+                'estado_color' => $estadoInfo['color'],
                 'tiene_ficha' => $cita->fichaGrooming ? true : false,
                 'ficha_id' => $cita->fichaGrooming->idFicha ?? null,
                 'ficha_abierta' => $cita->fichaGrooming && !$cita->fichaGrooming->fechaCierre ? true : false
@@ -245,7 +258,7 @@ class AgendaController extends ApiController
                 'fotos' => $ficha->fotos->map(function($foto) {
                     return [
                         'id' => $foto->idFoto,
-                        'url' => $foto->urlFoto,
+                        'url' => $this->publicUrl($foto->urlFoto),
                         'tipo' => $foto->tipo
                     ];
                 })
@@ -267,5 +280,18 @@ class AgendaController extends ApiController
             ],
             'historial' => $historial
         ], 'Historial obtenido correctamente');
+    }
+
+    private function publicUrl(?string $path): ?string
+    {
+        if (!$path) {
+            return null;
+        }
+
+        if (preg_match('/^https?:\/\//i', $path)) {
+            return $path;
+        }
+
+        return request()->getSchemeAndHttpHost() . '/' . ltrim($path, '/');
     }
 }

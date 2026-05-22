@@ -209,7 +209,7 @@ export const useDetalleFicha = (fichaId: number | undefined) => {
   };
 
   const agregarInsumo = async (idInsumo: number, cantidadUsada: number) => {
-    if (!fichaId) return;
+    if (!fichaId) return false;
     try {
       setIsSaving(true);
       await groomerFichasService.agregarInsumo(fichaId, idInsumo, cantidadUsada);
@@ -257,7 +257,16 @@ export const useDetalleFicha = (fichaId: number | undefined) => {
     try {
       setIsSaving(true);
       const foto = await groomerFichasService.uploadFoto(fichaId, tipo, file);
-      await loadDetalle();
+      setFicha(prev => {
+        if (!prev) return prev;
+        return {
+          ...prev,
+          fotos: {
+            ...prev.fotos,
+            [tipo === 'antes' ? 'antes' : 'despues']: [...prev.fotos[tipo === 'antes' ? 'antes' : 'despues'], foto]
+          }
+        };
+      });
       showToast('Foto subida correctamente', 'success');
       return foto;
     } catch (error) {

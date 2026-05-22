@@ -165,7 +165,7 @@ class FichaController extends ApiController
             ->map(function($foto) {
                 return [
                     'id' => $foto->idFoto,
-                    'url' => $foto->urlFoto,
+                    'url' => $this->publicUrl($foto->urlFoto),
                     'tipo' => $foto->tipo,
                     'fecha' => $foto->fechaCarga->format('d/m/Y H:i'),
                     'servicio' => $foto->fichaGrooming->cita->servicio->nombre ?? 'Desconocido'
@@ -235,7 +235,7 @@ class FichaController extends ApiController
                 'antes' => $ficha->fotos->where('tipo', 'antes')->map(function($foto) {
                     return [
                         'id' => $foto->idFoto,
-                        'url' => $foto->urlFoto,
+                        'url' => $this->publicUrl($foto->urlFoto),
                         'tipo' => $foto->tipo,
                         'fecha' => $foto->fechaCarga->format('d/m/Y H:i')
                     ];
@@ -243,7 +243,7 @@ class FichaController extends ApiController
                 'despues' => $ficha->fotos->where('tipo', 'despues')->map(function($foto) {
                     return [
                         'id' => $foto->idFoto,
-                        'url' => $foto->urlFoto,
+                        'url' => $this->publicUrl($foto->urlFoto),
                         'tipo' => $foto->tipo,
                         'fecha' => $foto->fechaCarga->format('d/m/Y H:i')
                     ];
@@ -544,7 +544,7 @@ class FichaController extends ApiController
             
             return $this->successResponse([
                 'id' => $foto->idFoto,
-                'url' => $foto->urlFoto,
+                'url' => $this->publicUrl($foto->urlFoto),
                 'tipo' => $foto->tipo,
                 'fecha' => $foto->fechaCarga->format('d/m/Y H:i')
             ], 'Foto subida correctamente', 201);
@@ -685,5 +685,18 @@ class FichaController extends ApiController
         }
         
         return $ficha;
+    }
+
+    private function publicUrl(?string $path): ?string
+    {
+        if (!$path) {
+            return null;
+        }
+
+        if (preg_match('/^https?:\/\//i', $path)) {
+            return $path;
+        }
+
+        return request()->getSchemeAndHttpHost() . '/' . ltrim($path, '/');
     }
 }

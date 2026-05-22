@@ -1,5 +1,5 @@
 // src/pages/groomer/agenda/components/HistorialMascotaDrawer.tsx
-import { useState, useEffect, Fragment } from 'react';
+import { useState, useEffect } from 'react';
 import { createPortal } from 'react-dom';
 import { XMarkIcon, PhotoIcon, CalendarIcon, ScissorsIcon, ChatBubbleLeftIcon } from '@heroicons/react/24/outline';
 import { groomerAgendaService } from '../services/groomer.agenda.service';

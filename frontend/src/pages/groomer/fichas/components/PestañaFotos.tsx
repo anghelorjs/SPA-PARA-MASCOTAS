@@ -1,5 +1,5 @@
 // src/pages/groomer/fichas/components/PestañaFotos.tsx
-import { useRef, useState } from 'react';
+import { useRef, useState, useEffect } from 'react';
 import { CameraIcon, TrashIcon, XMarkIcon } from '@heroicons/react/24/outline';
 import type { FotoFicha, GaleriaHistorica } from '../types';
 
@@ -13,6 +13,12 @@ interface PestañaFotosProps {
   onDeleteFoto: (fotoId: number) => void;
 }
 
+interface PreviewFoto {
+  id: string;
+  tipo: 'antes' | 'despues';
+  url: string;
+}
+
 export const PestañaFotos = ({
   fotosAntes,
   fotosDespues,
@@ -24,9 +30,22 @@ export const PestañaFotos = ({
 }: PestañaFotosProps) => {
   const [uploadingTipo, setUploadingTipo] = useState<'antes' | 'despues' | null>(null);
   const [selectedFoto, setSelectedFoto] = useState<string | null>(null);
-  const [previewUrls, setPreviewUrls] = useState<{ tipo: 'antes' | 'despues'; url: string; file: File }[]>([]);
+  const [previews, setPreviews] = useState<PreviewFoto[]>([]);
+  const previewUrlsRef = useRef<Set<string>>(new Set());
   const fileInputRefAntes = useRef<HTMLInputElement>(null);
   const fileInputRefDespues = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    return () => {
+      previewUrlsRef.current.forEach((url) => URL.revokeObjectURL(url));
+      previewUrlsRef.current.clear();
+    };
+  }, []);
+
+  const revokePreviewUrl = (url: string) => {
+    URL.revokeObjectURL(url);
+    previewUrlsRef.current.delete(url);
+  };
 
   const handleFileSelect = async (tipo: 'antes' | 'despues', file: File) => {
     if (!file.type.startsWith('image/')) {
@@ -38,36 +57,45 @@ export const PestañaFotos = ({
       return;
     }
 
-    // Crear preview local
+    // Crear ID único para el preview
+    const previewId = `preview-${Date.now()}-${Math.random()}`;
     const previewUrl = URL.createObjectURL(file);
-    setPreviewUrls(prev => [...prev, { tipo, url: previewUrl, file }]);
+    previewUrlsRef.current.add(previewUrl);
+
+    // Agregar preview
+    setPreviews(prev => [...prev, {
+      id: previewId,
+      tipo,
+      url: previewUrl
+    }]);
 
     // Subir al servidor
     setUploadingTipo(tipo);
     try {
       await onUploadFoto(tipo, file);
+      setPreviews(prev => prev.filter(p => p.id !== previewId));
+      revokePreviewUrl(previewUrl);
     } catch (error) {
       console.error('Error al subir foto:', error);
+      // Si hay error, eliminar el preview y revocar URL
+      setPreviews(prev => prev.filter(p => p.id !== previewId));
+      revokePreviewUrl(previewUrl);
     } finally {
       setUploadingTipo(null);
-      // Limpiar preview después de un tiempo (opcional)
-      setTimeout(() => {
-        setPreviewUrls(prev => prev.filter(p => p.url !== previewUrl));
-        URL.revokeObjectURL(previewUrl);
-      }, 1000);
     }
   };
 
   // Función para obtener todas las fotos (incluyendo previews)
   const getFotosConPreview = (tipo: 'antes' | 'despues', fotos: FotoFicha[]) => {
-    const previews = previewUrls.filter(p => p.tipo === tipo).map(p => ({
-      id: `preview-${p.url}`,
+    const previewsDelTipo = previews.filter(p => p.tipo === tipo).map(p => ({
+      id: p.id,
       url: p.url,
       tipo: tipo,
       fecha: '',
-      isPreview: true
+      isPreview: true,
+      isUploading: uploadingTipo === tipo
     }));
-    return [...previews, ...fotos];
+    return [...previewsDelTipo, ...fotos];
   };
 
   const FotoGrid = ({ fotos, titulo, tipo }: { fotos: FotoFicha[]; titulo: string; tipo: 'antes' | 'despues' }) => {
@@ -140,7 +168,7 @@ export const PestañaFotos = ({
                   </button>
                 )}
                 {foto.isPreview && (
-                  <div className="absolute top-1 right-1 p-1 bg-yellow-500 text-white rounded-full animate-pulse">
+                  <div className={`absolute top-1 right-1 p-1 rounded-full ${foto.isUploading ? 'bg-yellow-500 animate-pulse' : 'bg-green-500'}`}>
                     <div className="h-3 w-3 rounded-full" />
                   </div>
                 )}

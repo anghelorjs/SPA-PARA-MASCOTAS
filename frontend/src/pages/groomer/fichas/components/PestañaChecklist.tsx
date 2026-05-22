@@ -1,6 +1,6 @@
 // src/pages/groomer/fichas/components/PestañaChecklist.tsx
 import { useState, useEffect } from 'react';
-import { CheckCircleIcon, XCircleIcon } from '@heroicons/react/24/outline';
+import { CheckCircleIcon } from '@heroicons/react/24/outline';
 import type { ChecklistItem } from '../types';
 
 interface PestañaChecklistProps {

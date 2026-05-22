@@ -4,6 +4,8 @@ import type {
   FichaHoy,
   FichaTodas,
   DetalleFichaResponse,
+  FotoFicha,
+  InsumoFicha,
   InsumoSearchResult,
   ChecklistPredefinido,
 } from '../types';
@@ -130,8 +132,8 @@ export const groomerFichasService = {
    * Actualizar observaciones
    */
   async updateObservaciones(fichaId: number, data: {
-    observaciones?: string;
-    recomendaciones?: string;
+    observaciones?: string | null;
+    recomendaciones?: string | null;
   }): Promise<{ observaciones: string | null; recomendaciones: string | null }> {
     const response = await api.put<ApiResponse<{ observaciones: string | null; recomendaciones: string | null }>>(
       `/groomer/fichas/${fichaId}/observaciones`,

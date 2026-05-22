@@ -27,7 +27,6 @@ export const MiAgendaGroomer = () => {
     cambiarFiltroEstado,
     cambiarPagina,
     iniciarServicio,
-    refresh,
   } = useAgendaGroomer();
 
   const [drawerOpen, setDrawerOpen] = useState(false);

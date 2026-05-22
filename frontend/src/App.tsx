@@ -56,9 +56,8 @@ import { PerfilRecepcionista } from "./pages/recepcionista/perfil/pages/PerfilRe
 // ========================
 const DashboardGroomer = () => <div className="p-6"><h1 className="text-2xl font-bold">Dashboard Groomer</h1><p className="mt-4 text-gray-600">Bienvenido al panel del groomer.</p></div>;
 import { MiAgendaGroomer } from "./pages/groomer/agenda/pages/MiAgendaGroomer";
-const FichasGroomerHoy = () => <div className="p-6"><h1 className="text-2xl font-bold">Fichas de Hoy</h1><p className="mt-4 text-gray-600">Fichas de grooming del día.</p></div>;
-const FichasGroomerTodas = () => <div className="p-6"><h1 className="text-2xl font-bold">Todas las Fichas</h1><p className="mt-4 text-gray-600">Historial de fichas de grooming.</p></div>;
-const FichaDetalleGroomer = () => <div className="p-6"><h1 className="text-2xl font-bold">Ficha de Grooming</h1><p className="mt-4 text-gray-600">Detalle de la ficha de grooming.</p></div>;
+import { FichasGroomer } from "./pages/groomer/fichas/pages/FichasGroomer";
+import { DetalleFichaGroomer } from "./pages/groomer/fichas/pages/DetalleFichaGroomer";
 import { PerfilGroomer } from "./pages/groomer/perfil/pages/PerfilGroomer";
 // ========================
 // CLIENTE
@@ -152,9 +151,8 @@ const AppRoutes = () => {
         {/* ===================================== */}
         <Route path="groomer/dashboard" element={<DashboardGroomer />} />
         <Route path="groomer/agenda" element={<MiAgendaGroomer />} />
-        <Route path="groomer/fichas/hoy" element={<FichasGroomerHoy />} />
-        <Route path="groomer/fichas/todas" element={<FichasGroomerTodas />} />
-        <Route path="groomer/fichas/:fichaId" element={<FichaDetalleGroomer />} />
+        <Route path="groomer/fichas" element={<FichasGroomer />} />        {/* ← SOLO ESTA RUTA */}
+        <Route path="groomer/fichas/:id" element={<DetalleFichaGroomer />} />  {/* ← Para detalle */}
         <Route path="groomer/perfil" element={<PerfilGroomer />} />
 
         {/* ===================================== */}

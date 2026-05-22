@@ -232,8 +232,22 @@ class FichaController extends ApiController
                 ];
             }),
             'fotos' => [
-                'antes' => $ficha->fotos->where('tipo', 'antes')->values(),
-                'despues' => $ficha->fotos->where('tipo', 'despues')->values()
+                'antes' => $ficha->fotos->where('tipo', 'antes')->map(function($foto) {
+                    return [
+                        'id' => $foto->idFoto,
+                        'url' => $foto->urlFoto,
+                        'tipo' => $foto->tipo,
+                        'fecha' => $foto->fechaCarga->format('d/m/Y H:i')
+                    ];
+                })->values(),
+                'despues' => $ficha->fotos->where('tipo', 'despues')->map(function($foto) {
+                    return [
+                        'id' => $foto->idFoto,
+                        'url' => $foto->urlFoto,
+                        'tipo' => $foto->tipo,
+                        'fecha' => $foto->fechaCarga->format('d/m/Y H:i')
+                    ];
+                })->values()
             ],
             'observaciones' => [
                 'observaciones' => $ficha->observaciones,

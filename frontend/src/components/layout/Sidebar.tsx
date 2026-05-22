@@ -256,14 +256,8 @@ const recepcionistaMenu: MenuItem[] = [
 const groomerMenu: MenuItem[] = [
   { id: "grm-dashboard", label: "Dashboard", icon: <FiHome />, to: "/groomer/dashboard" },
   { id: "grm-agenda", label: "Mi Agenda", icon: <FiCalendar />, to: "/groomer/agenda" },
-  {
-    id: "grm-fichas", label: "Fichas", icon: <FiFileText />,
-    children: [
-      { label: "Fichas de Hoy", to: "/groomer/fichas/hoy", icon: <FiClock size={13} /> },
-      { label: "Todas las Fichas", to: "/groomer/fichas/todas", icon: <FiFileText size={13} /> },
-    ]
-  },
-  { id: "grm-perfil", label: "Perfil", icon: <FiUser />, to: "/groomer/perfil" },  // ✅ AGREGADO
+  { id: "grm-fichas", label: "Fichas", icon: <FiFileText />, to: "/groomer/fichas" },  // ← SOLO UNA ENTRADA
+  { id: "grm-perfil", label: "Perfil", icon: <FiUser />, to: "/groomer/perfil" },
 ];
 
 const clienteMenu: MenuItem[] = [

@@ -163,7 +163,7 @@ class AgendaController extends ApiController
         }
         
         DB::beginTransaction();
-        
+
         try {
             // Crear ficha
             $ficha = FichaGrooming::create([
@@ -179,18 +179,37 @@ class AgendaController extends ApiController
                 'fechaApertura' => now(),
                 'fechaCierre' => null
             ]);
-            
+
+            // Crear items de checklist predefinidos
+            $checklistItems = [
+                'Baño',
+                'Corte',
+                'Uñas',
+                'Oídos',
+                'Glándulas',
+                'Perfume'
+            ];
+
+            foreach ($checklistItems as $nombre) {
+                \App\Models\ChecklistItem::create([
+                    'idFicha' => $ficha->idFicha,
+                    'nombreItem' => $nombre,
+                    'completado' => false,
+                    'observacion' => null
+                ]);
+            }
+
             // Actualizar estado de la cita
             $cita->estado = 'en_curso';
             $cita->save();
-            
+
             DB::commit();
-            
+
             return $this->successResponse([
                 'cita_id' => $cita->idCita,
                 'ficha_id' => $ficha->idFicha
             ], 'Servicio iniciado correctamente');
-            
+
         } catch (\Exception $e) {
             DB::rollBack();
             return $this->errorResponse('Error al iniciar servicio: ' . $e->getMessage(), 500);

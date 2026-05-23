@@ -47,7 +47,8 @@ const DashboardRecepcionista = () => <div className="p-6"><h1 className="text-2x
 import { AgendaRecepcionista } from "./pages/recepcionista/agenda/pages/AgendaRecepcionista";
 const ClientesRecepcionista = () => <div className="p-6"><h1 className="text-2xl font-bold">Clientes</h1><p className="mt-4 text-gray-600">Gestión de clientes.</p></div>;
 const MascotasRecepcionista = () => <div className="p-6"><h1 className="text-2xl font-bold">Mascotas</h1><p className="mt-4 text-gray-600">Gestión de mascotas.</p></div>;
-const VentasRecepcionista = () => <div className="p-6"><h1 className="text-2xl font-bold">Ventas</h1><p className="mt-4 text-gray-600">Registro de ventas.</p></div>;
+// ✅ AGREGA ESTE IMPORT:
+import { VentasRecepcionista } from "./pages/recepcionista/ventas/pages/VentasRecepcionista";
 const NotificacionesRecepcionista = () => <div className="p-6"><h1 className="text-2xl font-bold">Notificaciones</h1><p className="mt-4 text-gray-600">Envío de notificaciones a clientes.</p></div>;
 import { PerfilRecepcionista } from "./pages/recepcionista/perfil/pages/PerfilRecepcionista";
 

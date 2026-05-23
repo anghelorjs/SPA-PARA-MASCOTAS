@@ -78,9 +78,13 @@ export const recepcionistaVentasService = {
   /**
    * Buscar productos para agregar a la venta
    */
-  async buscarProductos(search: string): Promise<ProductoVenta[]> {
+  async buscarProductos(search?: string, categoriaId?: number | null): Promise<ProductoVenta[]> {
+    const params: Record<string, string | number> = {};
+    if (search) params.search = search;
+    if (categoriaId) params.categoria_id = categoriaId;
+
     const response = await api.get<ApiResponse<ProductoApiResponse[]>>('/recepcionista/productos/buscar', {
-      params: { search }
+      params: Object.keys(params).length > 0 ? params : undefined
     });
 
     return response.data.data.map((producto) => ({

@@ -75,18 +75,29 @@ class VentaController extends ApiController
     public function buscarProductos(Request $request)
     {
         $request->validate([
-            'search' => 'required|string|min:2',
+            'search' => 'nullable|string|min:2',
+            'categoria_id' => 'nullable|integer|exists:categorias,idCategoria',
         ]);
 
-        $productos = Producto::with(['categoria', 'variantes'])
-            ->where('activo', true)
-            ->where(function ($q) use ($request) {
+        $productosQuery = Producto::with(['categoria', 'variantes'])
+            ->where('activo', true);
+
+        if ($request->filled('categoria_id')) {
+            $productosQuery->where('idCategoria', $request->categoria_id);
+        }
+
+        if ($request->filled('search')) {
+            $productosQuery->where(function ($q) use ($request) {
                 $q->where('nombre', 'like', "%{$request->search}%")
                     ->orWhereHas('categoria', function ($q2) use ($request) {
                         $q2->where('nombre', 'like', "%{$request->search}%");
                     });
-            })
-            ->limit(20)
+            });
+        }
+
+        $productos = $productosQuery
+            ->orderBy('nombre')
+            ->limit(100)
             ->get()
             ->map(function ($producto) {
                 return [

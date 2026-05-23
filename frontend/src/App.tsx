@@ -25,7 +25,7 @@ import DashboardLayout from "./components/layout/Layout";
 import { DashboardAdmin } from "./pages/admin/dashboard/pages/DashboardAdmin";
 
 // Componentes placeholder para las demás pantallas del administrador
-const AgendaAdmin = () => <div className="p-6"><h1 className="text-2xl font-bold">Agenda del Administrador</h1><p className="mt-4 text-gray-600">Panel de gestión de citas y horarios.</p></div>;
+import { AgendaAdmin } from "./pages/admin/agenda/pages/AgendaAdmin";
 const GroomingAdmin = () => <div className="p-6"><h1 className="text-2xl font-bold">Grooming</h1><p className="mt-4 text-gray-600">Gestión de fichas de grooming y galería de fotos.</p></div>;
 const ClientesAdmin = () => <div className="p-6"><h1 className="text-2xl font-bold">Clientes</h1><p className="mt-4 text-gray-600">Gestión de clientes y sus mascotas.</p></div>;
 const MascotasAdmin = () => <div className="p-6"><h1 className="text-2xl font-bold">Mascotas</h1><p className="mt-4 text-gray-600">Gestión de mascotas del sistema.</p></div>;

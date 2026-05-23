@@ -15,6 +15,17 @@ interface MascotaCreadaResponse {
 interface NuevaMascotaModalProps {
   isOpen: boolean; onClose: () => void;
   clienteId: number; onMascotaCreada: (mascota: MascotaData) => void;
+  createMascota?: (data: {
+    idCliente: number;
+    nombre: string;
+    especie: string;
+    raza?: string;
+    pesoKg: number;
+    fechaNacimiento?: string;
+    temperamento?: string;
+    alergias?: string[];
+    vacunas?: string[];
+  }) => Promise<MascotaCreadaResponse>;
 }
 
 const getErrorMessage = (error: unknown, fallback: string): string => {
@@ -31,7 +42,7 @@ const initialForm = {
   fechaNacimiento: '', temperamento: '', alergias: '', vacunas: '',
 };
 
-export const NuevaMascotaModal = ({ isOpen, onClose, clienteId, onMascotaCreada }: NuevaMascotaModalProps) => {
+export const NuevaMascotaModal = ({ isOpen, onClose, clienteId, onMascotaCreada, createMascota }: NuevaMascotaModalProps) => {
   const [formData, setFormData] = useState(initialForm);
   const [isLoading, setIsLoading] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
@@ -60,7 +71,7 @@ export const NuevaMascotaModal = ({ isOpen, onClose, clienteId, onMascotaCreada 
     if (!validate()) return;
     setIsLoading(true);
     try {
-      const response = await recepcionistaClienteService.createMascota({
+      const response = await (createMascota ?? recepcionistaClienteService.createMascota)({
         idCliente: clienteId,
         nombre: formData.nombre, especie: formData.especie,
         raza: formData.raza || undefined,

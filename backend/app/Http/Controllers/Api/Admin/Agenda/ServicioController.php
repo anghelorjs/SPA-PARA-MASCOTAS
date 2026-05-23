@@ -15,10 +15,30 @@ class ServicioController extends ApiController
      */
     public function index(Request $request)
     {
-        $servicios = Servicio::with('rangosPeso')->get();
-        
+        $servicios = Servicio::with(['rangosPeso' => function($q) {
+            $q->withPivot('duracionAjustadaMin', 'precioAjustado');
+        }])->get()->map(function($servicio) {
+            return [
+                'idServicio' => $servicio->idServicio,
+                'nombre' => $servicio->nombre,
+                'duracionMinutos' => $servicio->duracionMinutos,
+                'precioBase' => $servicio->precioBase,
+                'admiteDobleBooking' => (bool) $servicio->admiteDobleBooking,
+                'rangosPeso' => $servicio->rangosPeso->map(function($rango) {
+                    return [
+                        'idRango' => $rango->idRango,
+                        'nombre' => $rango->nombre,
+                        'pesoMinKg' => $rango->pesoMinKg,
+                        'pesoMaxKg' => $rango->pesoMaxKg,
+                        'duracionAjustadaMin' => $rango->pivot->duracionAjustadaMin,
+                        'precioAjustado' => $rango->pivot->precioAjustado,
+                    ];
+                }),
+            ];
+        });
+
         $rangos = RangoPeso::all();
-        
+
         return $this->successResponse([
             'servicios' => $servicios,
             'rangos' => $rangos

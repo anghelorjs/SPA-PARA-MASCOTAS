@@ -105,10 +105,14 @@ Route::middleware('auth:sanctum')->group(function () {
         // Calendario de Citas
         Route::get('agenda/citas', [CalendarioController::class, 'citas']);
         Route::get('agenda/citas/{id}', [CalendarioController::class, 'detalleCita']);
+        Route::post('agenda/citas', [CalendarioController::class, 'crearCita']);
         Route::post('agenda/citas/{id}/confirmar', [CalendarioController::class, 'confirmar']);
         Route::post('agenda/citas/{id}/cancelar', [CalendarioController::class, 'cancelar']);
         Route::put('agenda/citas/{id}/reprogramar', [CalendarioController::class, 'reprogramar']);
         Route::post('agenda/slots-disponibles', [CalendarioController::class, 'slotsDisponibles']);
+        Route::get('buscar-clientes', [CalendarioController::class, 'buscarClientes']);
+        Route::get('clientes/{id}/mascotas', [CalendarioController::class, 'mascotasPorCliente']);
+        Route::post('servicios-con-precios', [CalendarioController::class, 'serviciosConPrecios']);
         
         // Disponibilidad de Groomers
         Route::get('agenda/disponibilidad', [DisponibilidadController::class, 'index']);

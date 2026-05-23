@@ -19,6 +19,14 @@ interface NuevoClienteModalProps {
   isOpen: boolean;
   onClose: () => void;
   onClienteCreado: (cliente: ClienteSearchResult) => void;
+  createCliente?: (data: {
+    nombre: string;
+    apellido: string;
+    email: string;
+    telefono?: string;
+    direccion?: string;
+    canalContacto?: CanalContacto;
+  }) => Promise<ClienteCreadoResponse>;
 }
 
 const getErrorMessage = (error: unknown, fallback: string): string => {
@@ -35,7 +43,7 @@ const initialForm = {
   direccion: '', canalContacto: 'whatsapp' as CanalContacto,
 };
 
-export const NuevoClienteModal = ({ isOpen, onClose, onClienteCreado }: NuevoClienteModalProps) => {
+export const NuevoClienteModal = ({ isOpen, onClose, onClienteCreado, createCliente }: NuevoClienteModalProps) => {
   const [formData, setFormData] = useState(initialForm);
   const [isLoading, setIsLoading] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
@@ -63,7 +71,7 @@ export const NuevoClienteModal = ({ isOpen, onClose, onClienteCreado }: NuevoCli
     if (!validate()) return;
     setIsLoading(true);
     try {
-      const response = await recepcionistaClienteService.createCliente({
+      const response = await (createCliente ?? recepcionistaClienteService.createCliente)({
         nombre: formData.nombre,
         apellido: formData.apellido,
         email: formData.email,

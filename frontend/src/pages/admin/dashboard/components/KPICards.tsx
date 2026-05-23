@@ -1,4 +1,16 @@
+// src/pages/admin/dashboard/components/KPICards.tsx
 import { CalendarIcon, CurrencyDollarIcon, UserGroupIcon, HeartIcon } from '@heroicons/react/24/outline';
+
+// ✅ Función helper para convertir a número
+const toNumber = (value: any): number => {
+  if (value === null || value === undefined) return 0;
+  if (typeof value === 'number') return value;
+  if (typeof value === 'string') {
+    const parsed = parseFloat(value);
+    return isNaN(parsed) ? 0 : parsed;
+  }
+  return 0;
+};
 
 interface KPICardsProps {
   kpi: {
@@ -10,10 +22,16 @@ interface KPICardsProps {
 }
 
 export const KPICards = ({ kpi }: KPICardsProps) => {
+  // ✅ Convertir valores a números
+  const totalCitas = toNumber(kpi.total_citas_hoy);
+  const ingresosHoy = toNumber(kpi.ingresos_hoy);
+  const groomersActivos = toNumber(kpi.groomers_activos);
+  const mascotasAtendidas = toNumber(kpi.mascotas_atendidas);
+
   const cards = [
     {
       title: 'Citas Hoy',
-      value: kpi.total_citas_hoy,
+      value: totalCitas,
       icon: CalendarIcon,
       color: 'from-blue-500 to-blue-600',
       bgColor: 'bg-blue-50',
@@ -21,7 +39,7 @@ export const KPICards = ({ kpi }: KPICardsProps) => {
     },
     {
       title: 'Ingresos Hoy',
-      value: `Bs ${kpi.ingresos_hoy.toFixed(2)}`,
+      value: `Bs ${ingresosHoy.toFixed(2)}`,
       icon: CurrencyDollarIcon,
       color: 'from-green-500 to-green-600',
       bgColor: 'bg-green-50',
@@ -29,7 +47,7 @@ export const KPICards = ({ kpi }: KPICardsProps) => {
     },
     {
       title: 'Groomers Activos',
-      value: kpi.groomers_activos,
+      value: groomersActivos,
       icon: UserGroupIcon,
       color: 'from-purple-500 to-purple-600',
       bgColor: 'bg-purple-50',
@@ -37,7 +55,7 @@ export const KPICards = ({ kpi }: KPICardsProps) => {
     },
     {
       title: 'Mascotas Atendidas',
-      value: kpi.mascotas_atendidas,
+      value: mascotasAtendidas,
       icon: HeartIcon,
       color: 'from-pink-500 to-pink-600',
       bgColor: 'bg-pink-50',

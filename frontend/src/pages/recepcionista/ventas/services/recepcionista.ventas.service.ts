@@ -40,15 +40,21 @@ interface VentasListResponse {
     total: number;
   };
   total_dia: number;
+  resumen?: {
+    general: number;
+    productos: number;
+    servicios: number;
+  };
 }
 
 export const recepcionistaVentasService = {
   /**
    * Obtener ventas del día
    */
-  async getVentas(fecha: string, estado?: string, page: number = 1): Promise<VentasListResponse> {
+  async getVentas(fecha: string, estado?: string, tipo: string = 'todas', page: number = 1): Promise<VentasListResponse> {
     const params: Record<string, ParamValue> = { fecha, page, per_page: 15 };
     if (estado && estado !== 'todas') params.estado = estado;
+    if (tipo && tipo !== 'todas') params.tipo = tipo;
     const response = await api.get<ApiResponse<VentasListResponse>>('/recepcionista/ventas', { params });
     return response.data.data;
   },

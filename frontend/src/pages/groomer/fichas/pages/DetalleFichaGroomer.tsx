@@ -54,7 +54,7 @@ export const DetalleFichaGroomer = () => {
   };
 
   const handleVolver = () => {
-    navigate('/groomer/fichas/hoy');
+    navigate('/groomer/fichas');
   };
 
   if (isLoading) {

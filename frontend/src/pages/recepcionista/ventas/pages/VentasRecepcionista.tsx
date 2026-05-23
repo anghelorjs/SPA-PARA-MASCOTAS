@@ -17,13 +17,15 @@ export const VentasRecepcionista = () => {
     ventas,
     fecha,
     filtroEstado,
-    totalDia,
+    filtroTipo,
+    resumen,
     isLoading,
     currentPage,
     lastPage,
     total,
     cambiarFecha,
     cambiarFiltroEstado,
+    cambiarFiltroTipo,
     cambiarPagina,
     refresh,
   } = useVentasRecepcion();
@@ -55,6 +57,7 @@ export const VentasRecepcionista = () => {
 
   const handleLimpiarFiltros = () => {
     cambiarFiltroEstado('todas');
+    cambiarFiltroTipo('todas');
   };
 
   const handleCrearVenta = async () => {
@@ -100,9 +103,11 @@ export const VentasRecepcionista = () => {
       <FiltroVentas
         fecha={fecha}
         filtroEstado={filtroEstado}
-        totalDia={totalDia}
+        filtroTipo={filtroTipo}
+        resumen={resumen}
         onFechaChange={cambiarFecha}
         onFiltroEstadoChange={cambiarFiltroEstado}
+        onFiltroTipoChange={cambiarFiltroTipo}
         onLimpiarFiltros={handleLimpiarFiltros}
       />
 

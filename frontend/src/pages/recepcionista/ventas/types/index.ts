@@ -4,7 +4,7 @@ import type { Venta, MedioPago, ItemCarrito, ProductoVenta, CategoriaVenta, Clie
 export type { Venta, MedioPago, ItemCarrito, ProductoVenta, CategoriaVenta, ClienteVenta };
 
 export type FiltroEstadoVenta = 'todas' | 'pagado' | 'cancelado';
-export type FiltroTipoVenta = 'todas' | 'producto' | 'servicio';
+export type FiltroTipoVenta = 'todas' | 'producto' | 'servicio' | 'mixta';
 
 export interface FiltroVentas {
   fecha: string;

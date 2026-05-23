@@ -22,7 +22,9 @@ export const useVentasRecepcion = () => {
   const [ventas, setVentas] = useState<Venta[]>([]);
   const [fecha, setFecha] = useState(toDateInputValue(new Date()));
   const [filtroEstado, setFiltroEstado] = useState<string>('todas');
+  const [filtroTipo, setFiltroTipo] = useState<string>('todas');
   const [totalDia, setTotalDia] = useState(0);
+  const [resumen, setResumen] = useState({ general: 0, productos: 0, servicios: 0 });
   const [isLoading, setIsLoading] = useState(true);
   const [currentPage, setCurrentPage] = useState(1);
   const [lastPage, setLastPage] = useState(1);
@@ -33,9 +35,10 @@ export const useVentasRecepcion = () => {
   const loadVentas = useCallback(async () => {
     try {
       setIsLoading(true);
-      const response = await recepcionistaVentasService.getVentas(fecha, filtroEstado, currentPage);
+      const response = await recepcionistaVentasService.getVentas(fecha, filtroEstado, filtroTipo, currentPage);
       setVentas(response.ventas.data);
       setTotalDia(response.total_dia);
+      setResumen(response.resumen ?? { general: response.total_dia, productos: 0, servicios: 0 });
       setLastPage(response.ventas.last_page);
       setTotal(response.ventas.total);
     } catch (error) {
@@ -44,7 +47,7 @@ export const useVentasRecepcion = () => {
     } finally {
       setIsLoading(false);
     }
-  }, [fecha, filtroEstado, currentPage, showToast]);
+  }, [fecha, filtroEstado, filtroTipo, currentPage, showToast]);
 
   const cambiarFecha = useCallback((nuevaFecha: string) => {
     setFecha(nuevaFecha);
@@ -53,6 +56,11 @@ export const useVentasRecepcion = () => {
 
   const cambiarFiltroEstado = useCallback((nuevoFiltro: string) => {
     setFiltroEstado(nuevoFiltro);
+    setCurrentPage(1);
+  }, []);
+
+  const cambiarFiltroTipo = useCallback((nuevoFiltro: string) => {
+    setFiltroTipo(nuevoFiltro);
     setCurrentPage(1);
   }, []);
 
@@ -81,13 +89,16 @@ export const useVentasRecepcion = () => {
     ventas,
     fecha,
     filtroEstado,
+    filtroTipo,
     totalDia,
+    resumen,
     isLoading,
     currentPage,
     lastPage,
     total,
     cambiarFecha,
     cambiarFiltroEstado,
+    cambiarFiltroTipo,
     cambiarPagina,
     refresh: loadVentas,
   };

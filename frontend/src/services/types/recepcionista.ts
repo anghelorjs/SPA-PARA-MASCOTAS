@@ -76,7 +76,7 @@ export interface ItemCarrito {
 
 export interface DetalleVenta {
   idDetalleVenta: number;
-  idVariante: number;
+  idVariante: number | null;
   tipo: 'producto' | 'servicio';  // ← Asegurar que existe
   descripcion: string;
   cantidad: number;
@@ -103,6 +103,7 @@ export interface FacturaVenta {
     idPago: number;
     monto: number;
     metodo: string;
+    fechaPago?: string | null;
     referencia: string | null;
   }>;
 }
@@ -115,6 +116,7 @@ export interface Venta {
   total: number;
   medioPago: MedioPago;
   estado: EstadoVenta;
+  tipo_venta?: 'producto' | 'servicio' | 'mixta' | 'sin_items';
   created_at: string;
   updated_at: string;
   cliente?: {
@@ -154,6 +156,11 @@ export interface VentaResponse {
     total: number;
   };
   total_dia: number;
+  resumen?: {
+    general: number;
+    productos: number;
+    servicios: number;
+  };
 }
 
 export interface CreateVentaData {

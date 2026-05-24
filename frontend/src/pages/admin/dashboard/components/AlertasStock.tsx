@@ -1,73 +1,77 @@
-import { ExclamationTriangleIcon, XCircleIcon } from '@heroicons/react/24/outline';
+// src/pages/admin/dashboard/components/AlertasStock.tsx
+import { 
+  ExclamationTriangleIcon, 
+  CubeIcon, 
+  BeakerIcon,
+  ArrowRightIcon 
+} from '@heroicons/react/24/outline';
+import type { AlertaStock } from '../../../../services/types/admin';
 
 interface AlertasStockProps {
-  data: Array<{
-    idProducto?: number;
-    idInsumo?: number;
-    nombre: string;
-    stock_total?: number;
-    stock_actual?: number;
-    tipo: string;
-  }>;
+  alertas: AlertaStock[];
+  isLoading: boolean;
+  onVerProducto?: (idProducto: number) => void;
+  onVerInsumo?: (idInsumo: number) => void;
 }
 
-export const AlertasStock = ({ data }: AlertasStockProps) => {
-  if (data.length === 0) {
+export const AlertasStock = ({ 
+  alertas, 
+  isLoading, 
+  onVerProducto, 
+  onVerInsumo 
+}: AlertasStockProps) => {
+  if (isLoading) {
+    return (
+      <div className="flex justify-center py-4">
+        <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-red-500" />
+      </div>
+    );
+  }
+
+  if (alertas.length === 0) {
     return null;
   }
 
-  // Calcular el nivel de alerta
-  const getAlertLevel = (stock: number) => {
-    if (stock <= 0) return { text: 'Sin stock', color: 'bg-red-100 text-red-800 border-red-200' };
-    if (stock <= 5) return { text: 'Stock crítico', color: 'bg-orange-100 text-orange-800 border-orange-200' };
-    return { text: 'Stock bajo', color: 'bg-yellow-100 text-yellow-800 border-yellow-200' };
+  const handleVer = (alerta: AlertaStock) => {
+    if (alerta.tipo === 'producto' && alerta.idProducto && onVerProducto) {
+      onVerProducto(alerta.idProducto);
+    } else if (alerta.tipo === 'insumo' && alerta.idInsumo && onVerInsumo) {
+      onVerInsumo(alerta.idInsumo);
+    }
   };
 
   return (
-    <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
-      <div className="px-6 py-4 border-b border-gray-100 bg-gradient-to-r from-red-50 to-orange-50">
-        <div className="flex items-center gap-2">
-          <div className="p-1 bg-red-100 rounded-lg">
-            <ExclamationTriangleIcon className="w-5 h-5 text-red-600" />
-          </div>
-          <h3 className="text-base font-semibold text-gray-900">Alertas de Stock Bajo</h3>
-          <span className="ml-auto text-xs font-medium text-gray-500 bg-white px-2 py-1 rounded-full">
-            {data.length} alerta{data.length !== 1 ? 's' : ''}
-          </span>
-        </div>
+    <div className="bg-red-50 border border-red-200 rounded-xl overflow-hidden">
+      <div className="flex items-center gap-2 px-4 py-3 bg-red-100 border-b border-red-200">
+        <ExclamationTriangleIcon className="h-5 w-5 text-red-600" />
+        <h3 className="text-sm font-semibold text-red-800">Alertas de Stock Bajo</h3>
       </div>
-      
-      <div className="divide-y divide-gray-100">
-        {data.map((item, index) => {
-          const stock = item.tipo === 'producto' ? item.stock_total : item.stock_actual;
-          const alertLevel = getAlertLevel(stock || 0);
-          
-          return (
-            <div key={index} className="px-6 py-4 hover:bg-gray-50 transition-colors">
-              <div className="flex items-start justify-between">
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-center gap-2 mb-1">
-                    <span className={`text-xs font-medium px-2 py-0.5 rounded-full ${alertLevel.color}`}>
-                      {alertLevel.text}
-                    </span>
-                    <span className="text-xs text-gray-400 uppercase">
-                      {item.tipo === 'producto' ? 'Producto' : 'Insumo'}
-                    </span>
-                  </div>
-                  <p className="text-sm font-medium text-gray-900 truncate">
-                    {item.nombre}
-                  </p>
-                </div>
-                <div className="ml-4 text-right">
-                  <p className="text-lg font-bold text-red-600">
-                    {stock || 0}
-                  </p>
-                  <p className="text-xs text-gray-400">unidades</p>
-                </div>
+      <div className="divide-y divide-red-100">
+        {alertas.map((alerta, index) => (
+          <div key={index} className="flex items-center justify-between px-4 py-3 hover:bg-red-100/50 transition-colors">
+            <div className="flex items-center gap-3">
+              {alerta.tipo === 'producto' ? (
+                <CubeIcon className="h-4 w-4 text-red-500" />
+              ) : (
+                <BeakerIcon className="h-4 w-4 text-red-500" />
+              )}
+              <div>
+                <p className="text-sm font-medium text-gray-800">{alerta.nombre}</p>
+                <p className="text-xs text-red-600">
+                  Stock: {alerta.tipo === 'producto' ? alerta.stock_total : alerta.stock_actual} / 
+                  Mínimo: {alerta.stock_minimo}
+                </p>
               </div>
             </div>
-          );
-        })}
+            <button
+              onClick={() => handleVer(alerta)}
+              className="flex items-center gap-1 px-3 py-1 text-xs font-medium text-red-700 bg-red-100 rounded-lg hover:bg-red-200 transition-colors"
+            >
+              Ver
+              <ArrowRightIcon className="h-3 w-3" />
+            </button>
+          </div>
+        ))}
       </div>
     </div>
   );

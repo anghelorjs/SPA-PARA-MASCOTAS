@@ -1,7 +1,16 @@
-// src/pages/admin/dashboard/components/KPICards.tsx
-import { CalendarIcon, CurrencyDollarIcon, UserGroupIcon, HeartIcon } from '@heroicons/react/24/outline';
+// src/pages/admin/dashboard/components/KPICardsAdmin.tsx
+import { 
+  CalendarIcon, 
+  CurrencyDollarIcon, 
+  UserGroupIcon, 
+  HeartIcon 
+} from '@heroicons/react/24/outline';
+import type { DashboardKPIAdmin } from '../../../../services/types/admin';
 
-// ✅ Función helper para convertir a número
+interface KPICardsAdminProps {
+  kpi: DashboardKPIAdmin;
+}
+
 const toNumber = (value: any): number => {
   if (value === null || value === undefined) return 0;
   if (typeof value === 'number') return value;
@@ -12,36 +21,24 @@ const toNumber = (value: any): number => {
   return 0;
 };
 
-interface KPICardsProps {
-  kpi: {
-    total_citas_hoy: number;
-    ingresos_hoy: number;
-    groomers_activos: number;
-    mascotas_atendidas: number;
-  };
-}
-
-export const KPICards = ({ kpi }: KPICardsProps) => {
-  // ✅ Convertir valores a números
+export const KPICardsAdmin = ({ kpi }: KPICardsAdminProps) => {
   const totalCitas = toNumber(kpi.total_citas_hoy);
-  const ingresosHoy = toNumber(kpi.ingresos_hoy);
+  const ingresos = toNumber(kpi.ingresos_hoy);
   const groomersActivos = toNumber(kpi.groomers_activos);
   const mascotasAtendidas = toNumber(kpi.mascotas_atendidas);
 
   const cards = [
     {
-      title: 'Citas Hoy',
+      title: 'Total Citas Hoy',
       value: totalCitas,
       icon: CalendarIcon,
-      color: 'from-blue-500 to-blue-600',
       bgColor: 'bg-blue-50',
       iconColor: 'text-blue-600',
     },
     {
       title: 'Ingresos Hoy',
-      value: `Bs ${ingresosHoy.toFixed(2)}`,
+      value: `Bs ${ingresos.toFixed(2)}`,
       icon: CurrencyDollarIcon,
-      color: 'from-green-500 to-green-600',
       bgColor: 'bg-green-50',
       iconColor: 'text-green-600',
     },
@@ -49,7 +46,6 @@ export const KPICards = ({ kpi }: KPICardsProps) => {
       title: 'Groomers Activos',
       value: groomersActivos,
       icon: UserGroupIcon,
-      color: 'from-purple-500 to-purple-600',
       bgColor: 'bg-purple-50',
       iconColor: 'text-purple-600',
     },
@@ -57,14 +53,13 @@ export const KPICards = ({ kpi }: KPICardsProps) => {
       title: 'Mascotas Atendidas',
       value: mascotasAtendidas,
       icon: HeartIcon,
-      color: 'from-pink-500 to-pink-600',
       bgColor: 'bg-pink-50',
       iconColor: 'text-pink-600',
     },
   ];
 
   return (
-    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
       {cards.map((card, index) => (
         <div
           key={index}

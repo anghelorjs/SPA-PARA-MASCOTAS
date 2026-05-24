@@ -1,5 +1,6 @@
 // src/pages/groomer/fichas/components/PestañaEstadoIngreso.tsx
 import { useState, useEffect } from 'react';
+import { LinkIcon, BugAntIcon, ExclamationCircleIcon } from '@heroicons/react/24/outline';
 
 interface PestañaEstadoIngresoProps {
   estadoIngreso: string | null;
@@ -38,26 +39,41 @@ export const PestañaEstadoIngreso = ({
   }, [initialEstadoIngreso, initialNudos, initialTienePulgas, initialTieneHeridas]);
 
   const handleSubmit = () => {
-    onSave({
-      estadoIngreso,
-      nudos,
-      tienePulgas,
-      tieneHeridas,
-    });
+    onSave({ estadoIngreso, nudos, tienePulgas, tieneHeridas });
   };
 
-  const hasChanges = () => {
-    return (
-      estadoIngreso !== (initialEstadoIngreso || '') ||
-      nudos !== initialNudos ||
-      tienePulgas !== initialTienePulgas ||
-      tieneHeridas !== initialTieneHeridas
-    );
-  };
+  const hasChanges = () =>
+    estadoIngreso !== (initialEstadoIngreso || '') ||
+    nudos !== initialNudos ||
+    tienePulgas !== initialTienePulgas ||
+    tieneHeridas !== initialTieneHeridas;
+
+  const condiciones = [
+    {
+      key: 'nudos',
+      label: 'Nudos en el pelo',
+      value: nudos,
+      setter: setNudos,
+      Icon: LinkIcon,
+    },
+    {
+      key: 'pulgas',
+      label: 'Tiene pulgas',
+      value: tienePulgas,
+      setter: setTienePulgas,
+      Icon: BugAntIcon,
+    },
+    {
+      key: 'heridas',
+      label: 'Tiene heridas o lesiones',
+      value: tieneHeridas,
+      setter: setTieneHeridas,
+      Icon: ExclamationCircleIcon,
+    },
+  ] as const;
 
   return (
     <div className="space-y-6">
-      {/* Estado de ingreso - campo de texto */}
       <div>
         <label className="block text-sm font-medium text-gray-700 mb-1">
           Estado de ingreso
@@ -75,45 +91,23 @@ export const PestañaEstadoIngreso = ({
         </p>
       </div>
 
-      {/* Checkboxes */}
       <div className="space-y-3">
         <h4 className="text-sm font-medium text-gray-700">Condiciones detectadas</h4>
-        
-        <label className="flex items-center gap-3 cursor-pointer">
-          <input
-            type="checkbox"
-            checked={nudos}
-            onChange={(e) => setNudos(e.target.checked)}
-            disabled={!isOpen}
-            className="w-4 h-4 text-blue-600 rounded focus:ring-blue-500"
-          />
-          <span className="text-sm text-gray-700">🔗 Nudos en el pelo</span>
-        </label>
-
-        <label className="flex items-center gap-3 cursor-pointer">
-          <input
-            type="checkbox"
-            checked={tienePulgas}
-            onChange={(e) => setTienePulgas(e.target.checked)}
-            disabled={!isOpen}
-            className="w-4 h-4 text-blue-600 rounded focus:ring-blue-500"
-          />
-          <span className="text-sm text-gray-700">🦟 Tiene pulgas</span>
-        </label>
-
-        <label className="flex items-center gap-3 cursor-pointer">
-          <input
-            type="checkbox"
-            checked={tieneHeridas}
-            onChange={(e) => setTieneHeridas(e.target.checked)}
-            disabled={!isOpen}
-            className="w-4 h-4 text-blue-600 rounded focus:ring-blue-500"
-          />
-          <span className="text-sm text-gray-700">🩹 Tiene heridas o lesiones</span>
-        </label>
+        {condiciones.map(({ key, label, value, setter, Icon }) => (
+          <label key={key} className="flex items-center gap-3 cursor-pointer">
+            <input
+              type="checkbox"
+              checked={value}
+              onChange={(e) => setter(e.target.checked)}
+              disabled={!isOpen}
+              className="w-4 h-4 text-blue-600 rounded focus:ring-blue-500"
+            />
+            <Icon className="h-4 w-4 text-gray-400 shrink-0" />
+            <span className="text-sm text-gray-700">{label}</span>
+          </label>
+        ))}
       </div>
 
-      {/* Botón guardar */}
       {isOpen && hasChanges() && (
         <div className="pt-4 border-t border-gray-200">
           <button

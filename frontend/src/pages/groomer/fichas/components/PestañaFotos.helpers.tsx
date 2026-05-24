@@ -65,7 +65,7 @@ export const ImgWithFallback = ({
 
 interface FotoGridProps {
   fotos: FotoItem[];
-  titulo: string;
+  titulo: React.ReactNode; 
   tipo: 'antes' | 'despues';
   isOpen: boolean;
   isSaving: boolean;

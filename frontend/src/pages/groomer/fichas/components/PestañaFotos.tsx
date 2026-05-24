@@ -1,5 +1,6 @@
+// src/pages/groomer/fichas/components/PestañaFotos.tsx
 import { useRef, useState, useEffect, useCallback } from 'react';
-import { XMarkIcon } from '@heroicons/react/24/outline';
+import { XMarkIcon, CameraIcon, PhotoIcon, SparklesIcon } from '@heroicons/react/24/outline';
 import type { FotoFicha, GaleriaHistorica } from '../types';
 import { FotoGrid, ImgWithFallback, type FotoItem, type PreviewFoto } from './PestañaFotos.helpers';
 
@@ -32,9 +33,7 @@ export const PestañaFotos = ({
 
   useEffect(() => {
     const urls = Array.from(previewUrlsRef.current);
-    return () => {
-      urls.forEach((url) => URL.revokeObjectURL(url));
-    };
+    return () => { urls.forEach((url) => URL.revokeObjectURL(url)); };
   }, []);
 
   const removePreview = useCallback((previewId: string, previewUrl: string) => {
@@ -46,14 +45,8 @@ export const PestañaFotos = ({
   }, []);
 
   const handleFileSelect = async (tipo: 'antes' | 'despues', file: File) => {
-    if (!file.type.startsWith('image/')) {
-      alert('Por favor selecciona una imagen válida');
-      return;
-    }
-    if (file.size > 5 * 1024 * 1024) {
-      alert('La imagen no puede superar los 5MB');
-      return;
-    }
+    if (!file.type.startsWith('image/')) { alert('Por favor selecciona una imagen válida'); return; }
+    if (file.size > 5 * 1024 * 1024) { alert('La imagen no puede superar los 5MB'); return; }
 
     previewIdCounterRef.current += 1;
     const previewId = `preview-${previewIdCounterRef.current}`;
@@ -77,26 +70,30 @@ export const PestañaFotos = ({
   const getFotosConPreview = (tipo: 'antes' | 'despues', fotos: FotoFicha[]): FotoItem[] => {
     const previewsDelTipo: FotoItem[] = previews
       .filter((p) => p.tipo === tipo)
-      .map((p) => ({
-        id: p.id,
-        url: p.url,
-        tipo,
-        fecha: '',
-        isPreview: true,
-        uploading: true,
-      }));
-
+      .map((p) => ({ id: p.id, url: p.url, tipo, fecha: '', isPreview: true, uploading: true }));
     return [...fotos, ...previewsDelTipo];
   };
 
-  const fotosAntesConPreview = getFotosConPreview('antes', fotosAntes);
-  const fotosDespuesConPreview = getFotosConPreview('despues', fotosDespues);
+  // Títulos con íconos en lugar de emojis
+  const tituloAntes = (
+    <span className="flex items-center gap-2 font-medium text-gray-800">
+      <CameraIcon className="h-4 w-4 text-gray-500" />
+      Antes del servicio
+    </span>
+  );
+
+  const tituloDespues = (
+    <span className="flex items-center gap-2 font-medium text-gray-800">
+      <SparklesIcon className="h-4 w-4 text-gray-500" />
+      Después del servicio
+    </span>
+  );
 
   return (
     <div className="space-y-8">
       <FotoGrid
-        fotos={fotosAntesConPreview}
-        titulo="📸 Antes del servicio"
+        fotos={getFotosConPreview('antes', fotosAntes)}
+        titulo={tituloAntes as unknown as string}
         tipo="antes"
         isOpen={isOpen}
         isSaving={isSaving}
@@ -107,8 +104,8 @@ export const PestañaFotos = ({
         onDeleteFoto={onDeleteFoto}
       />
       <FotoGrid
-        fotos={fotosDespuesConPreview}
-        titulo="✨ Después del servicio"
+        fotos={getFotosConPreview('despues', fotosDespues)}
+        titulo={tituloDespues as unknown as string}
         tipo="despues"
         isOpen={isOpen}
         isSaving={isSaving}
@@ -121,7 +118,10 @@ export const PestañaFotos = ({
 
       {galeriaHistorica.length > 0 && (
         <div>
-          <h4 className="font-medium text-gray-800 mb-3">📷 Galería histórica de esta mascota</h4>
+          <h4 className="flex items-center gap-2 font-medium text-gray-800 mb-3">
+            <PhotoIcon className="h-4 w-4 text-gray-500" />
+            Galería histórica de esta mascota
+          </h4>
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
             {galeriaHistorica.map((foto) => (
               <button
@@ -146,11 +146,7 @@ export const PestañaFotos = ({
           className="fixed inset-0 bg-black/90 z-50 flex items-center justify-center"
           onClick={() => setSelectedFoto(null)}
         >
-          <img
-            src={selectedFoto}
-            alt="Foto ampliada"
-            className="max-w-[90vw] max-h-[90vh] object-contain"
-          />
+          <img src={selectedFoto} alt="Foto ampliada" className="max-w-[90vw] max-h-[90vh] object-contain" />
           <button
             onClick={() => setSelectedFoto(null)}
             className="absolute top-4 right-4 text-white p-2 hover:bg-white/20 rounded-full"

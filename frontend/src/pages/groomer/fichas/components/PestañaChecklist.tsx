@@ -1,6 +1,15 @@
 // src/pages/groomer/fichas/components/PestañaChecklist.tsx
 import { useState, useEffect } from 'react';
-import { CheckCircleIcon } from '@heroicons/react/24/outline';
+import {
+  CheckCircleIcon,
+  ExclamationTriangleIcon,
+  BeakerIcon,
+  ScissorsIcon,
+  SparklesIcon,
+  EyeIcon,
+  HandRaisedIcon,
+  HeartIcon,
+} from '@heroicons/react/24/outline';
 import type { ChecklistItem } from '../types';
 
 interface PestañaChecklistProps {
@@ -10,13 +19,13 @@ interface PestañaChecklistProps {
   onSave: (checklist: { nombre: string; completado: boolean; observacion?: string }[]) => void;
 }
 
-const CHECKLIST_ICONS: Record<string, string> = {
-  'Baño': '🛁',
-  'Corte': '✂️',
-  'Uñas': '🔪',
-  'Oídos': '👂',
-  'Glándulas': '🩺',
-  'Perfume': '🌸',
+const CHECKLIST_ICONS: Record<string, React.ReactNode> = {
+  'Baño':      <BeakerIcon className="h-4 w-4" />,
+  'Corte':     <ScissorsIcon className="h-4 w-4" />,
+  'Uñas':      <HandRaisedIcon className="h-4 w-4" />,
+  'Oídos':     <EyeIcon className="h-4 w-4" />,
+  'Glándulas': <HeartIcon className="h-4 w-4" />,
+  'Perfume':   <SparklesIcon className="h-4 w-4" />,
 };
 
 export const PestañaChecklist = ({
@@ -89,9 +98,12 @@ export const PestañaChecklist = ({
           />
         </div>
         {!puedeCerrar && isOpen && (
-          <p className="text-xs text-amber-600 mt-2">
-            ⚠️ Necesitas al menos 5 items completados para poder cerrar la ficha
-          </p>
+          <div className="flex items-center gap-1.5 mt-2">
+            <ExclamationTriangleIcon className="h-3.5 w-3.5 text-amber-500 shrink-0" />
+            <p className="text-xs text-amber-600">
+              Necesitas al menos 5 items completados para poder cerrar la ficha
+            </p>
+          </div>
         )}
       </div>
 
@@ -108,19 +120,20 @@ export const PestañaChecklist = ({
                   disabled={!isOpen}
                   className="w-5 h-5 text-green-600 rounded focus:ring-green-500"
                 />
-                <div>
-                  <span className="text-base mr-2">{CHECKLIST_ICONS[item.nombre] || '✓'}</span>
+                <div className="flex items-center gap-2">
+                  <span className={`${item.completado ? 'text-green-500' : 'text-gray-400'}`}>
+                    {CHECKLIST_ICONS[item.nombre] ?? <CheckCircleIcon className="h-4 w-4" />}
+                  </span>
                   <span className={`font-medium ${item.completado ? 'text-green-700 line-through' : 'text-gray-700'}`}>
                     {item.nombre}
                   </span>
                 </div>
               </label>
               {item.completado && (
-                <CheckCircleIcon className="h-5 w-5 text-green-500" />
+                <CheckCircleIcon className="h-5 w-5 text-green-500 shrink-0" />
               )}
             </div>
-            
-            {/* Observación del item */}
+
             {isOpen && (
               <div className="mt-2 ml-8">
                 <input
@@ -141,7 +154,6 @@ export const PestañaChecklist = ({
         ))}
       </div>
 
-      {/* Botón guardar */}
       {isOpen && hasChanges() && (
         <div className="pt-4 border-t border-gray-200">
           <button

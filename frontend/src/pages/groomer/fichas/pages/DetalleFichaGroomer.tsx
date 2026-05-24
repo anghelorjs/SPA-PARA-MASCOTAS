@@ -6,6 +6,12 @@ import {
   ScissorsIcon,
   UserIcon,
   HeartIcon,
+  ClipboardDocumentListIcon,
+  CheckCircleIcon,
+  BeakerIcon,
+  ChatBubbleLeftEllipsisIcon,
+  CameraIcon,
+  InformationCircleIcon,
 } from '@heroicons/react/24/outline';
 import { useDetalleFicha } from '../hooks/useFichasGroomer';
 import { PestañaEstadoIngreso } from '../components/PestañaEstadoIngreso';
@@ -16,12 +22,12 @@ import { PestañaFotos } from '../components/PestañaFotos';
 
 type TabType = 'ingreso' | 'checklist' | 'insumos' | 'observaciones' | 'fotos';
 
-const TABS: { id: TabType; label: string; icon: string }[] = [
-  { id: 'ingreso', label: 'Estado de Ingreso', icon: '📋' },
-  { id: 'checklist', label: 'Checklist', icon: '✓' },
-  { id: 'insumos', label: 'Insumos', icon: '🧴' },
-  { id: 'observaciones', label: 'Observaciones', icon: '💬' },
-  { id: 'fotos', label: 'Fotos', icon: '📸' },
+const TABS: { id: TabType; label: string; Icon: React.ComponentType<{ className?: string }> }[] = [
+  { id: 'ingreso',       label: 'Estado de Ingreso', Icon: ClipboardDocumentListIcon },
+  { id: 'checklist',     label: 'Checklist',          Icon: CheckCircleIcon },
+  { id: 'insumos',       label: 'Insumos',            Icon: BeakerIcon },
+  { id: 'observaciones', label: 'Observaciones',      Icon: ChatBubbleLeftEllipsisIcon },
+  { id: 'fotos',         label: 'Fotos',              Icon: CameraIcon },
 ];
 
 export const DetalleFichaGroomer = () => {
@@ -31,30 +37,15 @@ export const DetalleFichaGroomer = () => {
   const [showCerrarConfirm, setShowCerrarConfirm] = useState(false);
 
   const {
-    ficha,
-    isLoading,
-    isSaving,
-    updateEstadoIngreso,
-    updateChecklist,
-    agregarInsumo,
-    eliminarInsumo,
-    updateObservaciones,
-    uploadFoto,
-    deleteFoto,
-    cerrarFicha,
-    refresh,
+    ficha, isLoading, isSaving,
+    updateEstadoIngreso, updateChecklist, agregarInsumo,
+    eliminarInsumo, updateObservaciones, uploadFoto,
+    deleteFoto, cerrarFicha, refresh,
   } = useDetalleFicha(id ? parseInt(id) : undefined);
 
   const handleCerrarFicha = async () => {
     const result = await cerrarFicha();
-    if (result) {
-      setShowCerrarConfirm(false);
-      refresh();
-    }
-  };
-
-  const handleVolver = () => {
-    navigate('/groomer/fichas');
+    if (result) { setShowCerrarConfirm(false); refresh(); }
   };
 
   if (isLoading) {
@@ -69,7 +60,7 @@ export const DetalleFichaGroomer = () => {
     return (
       <div className="text-center py-12">
         <p className="text-gray-500">No se pudo cargar la ficha</p>
-        <button onClick={handleVolver} className="mt-4 text-blue-600 hover:text-blue-800">
+        <button onClick={() => navigate('/groomer/fichas')} className="mt-4 text-blue-600 hover:text-blue-800">
           Volver a fichas
         </button>
       </div>
@@ -81,17 +72,15 @@ export const DetalleFichaGroomer = () => {
 
   return (
     <div className="space-y-6">
-      {/* Header con botón volver */}
+      {/* Header */}
       <div className="flex items-center justify-between">
         <button
-          onClick={handleVolver}
+          onClick={() => navigate('/groomer/fichas')}
           className="flex items-center gap-2 text-gray-600 hover:text-gray-900 transition-colors"
         >
           <ArrowLeftIcon className="h-5 w-5" />
           <span>Volver a fichas</span>
         </button>
-
-        {/* Botón cerrar ficha */}
         {isOpen && (
           <button
             onClick={() => setShowCerrarConfirm(true)}
@@ -107,7 +96,7 @@ export const DetalleFichaGroomer = () => {
         )}
       </div>
 
-      {/* Tarjeta de información general */}
+      {/* Tarjeta info general */}
       <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
         <div className="p-6 border-b border-gray-100">
           <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
@@ -152,20 +141,21 @@ export const DetalleFichaGroomer = () => {
           </div>
           <div>
             <p className="text-xs text-gray-500">Estado</p>
-            <span
-              className={`inline-flex px-2 py-0.5 text-xs font-medium rounded-full ${
-                isOpen ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'
-              }`}
-            >
+            <span className={`inline-flex px-2 py-0.5 text-xs font-medium rounded-full ${
+              isOpen ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'
+            }`}>
               {isOpen ? 'Abierta' : 'Cerrada'}
             </span>
           </div>
         </div>
 
-        {/* Datos clínicos de la mascota */}
+        {/* Datos clínicos */}
         {(ficha.mascota.temperamento || ficha.mascota.alergias || ficha.mascota.restricciones || ficha.mascota.vacunas) && (
           <div className="p-4 bg-amber-50 border-t border-amber-100">
-            <p className="text-xs font-medium text-amber-700 mb-2">📋 Datos importantes de la mascota</p>
+            <p className="flex items-center gap-1.5 text-xs font-medium text-amber-700 mb-2">
+              <InformationCircleIcon className="h-3.5 w-3.5 shrink-0" />
+              Datos importantes de la mascota
+            </p>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-2 text-sm">
               {ficha.mascota.temperamento && (
                 <p><span className="text-gray-600">Temperamento:</span> {ficha.mascota.temperamento}</p>
@@ -187,26 +177,26 @@ export const DetalleFichaGroomer = () => {
       {/* Pestañas */}
       <div className="border-b border-gray-200">
         <nav className="flex gap-1 overflow-x-auto">
-          {TABS.map((tab) => (
+          {TABS.map(({ id: tabId, label, Icon }) => (
             <button
-              key={tab.id}
-              onClick={() => setActiveTab(tab.id)}
+              key={tabId}
+              onClick={() => setActiveTab(tabId)}
               className={`px-4 py-2 text-sm font-medium rounded-t-lg transition-all ${
-                activeTab === tab.id
+                activeTab === tabId
                   ? 'bg-white text-blue-600 border-b-2 border-blue-600'
                   : 'text-gray-500 hover:text-gray-700 hover:bg-gray-50'
               }`}
             >
               <span className="flex items-center gap-2">
-                <span>{tab.icon}</span>
-                <span className="hidden sm:inline">{tab.label}</span>
+                <Icon className="h-4 w-4 shrink-0" />
+                <span className="hidden sm:inline">{label}</span>
               </span>
             </button>
           ))}
         </nav>
       </div>
 
-      {/* Contenido de las pestañas */}
+      {/* Contenido pestañas */}
       <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
         {activeTab === 'ingreso' && (
           <PestañaEstadoIngreso
@@ -214,55 +204,41 @@ export const DetalleFichaGroomer = () => {
             nudos={ficha.estado_ingreso.nudos}
             tienePulgas={ficha.estado_ingreso.tienePulgas}
             tieneHeridas={ficha.estado_ingreso.tieneHeridas}
-            isOpen={isOpen}
-            isSaving={isSaving}
-            onSave={updateEstadoIngreso}
+            isOpen={isOpen} isSaving={isSaving} onSave={updateEstadoIngreso}
           />
         )}
-
         {activeTab === 'checklist' && (
           <PestañaChecklist
             checklist={ficha.checklist}
-            isOpen={isOpen}
-            isSaving={isSaving}
-            onSave={updateChecklist}
+            isOpen={isOpen} isSaving={isSaving} onSave={updateChecklist}
           />
         )}
-
         {activeTab === 'insumos' && (
           <PestañaInsumos
             insumos={ficha.insumos}
-            isOpen={isOpen}
-            isSaving={isSaving}
-            onAgregar={agregarInsumo}
-            onEliminar={eliminarInsumo}
+            isOpen={isOpen} isSaving={isSaving}
+            onAgregar={agregarInsumo} onEliminar={eliminarInsumo}
           />
         )}
-
         {activeTab === 'observaciones' && (
           <PestañaObservaciones
             observaciones={ficha.observaciones.observaciones}
             recomendaciones={ficha.observaciones.recomendaciones}
-            isOpen={isOpen}
-            isSaving={isSaving}
-            onSave={updateObservaciones}
+            isOpen={isOpen} isSaving={isSaving} onSave={updateObservaciones}
           />
         )}
-
         {activeTab === 'fotos' && (
           <PestañaFotos
             fotosAntes={ficha.fotos.antes}
             fotosDespues={ficha.fotos.despues}
             galeriaHistorica={ficha.galeria_historica}
-            isOpen={isOpen}
-            isSaving={isSaving}
-            onUploadFoto={uploadFoto}
-            onDeleteFoto={deleteFoto}
+            isOpen={isOpen} isSaving={isSaving}
+            onUploadFoto={uploadFoto} onDeleteFoto={deleteFoto}
           />
         )}
       </div>
 
-      {/* Modal de confirmación para cerrar ficha */}
+      {/* Confirmar cerrar ficha */}
       {showCerrarConfirm && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50">
           <div className="bg-white rounded-xl max-w-md w-full p-6">

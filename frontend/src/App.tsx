@@ -63,7 +63,7 @@ import { PerfilGroomer } from "./pages/groomer/perfil/pages/PerfilGroomer";
 // ========================
 // CLIENTE
 // ========================
-const DashboardCliente = () => <div className="p-6"><h1 className="text-2xl font-bold">Dashboard Cliente</h1><p className="mt-4 text-gray-600">Bienvenido a tu panel.</p></div>;
+import { DashboardCliente } from "./pages/cliente/dashboard/pages/DashboardCliente";
 const MisMascotas = () => <div className="p-6"><h1 className="text-2xl font-bold">Mis Mascotas</h1><p className="mt-4 text-gray-600">Gestión de tus mascotas.</p></div>;
 const MisCitas = () => <div className="p-6"><h1 className="text-2xl font-bold">Mis Citas</h1><p className="mt-4 text-gray-600">Tus citas programadas.</p></div>;
 const CatalogoCliente = () => <div className="p-6"><h1 className="text-2xl font-bold">Catálogo</h1><p className="mt-4 text-gray-600">Productos disponibles.</p></div>;

@@ -87,7 +87,7 @@ class NotificacionController extends ApiController
         
         // Si hay mensaje personalizado, agregarlo
         if ($request->has('mensaje_personalizado')) {
-            $mensaje .= "\n\nNota adicional: " . $request->mensaje_personalizado;
+            $mensaje .= "\n\n---\n📝 Nota adicional: " . $request->mensaje_personalizado;
         }
         
         DB::beginTransaction();
@@ -233,29 +233,29 @@ class NotificacionController extends ApiController
         
         switch ($tipo) {
             case 'confirmacion':
-                return "🐾 Hola {$nombreCliente}, tu cita ha sido confirmada.\n\n" .
+                return "[CONFIRMACIÓN] Hola {$nombreCliente}, tu cita ha sido confirmada.\n\n" .
                        "📅 Fecha: {$fechaCita}\n" .
                        "🐕 Mascota: {$nombreMascota}\n" .
                        "✂️ Servicio: {$nombreServicio}\n\n" .
-                       "¡Te esperamos! 🐶";
+                       "¡Te esperamos!";
                        
             case 'recordatorio':
-                return "⏰ Recordatorio {$nombreCliente}!\n\n" .
+                return "[RECORDATORIO] Hola {$nombreCliente}!\n\n" .
                        "Tienes una cita mañana a las {$fechaCita} para {$nombreMascota} ({$nombreServicio}).\n\n" .
-                       "Confirma tu asistencia. 🐾";
+                       "Por favor, confirma tu asistencia.";
                        
             case 'listo_para_recoger':
-                return "✅ ¡{$nombreMascota} ya está listo/a {$nombreCliente}!\n\n" .
+                return "[LISTO] ¡{$nombreMascota} ya está listo/a {$nombreCliente}!\n\n" .
                        "Tu mascota ya terminó su sesión de {$nombreServicio}.\n" .
-                       "Puedes pasar a recogerla. 🐕✨";
+                       "Puedes pasar a recogerla.";
                        
             case 'encuesta':
-                return "📝 Hola {$nombreCliente},\n\n" .
+                return "[ENCUESTA] Hola {$nombreCliente},\n\n" .
                        "¿Cómo estuvo su experiencia con nosotros?\n" .
-                       "Califícanos del 1 al 5. ¡Tu opinión nos ayuda a mejorar! 🐾";
+                       "Valóranos del 1 al 5. ¡Tu opinión nos ayuda a mejorar!";
                        
             default:
-                return "Notificación de SPA para Mascotas";
+                return "Notificación del Sistema - SPA para Mascotas";
         }
     }
 }

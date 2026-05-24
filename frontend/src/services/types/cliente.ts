@@ -44,3 +44,47 @@ export interface UpdatePasswordResponse {
   message: string;
   data: null;
 }
+
+// ==================== DASHBOARD CLIENTE ====================
+
+export interface ProximaCitaCliente {
+  id: number;
+  fecha: string;
+  hora: string;
+  servicio: string;
+  groomer: string;
+  mascota: string;
+  estado: 'programada' | 'confirmada';
+  estado_color: string;
+}
+
+export interface NotificacionReciente {
+  id: number;
+  tipo: string;
+  mensaje_resumido: string;
+  fecha: string;
+  leida: boolean;
+}
+
+export interface RecomendacionCliente {
+  id: number;
+  recomendacion: string;
+  mascota: string;
+  fecha: string;
+  servicio: string;
+  groomer: string;
+}
+
+export interface DashboardClienteResponse {
+  proxima_cita: ProximaCitaCliente | null;
+  notificaciones: {
+    recientes: NotificacionReciente[];
+    total_no_leidas: number;
+  };
+  recomendacion: RecomendacionCliente | null;
+  estadisticas: {
+    total_mascotas: number;
+    total_citas_completadas: number;
+    total_compras: number;
+  };
+}

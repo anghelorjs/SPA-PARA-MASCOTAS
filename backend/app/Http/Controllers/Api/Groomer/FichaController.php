@@ -645,7 +645,7 @@ class FichaController extends ApiController
                 'idCita' => $cita->idCita,
                 'tipo' => 'listo_para_recoger',
                 'canal' => $cita->mascota->cliente->canalContacto ?? 'whatsapp',
-                'mensaje' => "✅ ¡{$cita->mascota->nombre} ya está listo/a! Puedes pasar a recoger a tu mascota. 🐕✨",
+                'mensaje' => "¡{$cita->mascota->nombre} ya está listo/a! Puedes pasar a recoger a tu mascota.",
                 'fechaEnvio' => now(),
                 'entregada' => false
             ]);

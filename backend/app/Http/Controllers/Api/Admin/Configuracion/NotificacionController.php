@@ -279,34 +279,34 @@ class NotificacionController extends ApiController
         
         switch ($tipo) {
             case 'confirmacion':
-                return "🐾 Hola {$nombreCliente}, tu cita ha sido confirmada.\n\n" .
-                       "📅 Fecha: {$fechaCita}\n" .
-                       "🐕 Mascota: {$nombreMascota}\n" .
-                       "✂️ Servicio: {$nombreServicio}\n\n" .
-                       "¡Te esperamos! 🐶";
+                return "Hola {$nombreCliente}, tu cita ha sido confirmada.\n\n" .
+                       "Fecha: {$fechaCita}\n" .
+                       "Mascota: {$nombreMascota}\n" .
+                       "Servicio: {$nombreServicio}\n\n" .
+                       "¡Te esperamos!";
                        
             case 'recordatorio':
-                return "⏰ Recordatorio {$nombreCliente}!\n\n" .
+                return "Recordatorio {$nombreCliente}!\n\n" .
                        "Tienes una cita mañana a las {$fechaCita} para {$nombreMascota} ({$nombreServicio}).\n\n" .
                        "Confirma tu asistencia. 🐾";
                        
             case 'listo_para_recoger':
-                return "✅ ¡{$nombreMascota} ya está listo/a {$nombreCliente}!\n\n" .
+                return "¡{$nombreMascota} ya está listo/a {$nombreCliente}!\n\n" .
                        "Tu mascota ya terminó su sesión de {$nombreServicio}.\n" .
-                       "Puedes pasar a recogerla. 🐕✨";
+                       "Puedes pasar a recogerla.";
                        
             case 'encuesta':
-                return "📝 Hola {$nombreCliente},\n\n" .
+                return "Hola {$nombreCliente},\n\n" .
                        "¿Cómo estuvo su experiencia con nosotros?\n" .
                        "Califícanos del 1 al 5. ¡Tu opinión nos ayuda a mejorar! 🐾";
                        
             case 'cancelacion':
-                return "❌ Hola {$nombreCliente},\n\n" .
+                return "Hola {$nombreCliente},\n\n" .
                        "Tu cita para {$nombreMascota} ({$nombreServicio}) ha sido cancelada.\n\n" .
                        "Si tienes alguna duda, contáctanos. 🐾";
                        
             case 'reprogramacion':
-                return "🔄 Hola {$nombreCliente},\n\n" .
+                return "Hola {$nombreCliente},\n\n" .
                        "Tu cita ha sido reprogramada para el {$fechaCita} para {$nombreMascota} ({$nombreServicio}).\n\n" .
                        "¡Te esperamos! 🐶";
                        

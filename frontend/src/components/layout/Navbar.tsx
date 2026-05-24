@@ -1,6 +1,31 @@
+// src/components/layout/Navbar.tsx
 import { useState, useRef, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { FiBell, FiSearch, FiLogOut, FiUser, FiChevronDown } from "react-icons/fi";
+import { 
+  FiBell, 
+  FiSearch, 
+  FiLogOut, 
+  FiUser, 
+  FiChevronDown,
+  FiCalendar,
+  FiClock,
+  FiCheckCircle,
+  FiXCircle,
+  FiRefreshCw,
+  FiAlertCircle,
+  FiMessageSquare,
+  FiPackage
+} from "react-icons/fi";
+import { 
+  CheckCircleIcon, 
+  ClockIcon, 
+  XCircleIcon, 
+  ArrowPathIcon, 
+  ExclamationCircleIcon,
+  ChatBubbleLeftRightIcon,
+  CubeIcon,
+  CalendarIcon
+} from '@heroicons/react/24/outline';
 import { useAuth } from "../../hooks/useAuth";
 import { clientePerfilService } from "../../pages/cliente/perfil/services/cliente.perfil.service";
 
@@ -29,6 +54,28 @@ const getPerfilPath = (role: string): string => {
   }
 };
 
+// Configuración de íconos por tipo de notificación usando Heroicons
+const getNotifIcon = (tipo: string): { icon: React.ReactNode; color: string } => {
+  switch (tipo) {
+    case 'confirmacion':
+      return { icon: <CheckCircleIcon className="h-5 w-5" />, color: 'text-green-400' };
+    case 'recordatorio':
+      return { icon: <ClockIcon className="h-5 w-5" />, color: 'text-blue-400' };
+    case 'listo_para_recoger':
+      return { icon: <CalendarIcon className="h-5 w-5" />, color: 'text-purple-400' };
+    case 'encuesta':
+      return { icon: <ChatBubbleLeftRightIcon className="h-5 w-5" />, color: 'text-yellow-400' };
+    case 'cancelacion':
+      return { icon: <XCircleIcon className="h-5 w-5" />, color: 'text-red-400' };
+    case 'reprogramacion':
+      return { icon: <ArrowPathIcon className="h-5 w-5" />, color: 'text-orange-400' };
+    case 'pendiente_confirmacion':
+      return { icon: <ExclamationCircleIcon className="h-5 w-5" />, color: 'text-amber-400' };
+    default:
+      return { icon: <CubeIcon className="h-5 w-5" />, color: 'text-gray-400' };
+  }
+};
+
 export default function Navbar({ sidebarCollapsed }: NavbarProps) {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
@@ -45,7 +92,7 @@ export default function Navbar({ sidebarCollapsed }: NavbarProps) {
     try {
       const perfil = await clientePerfilService.getPerfil();
       setNotificaciones(perfil.notificaciones.slice(0, 5));
-      const noLeidas = perfil.notificaciones.filter(n => !n.leida).length;
+      const noLeidas = perfil.notificaciones.filter((n: any) => !n.leida).length;
       setNotificacionesNoLeidas(noLeidas);
     } catch (error) {
       console.error('Error loading notificaciones:', error);
@@ -80,18 +127,6 @@ export default function Navbar({ sidebarCollapsed }: NavbarProps) {
   const perfilPath = getPerfilPath(role);
   const isCliente = role === 'cliente';
 
-  const tipoIconos: Record<string, string> = {
-    confirmacion: '✅',
-    recordatorio: '⏰',
-    listo_para_recoger: '🐕',
-    encuesta: '📝',
-    cancelacion: '❌',
-    reprogramacion: '🔄',
-    pendiente_confirmacion: '⏳',
-  };
-
-  const getNotifIcon = (tipo: string) => tipoIconos[tipo] || '🔔';
-
   return (
     <header
       className="fixed top-0 right-0 h-16 z-50 bg-[#1e3a5f] text-white flex items-center justify-between px-5 shadow-lg border-b border-white/10 transition-all duration-300"
@@ -120,7 +155,7 @@ export default function Navbar({ sidebarCollapsed }: NavbarProps) {
           >
             <FiBell />
             {notificacionesNoLeidas > 0 && (
-              <span className="absolute -top-1 -right-1 w-5 h-5 bg-red-500 text-white text-xs rounded-full flex items-center justify-center">
+              <span className="absolute -top-1 -right-1 min-w-[20px] h-5 bg-red-500 text-white text-xs rounded-full flex items-center justify-center px-1">
                 {notificacionesNoLeidas > 9 ? '9+' : notificacionesNoLeidas}
               </span>
             )}
@@ -144,31 +179,36 @@ export default function Navbar({ sidebarCollapsed }: NavbarProps) {
               </div>
               <div className="max-h-80 overflow-y-auto">
                 {isCliente && notificaciones.length > 0 ? (
-                  notificaciones.map((n) => (
-                    <div
-                      key={n.id}
-                      className={`px-4 py-3 border-b border-white/10 cursor-pointer transition-all duration-150 hover:bg-white/10 ${
-                        !n.leida ? 'bg-white/5' : ''
-                      }`}
-                      onClick={() => {
-                        setNotifOpen(false);
-                        navigate('/cliente/perfil');
-                      }}
-                    >
-                      <div className="flex gap-3">
-                        <span className="text-lg">{getNotifIcon(n.tipo)}</span>
-                        <div className="flex-1 min-w-0">
-                          <p className="text-white text-xs font-medium m-0 line-clamp-2">
-                            {n.mensaje}
-                          </p>
-                          <p className="text-white/40 text-[10px] mt-1">{n.fecha}</p>
+                  notificaciones.map((n) => {
+                    const { icon, color } = getNotifIcon(n.tipo);
+                    return (
+                      <div
+                        key={n.id}
+                        className={`px-4 py-3 border-b border-white/10 cursor-pointer transition-all duration-150 hover:bg-white/10 ${
+                          !n.leida ? 'bg-white/5' : ''
+                        }`}
+                        onClick={() => {
+                          setNotifOpen(false);
+                          navigate('/cliente/perfil');
+                        }}
+                      >
+                        <div className="flex gap-3">
+                          <div className={`flex-shrink-0 ${color}`}>
+                            {icon}
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <p className="text-white text-xs font-medium m-0 line-clamp-2">
+                              {n.mensaje}
+                            </p>
+                            <p className="text-white/40 text-[10px] mt-1">{n.fecha}</p>
+                          </div>
+                          {!n.leida && (
+                            <div className="w-2 h-2 bg-blue-400 rounded-full mt-1 flex-shrink-0" />
+                          )}
                         </div>
-                        {!n.leida && (
-                          <div className="w-2 h-2 bg-blue-400 rounded-full mt-1" />
-                        )}
                       </div>
-                    </div>
-                  ))
+                    );
+                  })
                 ) : (
                   <div className="px-4 py-8 text-center">
                     <FiBell className="h-8 w-8 text-white/30 mx-auto mb-2" />

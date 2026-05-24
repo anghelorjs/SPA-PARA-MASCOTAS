@@ -171,3 +171,70 @@ export interface CreateVentaData {
   }>;
   medioPago: MedioPago;
 }
+
+// ==================== DASHBOARD RECEPCIONISTA ====================
+
+export interface DashboardKPIRecepcion {
+  total_citas_hoy: number;
+  citas_confirmadas_hoy: number;
+  citas_en_curso: number;
+  citas_completadas_hoy: number;
+}
+
+export interface EstadoGroomer {
+  id: number;
+  nombre: string;
+  estado: 'libre' | 'ocupado' | 'con_citas' | 'ausente';
+  total_citas_hoy: number;
+}
+
+export interface AlertaCita {
+  id: number;
+  mascota: string;
+  groomer: string;
+  hora: string;
+  servicio: string;
+  minutos_restantes: number;
+}
+
+export interface CitaDashboardRecepcion {
+  id: number;
+  hora_inicio: string;
+  hora_fin: string;
+  mascota: string;
+  cliente: string;
+  groomer: string;
+  servicio: string;
+  duracion: number;
+  estado: string;
+  color: string;
+  tiene_ficha: boolean;
+  id_ficha: number | null;
+  precio: number;
+}
+
+export interface DetalleCitaRecepcion {
+  id: number;
+  mascota: string;
+  cliente: string;
+  cliente_id: number;
+  groomer: string;
+  groomer_id: number;
+  servicio: string;
+  servicio_id: number;
+  hora_inicio: string;
+  hora_fin: string;
+  duracion: number;
+  estado: string;
+  precio: number;
+  observaciones: string | null;
+  tiene_ficha: boolean;
+  id_ficha: number | null;
+}
+
+export interface DashboardRecepcionResponse {
+  kpi: DashboardKPIRecepcion;
+  estado_groomers: EstadoGroomer[];
+  alertas_citas: AlertaCita[];
+  citas_del_dia: CitaDashboardRecepcion[];
+}

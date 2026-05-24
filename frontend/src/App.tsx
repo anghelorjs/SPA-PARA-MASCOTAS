@@ -55,7 +55,7 @@ import { PerfilRecepcionista } from "./pages/recepcionista/perfil/pages/PerfilRe
 // ========================
 // GROOMER
 // ========================
-const DashboardGroomer = () => <div className="p-6"><h1 className="text-2xl font-bold">Dashboard Groomer</h1><p className="mt-4 text-gray-600">Bienvenido al panel del groomer.</p></div>;
+import { DashboardGroomer } from "./pages/groomer/dashboard/pages/DashboardGroomer";
 import { MiAgendaGroomer } from "./pages/groomer/agenda/pages/MiAgendaGroomer";
 import { FichasGroomer } from "./pages/groomer/fichas/pages/FichasGroomer";
 import { DetalleFichaGroomer } from "./pages/groomer/fichas/pages/DetalleFichaGroomer";

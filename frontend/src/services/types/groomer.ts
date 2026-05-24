@@ -198,3 +198,60 @@ export interface DetalleFichaResponse {
     servicio: string;
   }>;
 }
+
+// ==================== DASHBOARD GROOMER ====================
+
+export interface DashboardKPI {
+  total_citas_hoy: number;
+  citas_completadas: number;
+  citas_en_curso: number;
+  citas_pendientes: number;
+  proxima_cita: {
+    hora: string;
+    mascota: string;
+    minutos_restantes: number;
+  } | null;
+}
+
+export interface CitaDashboard {
+  id: number;
+  hora_inicio: string;
+  hora_fin: string;
+  duracion: number;
+  mascota: {
+    id: number;
+    nombre: string;
+    especie: string;
+    raza: string;
+    peso_kg: number;
+    rango_nombre: string | null;
+    temperamento: string | null;
+    alergias: string | null;
+    restricciones: string | null;
+    vacunas: string | null;
+  };
+  servicio: {
+    id: number;
+    nombre: string;
+  };
+  estado: CitaEstadoGroomer;
+  estado_texto: string;
+  estado_color: string;
+  tiene_ficha: boolean;
+  ficha_id: number | null;
+  ficha_abierta: boolean;
+}
+
+export interface RecomendacionDashboard {
+  id: number;
+  mascota: string;
+  servicio: string;
+  recomendacion: string;
+  fecha: string;
+}
+
+export interface DashboardGroomerResponse {
+  kpi: DashboardKPI;
+  citas_del_dia: CitaDashboard[];
+  ultimas_recomendaciones: RecomendacionDashboard[];
+}

@@ -355,6 +355,7 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::get('dashboard', [ClienteDashboardController::class, 'index']);
         
         // Mis Mascotas
+        Route::get('rangos-peso', [ClienteMascotaController::class, 'rangosPeso']);
         Route::get('mascotas', [ClienteMascotaController::class, 'index']);
         Route::get('mascotas/{id}', [ClienteMascotaController::class, 'show']);
         Route::post('mascotas', [ClienteMascotaController::class, 'store']);

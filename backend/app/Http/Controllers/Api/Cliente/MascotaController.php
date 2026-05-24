@@ -48,6 +48,25 @@ class MascotaController extends ApiController
         
         return $this->successResponse($mascotas, 'Mascotas obtenidas correctamente');
     }
+
+    /**
+     * Listar rangos de peso disponibles para el formulario del cliente
+     */
+    public function rangosPeso()
+    {
+        $rangos = RangoPeso::orderBy('pesoMinKg')
+            ->get()
+            ->map(function ($rango) {
+                return [
+                    'idRango' => $rango->idRango,
+                    'nombre' => $rango->nombre,
+                    'pesoMinKg' => (float) $rango->pesoMinKg,
+                    'pesoMaxKg' => (float) $rango->pesoMaxKg,
+                ];
+            });
+
+        return $this->successResponse($rangos, 'Rangos de peso obtenidos correctamente');
+    }
     
     /**
      * Ver detalle de una mascota
@@ -90,9 +109,9 @@ class MascotaController extends ApiController
                             'tipo' => $foto->tipo,
                             'fecha' => $foto->fechaCarga->format('d/m/Y H:i')
                         ];
-                    })
+                    })->values()
                 ];
-            });
+            })->values();
         
         // Obtener fotos agrupadas por sesión
         $fotosAgrupadas = $mascota->fotos()
@@ -115,11 +134,12 @@ class MascotaController extends ApiController
                             'url' => $this->publicUrl($foto->urlFoto),
                             'tipo' => $foto->tipo
                         ];
-                    })
+                    })->values()
                 ];
-            });
+            })->values();
         
         $rangoNombre = $mascota->rangoPeso ? $mascota->rangoPeso->nombre : 'No asignado';
+        $fotoPerfil = $mascota->fotos->where('tipo', 'perfil')->first();
         
         return $this->successResponse([
             'mascota' => [
@@ -130,6 +150,7 @@ class MascotaController extends ApiController
                 'tamanio' => $mascota->tamanio,
                 'peso_kg' => $mascota->pesoKg,
                 'rango_nombre' => $rangoNombre,
+                'foto_perfil_url' => $fotoPerfil ? $this->publicUrl($fotoPerfil->urlFoto) : null,
                 'fecha_nacimiento' => $mascota->fechaNacimiento ? $mascota->fechaNacimiento->format('Y-m-d') : null,
                 'temperamento' => $mascota->temperamento,
                 'alergias' => $mascota->alergias,
@@ -170,28 +191,25 @@ class MascotaController extends ApiController
         DB::beginTransaction();
         
         try {
-            // Calcular rango de peso automáticamente
-            $idRango = null;
-            if ($request->pesoKg) {
-                $rango = RangoPeso::where('pesoMinKg', '<=', $request->pesoKg)
-                    ->where('pesoMaxKg', '>=', $request->pesoKg)
-                    ->first();
-                $idRango = $rango ? $rango->idRango : null;
+            $rango = RangoPeso::getRangoByPeso($request->pesoKg);
+            if (!$rango) {
+                DB::rollBack();
+                return $this->errorResponse('No existe un rango de peso configurado para el peso ingresado', 422);
             }
             
             $mascota = Mascota::create([
                 'idCliente' => $cliente->idCliente,
-                'idRango' => $idRango,
+                'idRango' => $rango->idRango,
                 'nombre' => $request->nombre,
                 'especie' => $request->especie,
                 'raza' => $request->raza,
-                'tamanio' => $request->tamanio,
+                'tamanio' => $rango->nombre,
                 'pesoKg' => $request->pesoKg,
                 'fechaNacimiento' => $request->fechaNacimiento,
                 'temperamento' => $request->temperamento,
-                'alergias' => $request->alergias ? json_encode($request->alergias) : null,
-                'restricciones' => $request->restricciones ? json_encode($request->restricciones) : null,
-                'vacunas' => $request->vacunas ? json_encode($request->vacunas) : null
+                'alergias' => $request->alergias,
+                'restricciones' => $request->restricciones,
+                'vacunas' => $request->vacunas
             ]);
             
             DB::commit();
@@ -241,18 +259,21 @@ class MascotaController extends ApiController
         DB::beginTransaction();
         
         try {
-            // Recalcular rango si cambió el peso
             if ($request->has('pesoKg') && $request->pesoKg) {
-                $rango = RangoPeso::where('pesoMinKg', '<=', $request->pesoKg)
-                    ->where('pesoMaxKg', '>=', $request->pesoKg)
-                    ->first();
-                $mascota->idRango = $rango ? $rango->idRango : null;
+                $rango = RangoPeso::getRangoByPeso($request->pesoKg);
+                if (!$rango) {
+                    DB::rollBack();
+                    return $this->errorResponse('No existe un rango de peso configurado para el peso ingresado', 422);
+                }
+
+                $mascota->idRango = $rango->idRango;
+                $mascota->tamanio = $rango->nombre;
             }
             
             foreach ($request->all() as $key => $value) {
-                if (in_array($key, ['alergias', 'restricciones', 'vacunas']) && $value) {
-                    $mascota->$key = json_encode($value);
-                } elseif ($key !== 'idCliente' && $key !== 'idRango') {
+                if (in_array($key, ['alergias', 'restricciones', 'vacunas'])) {
+                    $mascota->$key = $value;
+                } elseif (!in_array($key, ['idCliente', 'idRango', 'tamanio'])) {
                     $mascota->$key = $value;
                 }
             }

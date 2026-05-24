@@ -88,3 +88,84 @@ export interface DashboardClienteResponse {
     total_compras: number;
   };
 }
+
+// ==================== MASCOTAS ====================
+
+export interface RangoPesoCliente {
+  idRango: number;
+  nombre: string;
+  pesoMinKg: number;
+  pesoMaxKg: number;
+}
+
+export interface FotoMascota {
+  id: number;
+  url: string;
+  tipo: 'perfil' | 'antes' | 'despues';
+  fecha?: string;
+}
+
+export interface Mascota {
+  id: number;
+  nombre: string;
+  especie: string;
+  raza: string | null;
+  tamanio: string | null;
+  peso_kg: number;
+  rango_nombre: string | null;
+  foto_perfil_url: string | null;
+  fecha_nacimiento: string | null;
+  temperamento: string | null;
+  alergias: string[] | null;  // ← Asegurar que sea array
+  restricciones: string[] | null;  // ← Asegurar que sea array
+  vacunas: string[] | null;  // ← Asegurar que sea array
+}
+
+export interface HistorialServicio {
+  id: number;
+  fecha: string;
+  servicio: string;
+  groomer: string;
+  observaciones: string | null;
+  recomendaciones: string | null;
+  fotos: FotoMascota[];
+}
+
+export interface GaleriaGrupo {
+  ficha_id: number | null;
+  fecha: string;
+  servicio: string;
+  fotos: FotoMascota[];
+}
+
+export interface DetalleMascotaResponse {
+  mascota: Mascota & { fotos_perfil: FotoMascota[] };
+  historial_servicios: HistorialServicio[];
+  galeria_fotos: GaleriaGrupo[];
+}
+
+export interface CreateMascotaData {
+  nombre: string;
+  especie: string;
+  raza?: string;
+  tamanio?: string;
+  pesoKg: number;
+  fechaNacimiento?: string;
+  temperamento?: string;
+  alergias?: string[];
+  restricciones?: string[];
+  vacunas?: string[];
+}
+
+export type UpdateMascotaData = Partial<CreateMascotaData>;
+
+export interface FotosSesionResponse {
+  ficha_id: number;
+  fecha: string;
+  servicio: string;
+  mascota: string;
+  fotos: {
+    antes: FotoMascota[];
+    despues: FotoMascota[];
+  };
+}

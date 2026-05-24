@@ -24,8 +24,6 @@ class Disponibilidad extends Model
 
     protected $casts = [
         'esBloqueo' => 'boolean',
-        'horaInicio' => 'datetime:H:i:s',
-        'horaFin' => 'datetime:H:i:s'
     ];
 
     // Relaciones

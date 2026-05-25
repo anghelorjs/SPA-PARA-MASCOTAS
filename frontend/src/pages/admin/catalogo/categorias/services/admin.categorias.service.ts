@@ -30,7 +30,7 @@ export const adminCategoriasService = {
    * @param page - Número de página
    */
   async getCategorias(tipo?: string, page: number = 1): Promise<PaginatedResponse<Categoria>> {
-    const params: Record<string, any> = { page, per_page: 15 };
+    const params: Record<string, any> = { page, per_page: 100 }; // traer todas
     if (tipo) params.tipo = tipo;
     const response = await api.get<ApiResponse<PaginatedResponse<Categoria>>>('/admin/catalogo/categorias', { params });
     return response.data.data;

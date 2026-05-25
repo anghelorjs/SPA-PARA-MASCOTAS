@@ -204,3 +204,57 @@ export interface UpdateVarianteData {
   precio?: number;
   stock?: number;
 }
+
+// ==================== CATÁLOGO - INSUMOS ====================
+
+export interface Insumo {
+  idInsumo: number;
+  idCategoria: number;
+  nombre: string;
+  unidadMedida: string;
+  stockActual: number;
+  stockMinimo: number;
+  costoUnitario: number;
+  alerta_stock?: boolean;
+  nivel_stock?: 'verde' | 'amarillo' | 'rojo';
+  categoria?: {
+    idCategoria: number;
+    nombre: string;
+  };
+  created_at?: string;
+  updated_at?: string;
+}
+
+export interface CreateInsumoData {
+  idCategoria: number;
+  nombre: string;
+  unidadMedida: string;
+  stockActual: number;
+  stockMinimo: number;
+  costoUnitario: number;
+}
+
+export interface UpdateInsumoData extends Partial<CreateInsumoData> {}
+
+export interface AjustarStockData {
+  tipo: 'entrada' | 'ajuste';
+  cantidad: number;
+  motivo: string;
+}
+
+export interface ConsumoHistorico {
+  id: number;
+  cantidadUsada: number;
+  created_at: string;
+  fichaGrooming?: {
+    idFicha: number;
+    cita: {
+      mascota: {
+        nombre: string;
+      };
+      servicio: {
+        nombre: string;
+      };
+    };
+  };
+}

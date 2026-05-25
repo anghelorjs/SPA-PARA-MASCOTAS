@@ -234,7 +234,7 @@ export interface CreateInsumoData {
   costoUnitario: number;
 }
 
-export interface UpdateInsumoData extends Partial<CreateInsumoData> {}
+export type UpdateInsumoData = Partial<CreateInsumoData>;
 
 export interface AjustarStockData {
   tipo: 'entrada' | 'ajuste';
@@ -257,4 +257,45 @@ export interface ConsumoHistorico {
       };
     };
   };
+}
+
+// ==================== CATÁLOGO - MOVIMIENTOS ====================
+
+export interface MovimientoInventario {
+  id: number;
+  fecha: string;
+  producto_id: number;
+  producto_nombre: string;
+  tipoMovimiento: 'entrada' | 'salida' | 'ajuste';
+  cantidad: number;
+  motivo: string;
+  stock_resultante: number | null;
+}
+
+export interface TipoMovimiento {
+  id: string;
+  nombre: string;
+}
+
+export interface ProductoMovimiento {
+  id: number;
+  nombre: string;
+  variantes: Array<{
+    id: number;
+    nombre: string;
+    stock_actual: number;
+  }>;
+}
+
+export interface CreateMovimientoData {
+  idProducto: number;
+  tipoMovimiento: 'entrada' | 'salida' | 'ajuste';
+  cantidad: number;
+  variante_id: number;
+  motivo: string;
+}
+
+export interface MovimientosResponse {
+  movimientos: PaginatedResponse<MovimientoInventario>;
+  tipos_movimiento: TipoMovimiento[];
 }

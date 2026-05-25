@@ -31,7 +31,7 @@ const ClientesAdmin = () => <div className="p-6"><h1 className="text-2xl font-bo
 const MascotasAdmin = () => <div className="p-6"><h1 className="text-2xl font-bold">Mascotas</h1><p className="mt-4 text-gray-600">Gestión de mascotas del sistema.</p></div>;
 const ProductosAdmin = () => <div className="p-6"><h1 className="text-2xl font-bold">Productos</h1><p className="mt-4 text-gray-600">Catálogo de productos y variantes.</p></div>;
 const InsumosAdmin = () => <div className="p-6"><h1 className="text-2xl font-bold">Insumos</h1><p className="mt-4 text-gray-600">Gestión de insumos y stock.</p></div>;
-const CategoriasAdmin = () => <div className="p-6"><h1 className="text-2xl font-bold">Categorías</h1><p className="mt-4 text-gray-600">Gestión de categorías de productos e insumos.</p></div>;
+import { CategoriasAdmin } from "./pages/admin/catalogo/categorias/pages/CategoriasAdmin";
 const MovimientosAdmin = () => <div className="p-6"><h1 className="text-2xl font-bold">Movimientos de Inventario</h1><p className="mt-4 text-gray-600">Historial de movimientos de stock.</p></div>;
 const ReportesAdmin = () => <div className="p-6"><h1 className="text-2xl font-bold">Reportes</h1><p className="mt-4 text-gray-600">Generación de reportes del sistema.</p></div>;
 const ConfiguracionNegocio = () => <div className="p-6"><h1 className="text-2xl font-bold">Datos del Negocio</h1><p className="mt-4 text-gray-600">Configuración de la empresa.</p></div>;

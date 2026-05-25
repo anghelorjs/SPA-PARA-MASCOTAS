@@ -426,7 +426,7 @@ class CitaController extends ApiController
                 'idCita'     => $cita->idCita,
                 'tipo'       => 'confirmacion',
                 'canal'      => $cliente->canalContacto ?? 'whatsapp',
-                'mensaje'    => "✅ Tu cita para {$cita->mascota->nombre} el {$cita->fechaHoraInicio->format('d/m/Y H:i')} ha sido confirmada. ¡Te esperamos!",
+                'mensaje'    => "Tu cita para {$cita->mascota->nombre} el {$cita->fechaHoraInicio->format('d/m/Y H:i')} ha sido confirmada. ¡Te esperamos!",
                 'fechaEnvio' => now(),
                 'entregada'  => false,
             ]);

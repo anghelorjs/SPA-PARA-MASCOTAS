@@ -125,3 +125,82 @@ export interface DashboardAdminResponse {
   top_productos: TopProducto[];
   alertas_stock: AlertaStock[];
 }
+
+// ==================== CATÁLOGO - CATEGORÍAS ====================
+
+export interface Categoria {
+  idCategoria: number;
+  nombre: string;
+  tipo: 'producto' | 'insumo';
+  descripcion: string | null;
+  productos_count?: number;
+  insumos_count?: number;
+  created_at?: string;
+  updated_at?: string;
+}
+
+export interface CreateCategoriaData {
+  nombre: string;
+  tipo: 'producto' | 'insumo';
+  descripcion?: string;
+}
+
+export type UpdateCategoriaData = Partial<CreateCategoriaData>;
+
+// ==================== CATÁLOGO - PRODUCTOS ====================
+
+export interface VarianteProducto {
+  idVariante: number;
+  idProducto: number;
+  nombreVariante: string;
+  precio: number;
+  stock: number;
+  created_at?: string;
+  updated_at?: string;
+}
+
+export interface Producto {
+  idProducto: number;
+  idCategoria: number;
+  nombre: string;
+  descripcion: string | null;
+  precioBase: number;
+  activo: boolean;
+  stock_total?: number;
+  alerta_stock?: boolean;
+  categoria?: {
+    idCategoria: number;
+    nombre: string;
+  };
+  variantes?: VarianteProducto[];
+  created_at?: string;
+  updated_at?: string;
+}
+
+export interface CreateVarianteData {
+  nombreVariante: string;
+  precio: number;
+  stock: number;
+}
+
+export interface CreateProductoData {
+  idCategoria: number;
+  nombre: string;
+  descripcion?: string;
+  precioBase: number;
+  variantes: CreateVarianteData[];
+}
+
+export interface UpdateProductoData {
+  idCategoria?: number;
+  nombre?: string;
+  descripcion?: string;
+  precioBase?: number;
+  activo?: boolean;
+}
+
+export interface UpdateVarianteData {
+  nombreVariante?: string;
+  precio?: number;
+  stock?: number;
+}

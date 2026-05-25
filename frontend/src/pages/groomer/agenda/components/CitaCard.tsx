@@ -1,5 +1,17 @@
 // src/pages/groomer/agenda/components/CitaCard.tsx
-import { ClockIcon, ScissorsIcon, HeartIcon, ExclamationTriangleIcon, PlayIcon, DocumentTextIcon, BeakerIcon } from '@heroicons/react/24/outline';
+import { 
+  ClockIcon, 
+  ScissorsIcon, 
+  HeartIcon, 
+  ExclamationTriangleIcon, 
+  PlayIcon, 
+  DocumentTextIcon, 
+  BeakerIcon,
+  FaceSmileIcon,
+  ExclamationCircleIcon,
+  NoSymbolIcon,
+  ShieldCheckIcon
+} from '@heroicons/react/24/outline';
 import type { CitaGroomer } from '../../../../services/types/groomer';
 
 interface CitaCardProps {
@@ -21,12 +33,32 @@ export const CitaCard = ({
   const tieneFichaAbierta = cita.ficha_abierta;
   const tieneFichaCerrada = cita.tiene_ficha && !cita.ficha_abierta;
 
-  // Datos clínicos para mostrar
+  // Datos clínicos para mostrar con iconos de Heroicons
   const datosClinicos = [
-    { label: 'Temperamento', value: cita.mascota.temperamento, icon: '😺' },
-    { label: 'Alergias', value: cita.mascota.alergias, icon: '⚠️' },
-    { label: 'Restricciones', value: cita.mascota.restricciones, icon: '🚫' },
-    { label: 'Vacunas', value: cita.mascota.vacunas, icon: '💉' },
+    { 
+      label: 'Temperamento', 
+      value: cita.mascota.temperamento, 
+      icon: FaceSmileIcon,
+      iconColor: 'text-amber-600'
+    },
+    { 
+      label: 'Alergias', 
+      value: cita.mascota.alergias, 
+      icon: ExclamationCircleIcon,
+      iconColor: 'text-red-500'
+    },
+    { 
+      label: 'Restricciones', 
+      value: cita.mascota.restricciones, 
+      icon: NoSymbolIcon,
+      iconColor: 'text-orange-500'
+    },
+    { 
+      label: 'Vacunas', 
+      value: cita.mascota.vacunas, 
+      icon: ShieldCheckIcon,
+      iconColor: 'text-green-600'
+    },
   ].filter(d => d.value);
 
   return (
@@ -77,18 +109,21 @@ export const CitaCard = ({
         {/* Datos clínicos importantes */}
         {datosClinicos.length > 0 && (
           <div className="mb-3 p-2 bg-amber-50 rounded-lg border border-amber-100">
-            <div className="flex items-center gap-1 text-xs text-amber-700 font-medium mb-1">
+            <div className="flex items-center gap-1 text-xs text-amber-700 font-medium mb-1.5">
               <ExclamationTriangleIcon className="h-3 w-3" />
               <span>Datos importantes</span>
             </div>
             <div className="space-y-1">
-              {datosClinicos.map((dato, idx) => (
-                <div key={idx} className="text-xs text-gray-600 flex items-start gap-1">
-                  <span>{dato.icon}</span>
-                  <span className="font-medium">{dato.label}:</span>
-                  <span>{dato.value}</span>
-                </div>
-              ))}
+              {datosClinicos.map((dato, idx) => {
+                const IconComponent = dato.icon;
+                return (
+                  <div key={idx} className="text-xs text-gray-600 flex items-start gap-1.5">
+                    <IconComponent className={`h-3.5 w-3.5 flex-shrink-0 mt-0.5 ${dato.iconColor}`} />
+                    <span className="font-medium">{dato.label}:</span>
+                    <span className="truncate">{dato.value}</span>
+                  </div>
+                );
+              })}
             </div>
           </div>
         )}

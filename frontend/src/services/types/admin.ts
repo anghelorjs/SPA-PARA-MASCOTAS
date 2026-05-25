@@ -295,6 +295,15 @@ export interface CreateMovimientoData {
   motivo: string;
 }
 
+// Generic paginated response used across APIs
+export interface PaginatedResponse<T> {
+  data: T[];
+  total: number;
+  per_page?: number;
+  current_page?: number;
+  last_page?: number;
+}
+
 export interface MovimientosResponse {
   movimientos: PaginatedResponse<MovimientoInventario>;
   tipos_movimiento: TipoMovimiento[];

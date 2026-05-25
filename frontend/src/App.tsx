@@ -66,7 +66,7 @@ import { PerfilGroomer } from "./pages/groomer/perfil/pages/PerfilGroomer";
 import { DashboardCliente } from "./pages/cliente/dashboard/pages/DashboardCliente";
 import { MisMascotas } from "./pages/cliente/mascotas/pages/MisMascotas";
 import { DetalleMascota } from "./pages/cliente/mascotas/pages/DetalleMascota";
-const MisCitas = () => <div className="p-6"><h1 className="text-2xl font-bold">Mis Citas</h1><p className="mt-4 text-gray-600">Tus citas programadas.</p></div>;
+import { MisCitas } from "./pages/cliente/citas/pages/MisCitas";
 const CatalogoCliente = () => <div className="p-6"><h1 className="text-2xl font-bold">Catálogo</h1><p className="mt-4 text-gray-600">Productos disponibles.</p></div>;
 const HistorialServicios = () => <div className="p-6"><h1 className="text-2xl font-bold">Historial de Servicios</h1><p className="mt-4 text-gray-600">Servicios realizados.</p></div>;
 const HistorialCompras = () => <div className="p-6"><h1 className="text-2xl font-bold">Historial de Compras</h1><p className="mt-4 text-gray-600">Tus compras realizadas.</p></div>;
@@ -164,6 +164,7 @@ const AppRoutes = () => {
         <Route path="cliente/mis-mascotas" element={<MisMascotas />} />
         <Route path="cliente/mis-mascotas/:id" element={<DetalleMascota />} />
         <Route path="cliente/mis-citas" element={<MisCitas />} />
+        <Route path="cliente/agendado" element={<Navigate to="/cliente/mis-citas" replace />} />
         <Route path="cliente/catalogo" element={<CatalogoCliente />} />
         <Route path="cliente/historial/servicios" element={<HistorialServicios />} />
         <Route path="cliente/historial/compras" element={<HistorialCompras />} />

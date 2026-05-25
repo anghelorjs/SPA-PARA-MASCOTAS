@@ -133,7 +133,7 @@ export const Paso5Confirmacion = ({
             Creando cita pendiente...
           </span>
         ) : (
-          '📅 Crear Cita (Pendiente de Confirmación)'
+          'Crear Cita (Pendiente de Confirmación)'
         )}
       </button>
 

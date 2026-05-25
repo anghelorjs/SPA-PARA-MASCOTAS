@@ -311,17 +311,17 @@ class CitaController extends ApiController
                 'fechaHoraInicio' => $fechaHoraInicio,
                 'fechaHoraFin' => $fechaHoraFin,
                 'duracionCalculadaMin' => $duracion,
-                'estado' => 'programada',
+                'estado' => 'confirmada',
                 'observaciones' => $request->observaciones ?? null
             ]);
             
-            // Crear notificación de confirmación
+            // La cita ya queda confirmada porque fue agendada por el propio cliente.
             Notificacion::create([
                 'idCliente' => $cliente->idCliente,
                 'idCita' => $cita->idCita,
                 'tipo' => 'confirmacion',
                 'canal' => $cliente->canalContacto ?? 'whatsapp',
-                'mensaje' => "Cita agendada para {$mascota->nombre} el {$fechaHoraInicio->format('d/m/Y H:i')}",
+                'mensaje' => "Tu cita para {$mascota->nombre} el {$fechaHoraInicio->format('d/m/Y H:i')} ha sido confirmada. ¡Te esperamos!",
                 'fechaEnvio' => now(),
                 'entregada' => false
             ]);
@@ -332,7 +332,7 @@ class CitaController extends ApiController
                 'id' => $cita->idCita,
                 'fecha' => $cita->fechaHoraInicio->format('d/m/Y'),
                 'hora' => $cita->fechaHoraInicio->format('H:i')
-            ], 'Cita creada exitosamente', 201);
+            ], 'Cita confirmada exitosamente', 201);
             
         } catch (\Exception $e) {
             DB::rollBack();

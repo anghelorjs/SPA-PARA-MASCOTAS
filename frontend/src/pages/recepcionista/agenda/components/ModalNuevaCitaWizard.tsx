@@ -1,6 +1,14 @@
 // src/pages/recepcionista/agenda/components/ModalNuevaCitaWizard.tsx
 import { useState, useEffect } from 'react';
-import { XMarkIcon, CheckIcon } from '@heroicons/react/24/outline';
+import { 
+  XMarkIcon, 
+  CheckIcon, 
+  UserIcon, 
+  HeartIcon, 
+  ScissorsIcon, 
+  CalendarIcon, 
+  CheckCircleIcon 
+} from '@heroicons/react/24/outline';
 import { Paso1Cliente } from './Paso1Cliente';
 import { Paso2Mascota } from './Paso2Mascota';
 import { Paso3Servicio } from './Paso3Servicio';
@@ -20,11 +28,11 @@ interface ModalNuevaCitaWizardProps {
 }
 
 const STEPS = [
-  { number: 1, title: 'Cliente',   emoji: '👤', desc: 'Buscar o registrar' },
-  { number: 2, title: 'Mascota',   emoji: '🐾', desc: 'Seleccionar mascota' },
-  { number: 3, title: 'Servicio',  emoji: '✂️',  desc: 'Elegir servicio'    },
-  { number: 4, title: 'Horario',   emoji: '📅', desc: 'Fecha y groomer'    },
-  { number: 5, title: 'Confirmar', emoji: '✅', desc: 'Revisar y confirmar' },
+  { number: 1, title: 'Cliente',   icon: UserIcon, desc: 'Buscar o registrar' },
+  { number: 2, title: 'Mascota',   icon: HeartIcon, desc: 'Seleccionar mascota' },
+  { number: 3, title: 'Servicio',  icon: ScissorsIcon, desc: 'Elegir servicio' },
+  { number: 4, title: 'Horario',   icon: CalendarIcon, desc: 'Fecha y groomer' },
+  { number: 5, title: 'Confirmar', icon: CheckCircleIcon, desc: 'Revisar y confirmar' },
 ];
 
 export const ModalNuevaCitaWizard = ({
@@ -45,8 +53,8 @@ export const ModalNuevaCitaWizard = ({
     clientes, mascotas, servicios,
     slotsDisponibles,
     isLoadingSlots,
-    isLoadingServicios,   // ← viene del hook corregido
-    isLoadingMascotas,    // ← viene del hook corregido
+    isLoadingServicios,
+    isLoadingMascotas,
     isCreatingCita,
     setSelectedCliente, setSelectedMascota, setSelectedServicio, setSelectedSlot,
     buscarClientes, loadMascotas, loadServiciosConPrecios, loadSlotsDisponibles,
@@ -169,7 +177,7 @@ export const ModalNuevaCitaWizard = ({
                     fontSize: 20,
                   }}
                 >
-                  🐾
+                  <HeartIcon style={{ width: 20, height: 20, color: 'white' }} />
                 </div>
                 <div>
                   <h2 style={{ color: '#fff', fontSize: 18, fontWeight: 700, margin: 0, lineHeight: 1.2 }}>
@@ -194,8 +202,10 @@ export const ModalNuevaCitaWizard = ({
             {/* Steps */}
             <div style={{ display: 'flex', alignItems: 'center', gap: 0 }}>
               {STEPS.map((step, idx) => {
-                const done   = step.number < currentStep;
+                const done = step.number < currentStep;
                 const active = step.number === currentStep;
+                const IconComponent = step.icon;
+                
                 return (
                   <div key={step.number} style={{ display: 'flex', alignItems: 'center', flex: 1 }}>
                     <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', flex: 1 }}>
@@ -210,7 +220,13 @@ export const ModalNuevaCitaWizard = ({
                           boxShadow: active ? '0 0 0 4px rgba(255,255,255,0.15)' : 'none',
                         }}
                       >
-                        {done ? <CheckIcon style={{ width: 14, height: 14 }} /> : step.number}
+                        {done ? (
+                          <CheckIcon style={{ width: 14, height: 14 }} />
+                        ) : active ? (
+                          <IconComponent style={{ width: 14, height: 14 }} />
+                        ) : (
+                          step.number
+                        )}
                       </div>
                       <span
                         style={{
@@ -241,7 +257,10 @@ export const ModalNuevaCitaWizard = ({
           {/* ── STEP LABEL ── */}
           <div style={{ padding: '14px 28px 0', flexShrink: 0 }}>
             <div className="flex items-center gap-2">
-              <span style={{ fontSize: 18 }}>{STEPS[currentStep - 1].emoji}</span>
+              {(() => {
+                const IconComponent = STEPS[currentStep - 1].icon;
+                return <IconComponent style={{ width: 20, height: 20, color: '#2563eb' }} />;
+              })()}
               <div>
                 <p style={{ margin: 0, fontSize: 15, fontWeight: 700, color: '#0f172a' }}>
                   Paso {currentStep}: {STEPS[currentStep - 1].title}

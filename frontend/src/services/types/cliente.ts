@@ -169,3 +169,87 @@ export interface FotosSesionResponse {
     despues: FotoMascota[];
   };
 }
+
+// ==================== MIS CITAS ====================
+
+export interface CitaCliente {
+  id: number;
+  fecha: string;
+  hora_inicio: string;
+  hora_fin: string;
+  duracion: number;
+  servicio: string;
+  servicio_id: number;
+  groomer: string;
+  mascota: string;
+  mascota_id: number;
+  precio: number;
+  estado: 'programada' | 'confirmada' | 'en_curso' | 'completada' | 'cancelada' | 'pendiente_confirmacion';
+  estado_color: string;
+  puede_cancelar: boolean;
+}
+
+export interface DetalleCitaCliente {
+  id: number;
+  fecha: string;
+  hora_inicio: string;
+  hora_fin: string;
+  duracion: number;
+  servicio: string;
+  servicio_id: number;
+  groomer: string;
+  groomer_id: number;
+  mascota: {
+    id: number;
+    nombre: string;
+    especie: string;
+    raza: string;
+    peso_kg: number;
+    rango_nombre: string | null;
+    temperamento: string | null;
+    alergias: string[] | null;
+    restricciones: string[] | null;
+  };
+  precio: number;
+  estado: string;
+  observaciones: string | null;
+  canal_notificacion: string;
+}
+
+// ==================== AGENDADO ====================
+
+export interface MascotaAgendado {
+  id: number;
+  nombre: string;
+  especie: string;
+  raza: string | null;
+  tamanio: string | null;
+  peso_kg: number;
+  rango_nombre: string | null;
+  rango_id: number | null;
+  temperamento: string | null;
+}
+
+export interface ServicioAgendado {
+  id: number;
+  nombre: string;
+  duracion_minutos: number;
+  precio: number;
+  descripcion: string | null;
+}
+
+export interface SlotAgendado {
+  id_groomer: number;
+  groomer_nombre: string;
+  hora_inicio: string;
+  hora_fin: string;
+}
+
+export interface CreateCitaClienteData {
+  idMascota: number;
+  idServicio: number;
+  idGroomer: number;
+  fecha: string;
+  hora_inicio: string;
+  observaciones?: string;
+}

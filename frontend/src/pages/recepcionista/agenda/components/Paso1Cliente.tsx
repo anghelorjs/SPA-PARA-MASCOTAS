@@ -87,7 +87,7 @@ export const Paso1Cliente = ({
                 padding: '1px 8px', borderRadius: 20, fontWeight: 600,
               }}
             >
-              📱 {selectedCliente.canal_contacto || 'whatsapp'}
+               {selectedCliente.canal_contacto || 'whatsapp'}
             </span>
           </div>
           <button

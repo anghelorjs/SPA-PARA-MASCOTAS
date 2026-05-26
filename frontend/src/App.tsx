@@ -10,6 +10,7 @@ import { ForceChangePassword } from "./pages/auth/ForceChangePassword";
 import { GoogleCallback } from "./pages/auth/GoogleCallback";
 import { ForgotPassword } from "./pages/auth/ForgotPassword";
 import { ResetPassword } from "./pages/auth/ResetPassword";
+import { CartProvider } from "./pages/cliente/catalogo/context/CartContext";
 
 // Pages de Auth
 import { Login } from "./pages/auth/Login";
@@ -67,7 +68,8 @@ import { DashboardCliente } from "./pages/cliente/dashboard/pages/DashboardClien
 import { MisMascotas } from "./pages/cliente/mascotas/pages/MisMascotas";
 import { DetalleMascota } from "./pages/cliente/mascotas/pages/DetalleMascota";
 import { MisCitas } from "./pages/cliente/citas/pages/MisCitas";
-const CatalogoCliente = () => <div className="p-6"><h1 className="text-2xl font-bold">Catálogo</h1><p className="mt-4 text-gray-600">Productos disponibles.</p></div>;
+import { CatalogoCliente } from "./pages/cliente/catalogo/pages/CatalogoCliente";
+import { CarritoCliente } from "./pages/cliente/catalogo/pages/CarritoCliente";
 const HistorialServicios = () => <div className="p-6"><h1 className="text-2xl font-bold">Historial de Servicios</h1><p className="mt-4 text-gray-600">Servicios realizados.</p></div>;
 const HistorialCompras = () => <div className="p-6"><h1 className="text-2xl font-bold">Historial de Compras</h1><p className="mt-4 text-gray-600">Tus compras realizadas.</p></div>;
 import { PerfilCliente } from "./pages/cliente/perfil/pages/PerfilCliente";
@@ -166,6 +168,7 @@ const AppRoutes = () => {
         <Route path="cliente/mis-citas" element={<MisCitas />} />
         <Route path="cliente/agendado" element={<Navigate to="/cliente/mis-citas" replace />} />
         <Route path="cliente/catalogo" element={<CatalogoCliente />} />
+        <Route path="cliente/carrito" element={<CarritoCliente />} />
         <Route path="cliente/historial/servicios" element={<HistorialServicios />} />
         <Route path="cliente/historial/compras" element={<HistorialCompras />} />
         <Route path="cliente/perfil" element={<PerfilCliente />} />
@@ -184,8 +187,11 @@ function App() {
   const { ToastContainer } = useToast();
   return (
     <AuthProvider>
-      <AppRoutes />
-      <ToastContainer />
+      {/* ✅ Envolver AppRoutes con CartProvider */}
+      <CartProvider>
+        <AppRoutes />
+        <ToastContainer />
+      </CartProvider>
     </AuthProvider>
   );
 }

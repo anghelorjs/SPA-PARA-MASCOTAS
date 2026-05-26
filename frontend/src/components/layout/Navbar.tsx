@@ -1,5 +1,6 @@
 // src/components/layout/Navbar.tsx
 import { useState, useRef, useEffect } from "react";
+import { ShoppingCartIcon } from '@heroicons/react/24/outline';
 import { useNavigate } from "react-router-dom";
 import { 
   FiBell, 
@@ -232,6 +233,35 @@ export default function Navbar({ sidebarCollapsed }: NavbarProps) {
             </div>
           )}
         </div>
+
+        {/* Carrito - solo para clientes */}
+        {isCliente && (
+          <div className="relative">
+            <button
+              onClick={() => navigate('/cliente/carrito')}
+              className="w-[38px] h-[38px] flex items-center justify-center rounded-lg bg-transparent text-white/70 text-lg relative transition-all duration-150 hover:bg-white/10 hover:text-white"
+            >
+              <ShoppingCartIcon className="h-5 w-5" />
+              {(() => {
+                const stored = localStorage.getItem('petspa_carrito');
+                if (stored) {
+                  try {
+                    const items = JSON.parse(stored);
+                    const totalItems = items.reduce((sum: number, item: any) => sum + item.cantidad, 0);
+                    if (totalItems > 0) {
+                      return (
+                        <span className="absolute -top-1 -right-1 min-w-[20px] h-5 bg-red-500 text-white text-xs rounded-full flex items-center justify-center px-1">
+                          {totalItems > 9 ? '9+' : totalItems}
+                        </span>
+                      );
+                    }
+                  } catch (e) {}
+                }
+                return null;
+              })()}
+            </button>
+          </div>
+        )}
 
         {/* Separador */}
         <div className="w-px h-8 bg-white/10" />

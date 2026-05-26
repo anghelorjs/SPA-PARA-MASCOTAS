@@ -253,3 +253,55 @@ export interface CreateCitaClienteData {
   hora_inicio: string;
   observaciones?: string;
 }
+
+// ==================== CATÁLOGO CLIENTE ====================
+
+export interface VarianteCatalogo {
+  id: number;
+  nombre: string;
+  precio: number;
+  stock: number;
+}
+
+export interface ProductoCatalogo {
+  id: number;
+  nombre: string;
+  descripcion: string | null;
+  categoria_id: number;
+  categoria_nombre: string;
+  precio_desde: number;
+  stock_total: number;
+  variantes: VarianteCatalogo[];
+  imagen_url: string | null;
+}
+
+export interface CategoriaCatalogo {
+  id: number;
+  nombre: string;
+  cantidad_productos: number;
+}
+
+export interface ItemCarrito {
+  idVariante: number;
+  nombreProducto: string;
+  nombreVariante: string;
+  precioUnitario: number;
+  cantidad: number;
+  subtotal: number;
+  stock: number;
+}
+
+export interface CrearPedidoData {
+  items: Array<{
+    idVariante: number;
+    cantidad: number;
+  }>;
+  canal: 'whatsapp' | 'telegram';
+}
+
+export interface PedidoResponse {
+  pedido_id: number;
+  subtotal: number;
+  mensaje: string;
+  enlace: string;
+}

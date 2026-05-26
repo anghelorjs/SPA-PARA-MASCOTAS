@@ -1,3 +1,5 @@
+import type { Venta } from "../../pages/recepcionista/ventas/types";
+
 // src/services/types/admin.ts
 export interface PerfilAdmin {
   idUsuario: number;
@@ -307,4 +309,133 @@ export interface PaginatedResponse<T> {
 export interface MovimientosResponse {
   movimientos: PaginatedResponse<MovimientoInventario>;
   tipos_movimiento: TipoMovimiento[];
+}
+
+// ==================== CLIENTES ADMIN ====================
+
+export interface ClienteAdmin {
+  idCliente: number;
+  idUsuario: number;
+  direccion: string | null;
+  canalContacto: 'whatsapp' | 'telegram' | 'email' | 'sms' | null;
+  user: {
+    idUsuario: number;
+    nombre: string;
+    apellido: string;
+    email: string;
+    telefono: string | null;
+    activo: boolean;
+  };
+  cant_mascotas: number;
+  ultima_cita: string | null;
+  ultima_cita_servicio: string | null;
+  created_at?: string;
+}
+
+export interface CreateClienteAdminData {
+  nombre: string;
+  apellido: string;
+  email: string;
+  telefono?: string;
+  direccion?: string;
+  canalContacto?: 'whatsapp' | 'telegram' | 'email' | 'sms';
+}
+
+export interface UpdateClienteAdminData {
+  nombre?: string;
+  apellido?: string;
+  telefono?: string;
+  direccion?: string;
+  canalContacto?: 'whatsapp' | 'telegram' | 'email' | 'sms';
+  activo?: boolean;
+}
+
+export interface PerfilClienteAdmin {
+  cliente: {
+    idCliente: number;
+    direccion: string | null;
+    canalContacto: string | null;
+    user: {
+      idUsuario: number;
+      nombre: string;
+      apellido: string;
+      email: string;
+      telefono: string | null;
+      activo: boolean;
+    };
+    mascotas: MascotaAdmin[];
+    ventas: Venta[];
+  };
+  estadisticas: {
+    total_citas: number;
+    total_gastado: number;
+    mascotas_registradas: number;
+  };
+}
+
+// ==================== MASCOTAS ADMIN ====================
+
+export interface MascotaAdmin {
+  idMascota: number;
+  idCliente: number;
+  nombre: string;
+  especie: string;
+  raza: string | null;
+  tamanio: string | null;
+  pesoKg: number;
+  rango_nombre: string | null;
+  fecha_nacimiento: string | null;
+  temperamento: string | null;
+  alergias: string[] | null;
+  restricciones: string[] | null;
+  vacunas: string[] | null;
+  ultima_cita: string | null;
+  ultimo_servicio: string | null;
+  cliente?: {
+    idCliente: number;
+    user: {
+      nombre: string;
+      apellido: string;
+    };
+  };
+  rangoPeso?: {
+    idRango: number;
+    nombre: string;
+  };
+}
+
+export interface CreateMascotaAdminData {
+  idCliente: number;
+  nombre: string;
+  especie: string;
+  raza?: string;
+  tamanio?: string;
+  pesoKg?: number;
+  fechaNacimiento?: string;
+  temperamento?: string;
+  alergias?: string[];
+  restricciones?: string[];
+  vacunas?: string[];
+}
+
+export interface FichaMascotaAdmin {
+  mascota: MascotaAdmin & {
+    citas: Array<{
+      idCita: number;
+      fechaHoraInicio: string;
+      servicio: { nombre: string };
+      groomer: { user: { nombre: string; apellido: string } };
+      fichaGrooming: { idFicha: number } | null;
+    }>;
+    fotos: Array<{
+      idFoto: number;
+      urlFoto: string;
+      tipo: string;
+    }>;
+  };
+  estadisticas: {
+    total_citas: number;
+    citas_completadas: number;
+    fotos_registradas: number;
+  };
 }

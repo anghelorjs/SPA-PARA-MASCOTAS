@@ -28,8 +28,8 @@ import { DashboardAdmin } from "./pages/admin/dashboard/pages/DashboardAdmin";
 // Componentes placeholder para las demás pantallas del administrador
 import { AgendaAdmin } from "./pages/admin/agenda/pages/AgendaAdmin";
 const GroomingAdmin = () => <div className="p-6"><h1 className="text-2xl font-bold">Grooming</h1><p className="mt-4 text-gray-600">Gestión de fichas de grooming y galería de fotos.</p></div>;
-const ClientesAdmin = () => <div className="p-6"><h1 className="text-2xl font-bold">Clientes</h1><p className="mt-4 text-gray-600">Gestión de clientes y sus mascotas.</p></div>;
-const MascotasAdmin = () => <div className="p-6"><h1 className="text-2xl font-bold">Mascotas</h1><p className="mt-4 text-gray-600">Gestión de mascotas del sistema.</p></div>;
+import { ClientesAdmin } from "./pages/admin/clientes/clientes/pages/ClientesAdmin";
+import { MascotasAdmin } from "./pages/admin/clientes/mascotas/pages/MascotasAdmin";
 import { ProductosAdmin } from "./pages/admin/catalogo/productos/pages/ProductosAdmin";
 import { InsumosAdmin } from "./pages/admin/catalogo/insumos/pages/InsumosAdmin";
 import { CategoriasAdmin } from "./pages/admin/catalogo/categorias/pages/CategoriasAdmin";
@@ -126,8 +126,8 @@ const AppRoutes = () => {
         <Route path="admin/dashboard" element={<DashboardAdmin />} />
         <Route path="admin/agenda" element={<AgendaAdmin />} />
         <Route path="admin/grooming" element={<GroomingAdmin />} />
-        <Route path="admin/clientes" element={<ClientesAdmin />} />
-        <Route path="admin/mascotas" element={<MascotasAdmin />} />
+        <Route path="admin/clientes" element={<ClientesAdmin />} />        
+        <Route path="admin/mascotas" element={<MascotasAdmin />} />  
         <Route path="admin/catalogo/productos" element={<ProductosAdmin />} />
         <Route path="admin/catalogo/insumos" element={<InsumosAdmin />} />
         <Route path="admin/catalogo/categorias" element={<CategoriasAdmin />} />

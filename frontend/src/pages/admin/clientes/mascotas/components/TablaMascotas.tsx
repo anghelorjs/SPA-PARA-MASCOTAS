@@ -18,6 +18,14 @@ interface TablaMascotasProps {
 }
 
 export const TablaMascotas = ({ mascotas, isLoading, onVerDetalle, onEditar }: TablaMascotasProps) => {
+  const getRangoNombre = (mascota: MascotaAdmin) => mascota.rangoPeso?.nombre || mascota.rango_nombre || 'No asignado';
+  const getFechaNacimiento = (mascota: MascotaAdmin) => mascota.fechaNacimiento || mascota.fecha_nacimiento;
+  const formatDate = (value?: string | null) => {
+    if (!value) return 'No registrada';
+    const date = new Date(value);
+    return Number.isNaN(date.getTime()) ? value : date.toLocaleDateString('es-ES');
+  };
+
   if (isLoading) {
     return (
       <div className="bg-white rounded-lg shadow overflow-hidden">
@@ -59,6 +67,9 @@ export const TablaMascotas = ({ mascotas, isLoading, onVerDetalle, onEditar }: T
               </th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                 Rango
+              </th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                Nacimiento
               </th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                 Última Cita
@@ -107,8 +118,14 @@ export const TablaMascotas = ({ mascotas, isLoading, onVerDetalle, onEditar }: T
                 <td className="px-6 py-4">
                   <span className="inline-flex items-center gap-1 px-2 py-1 text-xs rounded-full bg-blue-100 text-blue-700">
                     <TagIcon className="h-3 w-3" />
-                    {mascota.rango_nombre || 'No asignado'}
+                    {getRangoNombre(mascota)}
                   </span>
+                </td>
+                <td className="px-6 py-4">
+                  <div className="flex items-center gap-1 text-sm text-gray-600">
+                    <CalendarIcon className="h-3.5 w-3.5 text-gray-400" />
+                    {formatDate(getFechaNacimiento(mascota))}
+                  </div>
                 </td>
                 <td className="px-6 py-4">
                   {mascota.ultima_cita ? (

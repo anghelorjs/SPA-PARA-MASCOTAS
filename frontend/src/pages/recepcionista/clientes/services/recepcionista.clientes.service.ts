@@ -9,6 +9,7 @@ export interface CreateClienteData {
   email: string;
   telefono?: string;
   direccion?: string;
+  preferencias?: string[];
   canalContacto?: 'whatsapp' | 'telegram' | 'email' | 'sms';
 }
 
@@ -21,7 +22,31 @@ export interface CreateMascotaData {
   fechaNacimiento?: string;
   temperamento?: string;
   alergias?: string[];
+  restricciones?: string[];
   vacunas?: string[];
+}
+
+export interface UsuarioCliente {
+  idUsuario: number;
+  nombre: string;
+  apellido: string;
+  email: string;
+  telefono: string | null;
+  activo?: boolean;
+}
+
+export interface ClienteRecepcionista {
+  idCliente: number;
+  idUsuario: number;
+  direccion: string | null;
+  preferencias: string[] | string | null;
+  canalContacto: 'whatsapp' | 'telegram' | 'email' | 'sms' | null;
+  user: UsuarioCliente;
+  cant_mascotas: number;
+  ultima_cita: string | null;
+  ultimo_servicio?: string | null;
+  ultima_cita_servicio?: string | null;
+  mascotas?: MascotaRecepcionista[];
 }
 
 export interface ClienteSearchResult {
@@ -35,7 +60,7 @@ export interface ClienteSearchResult {
 
 export interface ClienteListResponse {
   current_page: number;
-  data: ClienteSearchResult[];
+  data: ClienteRecepcionista[];
   first_page_url: string;
   from: number;
   last_page: number;
@@ -48,20 +73,48 @@ export interface ClienteListResponse {
   total: number;
 }
 
-export interface MascotaData {
+export interface CitaMascotaRecepcionista {
+  idCita: number;
+  fechaHoraInicio: string;
+  estado: string;
+  servicio?: { nombre: string };
+  groomer?: { user?: { nombre: string; apellido: string } };
+}
+
+export interface MascotaRecepcionista {
   idMascota: number;
+  idCliente?: number;
   nombre: string;
   especie: string;
   raza: string | null;
-  pesoKg: number;
+  pesoKg: number | string | null;
+  rango_nombre?: string | null;
   rangoPeso: {
     idRango: number;
     nombre: string;
   } | null;
   temperamento: string | null;
   alergias: string[] | null;
+  restricciones?: string[] | null;
   vacunas: string[] | null;
   fechaNacimiento: string | null;
+  citas?: CitaMascotaRecepcionista[];
+}
+
+export interface PerfilClienteRecepcionista {
+  cliente: ClienteRecepcionista & {
+    mascotas: MascotaRecepcionista[];
+  };
+  estadisticas: {
+    total_citas: number;
+    total_gastado: number;
+    mascotas_registradas: number;
+  };
+}
+
+export interface FichaMascotaRecepcionista {
+  mascota: MascotaRecepcionista;
+  historial_citas: CitaMascotaRecepcionista[];
 }
 
 interface ApiResponse<T> {
@@ -117,8 +170,8 @@ export const recepcionistaClienteService = {
    * Obtener detalle de un cliente
    * @param idCliente - ID del cliente
    */
-  async getCliente(idCliente: number): Promise<any> {
-    const response = await api.get<ApiResponse<any>>(`/recepcionista/clientes/${idCliente}`);
+  async getCliente(idCliente: number): Promise<PerfilClienteRecepcionista> {
+    const response = await api.get<ApiResponse<PerfilClienteRecepcionista>>(`/recepcionista/clientes/${idCliente}`);
     return response.data.data;
   },
 
@@ -145,8 +198,8 @@ export const recepcionistaClienteService = {
    * Obtener todas las mascotas de un cliente
    * @param clienteId - ID del cliente
    */
-  async getMascotasPorCliente(clienteId: number): Promise<MascotaData[]> {
-    const response = await api.get<ApiResponse<MascotaData[]>>(`/recepcionista/clientes/${clienteId}/mascotas`);
+  async getMascotasPorCliente(clienteId: number): Promise<MascotaRecepcionista[]> {
+    const response = await api.get<ApiResponse<MascotaRecepcionista[]>>(`/recepcionista/clientes/${clienteId}/mascotas`);
     return response.data.data;
   },
 
@@ -154,8 +207,8 @@ export const recepcionistaClienteService = {
    * Obtener detalle de una mascota
    * @param mascotaId - ID de la mascota
    */
-  async getMascota(mascotaId: number): Promise<MascotaData> {
-    const response = await api.get<ApiResponse<MascotaData>>(`/recepcionista/mascotas/${mascotaId}`);
+  async getMascota(mascotaId: number): Promise<FichaMascotaRecepcionista> {
+    const response = await api.get<ApiResponse<FichaMascotaRecepcionista>>(`/recepcionista/mascotas/${mascotaId}`);
     return response.data.data;
   },
 

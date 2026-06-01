@@ -34,7 +34,7 @@ import { ProductosAdmin } from "./pages/admin/catalogo/productos/pages/Productos
 import { InsumosAdmin } from "./pages/admin/catalogo/insumos/pages/InsumosAdmin";
 import { CategoriasAdmin } from "./pages/admin/catalogo/categorias/pages/CategoriasAdmin";
 import { MovimientosAdmin } from "./pages/admin/catalogo/movimientos/pages/MovimientosAdmin";
-const ReportesAdmin = () => <div className="p-6"><h1 className="text-2xl font-bold">Reportes</h1><p className="mt-4 text-gray-600">Generación de reportes del sistema.</p></div>;
+import { ReportesAdmin } from "./pages/admin/reportes/pages/ReportesAdmin";
 const ConfiguracionNegocio = () => <div className="p-6"><h1 className="text-2xl font-bold">Datos del Negocio</h1><p className="mt-4 text-gray-600">Configuración de la empresa.</p></div>;
 import { UsuariosPage } from "./pages/admin/configuracion/usuarios/pages/UsuariosPage";
 import { LogsPage } from "./pages/admin/configuracion/logs/pages/LogsPage";
@@ -47,9 +47,7 @@ import { PedidosAdmin } from "./pages/admin/pedidos/pages/PedidosAdmin";
 // ========================
 import { DashboardRecepcionista } from "./pages/recepcionista/dashboard/pages/DashboardRecepcionista";
 import { AgendaRecepcionista } from "./pages/recepcionista/agenda/pages/AgendaRecepcionista";
-const ClientesRecepcionista = () => <div className="p-6"><h1 className="text-2xl font-bold">Clientes</h1><p className="mt-4 text-gray-600">Gestión de clientes.</p></div>;
-const MascotasRecepcionista = () => <div className="p-6"><h1 className="text-2xl font-bold">Mascotas</h1><p className="mt-4 text-gray-600">Gestión de mascotas.</p></div>;
-// ✅ AGREGA ESTE IMPORT:
+import { ClientesRecepcionista } from "./pages/recepcionista/clientes/pages/ClientesRecepcionista";
 import { VentasRecepcionista } from "./pages/recepcionista/ventas/pages/VentasRecepcionista";
 const NotificacionesRecepcionista = () => <div className="p-6"><h1 className="text-2xl font-bold">Notificaciones</h1><p className="mt-4 text-gray-600">Envío de notificaciones a clientes.</p></div>;
 import { PerfilRecepcionista } from "./pages/recepcionista/perfil/pages/PerfilRecepcionista";
@@ -72,8 +70,8 @@ import { DetalleMascota } from "./pages/cliente/mascotas/pages/DetalleMascota";
 import { MisCitas } from "./pages/cliente/citas/pages/MisCitas";
 import { CatalogoCliente } from "./pages/cliente/catalogo/pages/CatalogoCliente";
 import { CarritoCliente } from "./pages/cliente/catalogo/pages/CarritoCliente";
-const HistorialServicios = () => <div className="p-6"><h1 className="text-2xl font-bold">Historial de Servicios</h1><p className="mt-4 text-gray-600">Servicios realizados.</p></div>;
-const HistorialCompras = () => <div className="p-6"><h1 className="text-2xl font-bold">Historial de Compras</h1><p className="mt-4 text-gray-600">Tus compras realizadas.</p></div>;
+import { ServiciosHistorial } from "./pages/cliente/historial/servicios/pages/ServiciosHistorial";
+import { ComprasHistorial } from "./pages/cliente/historial/compras/pages/ComprasHistorial";
 import { PerfilCliente } from "./pages/cliente/perfil/pages/PerfilCliente";
 
 // ============================================================
@@ -149,7 +147,6 @@ const AppRoutes = () => {
         <Route path="recepcionista/agenda" element={<AgendaRecepcionista />} />
         <Route path="recepcionista/pedidos" element={<PedidosRecepcionista />} />
         <Route path="recepcionista/clientes" element={<ClientesRecepcionista />} />
-        <Route path="recepcionista/mascotas" element={<MascotasRecepcionista />} />
         <Route path="recepcionista/ventas" element={<VentasRecepcionista />} />
         <Route path="recepcionista/notificaciones" element={<NotificacionesRecepcionista />} />
         <Route path="recepcionista/perfil" element={<PerfilRecepcionista />} />
@@ -173,8 +170,8 @@ const AppRoutes = () => {
         <Route path="cliente/agendado" element={<Navigate to="/cliente/mis-citas" replace />} />
         <Route path="cliente/catalogo" element={<CatalogoCliente />} />
         <Route path="cliente/carrito" element={<CarritoCliente />} />
-        <Route path="cliente/historial/servicios" element={<HistorialServicios />} />
-        <Route path="cliente/historial/compras" element={<HistorialCompras />} />
+        <Route path="cliente/historial/servicios" element={<ServiciosHistorial />} />
+        <Route path="cliente/historial/compras" element={<ComprasHistorial />} />
         <Route path="cliente/perfil" element={<PerfilCliente />} />
 
         {/* Ruta por defecto dentro del layout */}

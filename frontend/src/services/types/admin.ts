@@ -390,6 +390,7 @@ export interface MascotaAdmin {
   pesoKg: number;
   rango_nombre: string | null;
   fecha_nacimiento: string | null;
+  fechaNacimiento?: string | null;
   temperamento: string | null;
   alergias: string[] | null;
   restricciones: string[] | null;
@@ -443,4 +444,211 @@ export interface FichaMascotaAdmin {
     citas_completadas: number;
     fotos_registradas: number;
   };
+}
+
+// ==================== REPORTES ====================
+
+export interface FiltrosReporte {
+  fecha_desde: string;
+  fecha_hasta: string;
+  groomer_id?: number;
+  categoria_id?: number;
+}
+
+export interface CitaPorDia {
+  fecha: string;
+  total: number;
+  completadas: number;
+  canceladas: number;
+}
+
+export interface CitaPorGroomer {
+  groomer: string;
+  total_citas: number;
+  completadas: number;
+  canceladas: number;
+  porcentaje: number;
+}
+
+export interface CitaPorServicio {
+  servicio: string;
+  total_citas: number;
+  porcentaje: number;
+}
+
+export interface FranjaHoraria {
+  franja: string;
+  citas: number;
+}
+
+export interface OcupacionFranja {
+  groomer: string;
+  franjas: FranjaHoraria[];
+}
+
+export interface EstadisticasAgenda {
+  total_citas: number;
+  citas_completadas: number;
+  citas_canceladas: number;
+  tasa_completadas: number;
+  tasa_canceladas: number;
+}
+
+export interface ReporteAgendaResponse {
+  estadisticas: EstadisticasAgenda;
+  grafica_citas_por_dia: CitaPorDia[];
+  grafica_citas_por_groomer: CitaPorGroomer[];
+  grafica_citas_por_servicio: CitaPorServicio[];
+  ocupacion_franjas: OcupacionFranja[];
+  canceladas_vs_completadas: { tipo: string; total: number }[];
+  export_data: any[];
+}
+
+// ==================== REPORTE INGRESOS ====================
+
+export interface IngresoPorDia {
+  fecha: string;
+  productos: number;
+  servicios: number;
+  total: number;
+}
+
+export interface IngresoPorTipo {
+  tipo: string;
+  total: number;
+}
+
+export interface IngresoPorMedioPago {
+  medio: string;
+  total: number;
+  porcentaje: number;
+}
+
+export interface TicketEstimadoReal {
+  cita_id: number;
+  servicio: string;
+  precio_base: number;
+  precio_ajustado: number;
+  diferencia: number;
+}
+
+export interface ResumenIngresos {
+  ingresos_productos: number;
+  ingresos_servicios: number;
+  total_ingresos: number;
+  ticket_promedio_general: number;
+}
+
+export interface TicketPromedioPorDia {
+  fecha: string;
+  promedio: number;
+}
+
+export interface ReporteIngresosResponse {
+  resumen: ResumenIngresos;
+  ticket_promedio_por_dia: TicketPromedioPorDia[];
+  grafica_ingresos_diarios: IngresoPorDia[];
+  ingresos_por_tipo: IngresoPorTipo[];
+  ingresos_por_medio_pago: IngresoPorMedioPago[];
+  ticket_estimado_real: TicketEstimadoReal[];
+  export_data: any[];
+}
+
+// ==================== REPORTE INVENTARIO ====================
+
+export interface ProductoCritico {
+  id: number;
+  nombre: string;
+  categoria: string;
+  stock_actual: number;
+  stock_minimo: number;
+  critico: boolean;
+}
+
+export interface InsumoConsumido {
+  insumo_id: number;
+  nombre: string;
+  categoria: string;
+  unidad_medida: string;
+  total_consumido: number;
+}
+
+export interface ProductoVendidoReporte {
+  producto_id: number;
+  nombre: string;
+  unidades_vendidas: number;
+  ingresos: number;
+}
+
+export interface MovimientoInventarioReporte {
+  fecha: string;
+  producto: string;
+  tipo: string;
+  cantidad: number;
+  motivo: string;
+}
+
+export interface AlertaStockReporte {
+  productos: ProductoCritico[];
+  insumos: any[];
+}
+
+export interface ReporteInventarioResponse {
+  productos_criticos: ProductoCritico[];
+  insumos_mas_consumidos: InsumoConsumido[];
+  productos_mas_vendidos: ProductoVendidoReporte[];
+  movimientos_recientes: MovimientoInventarioReporte[];
+  alertas_stock: AlertaStockReporte;
+  export_data: any;
+}
+
+// ==================== REPORTE CLIENTES ====================
+
+export interface TopClienteReporte {
+  id: number;
+  nombre: string;
+  telefono: string | null;
+  email: string;
+  total_citas: number;
+  total_gastado: number;
+}
+
+export interface ClienteInactivo {
+  id: number;
+  nombre: string;
+  telefono: string | null;
+  email: string;
+  ultima_cita: string;
+  dias_inactivo: number | null;
+}
+
+export interface TopMascotaReporte {
+  id: number;
+  nombre: string;
+  especie: string;
+  raza: string | null;
+  dueno: string;
+  total_citas: number;
+  citas_periodo: number;
+}
+
+export interface DistribucionEspecie {
+  especie: string;
+  total: number;
+  porcentaje: number;
+}
+
+export interface ClientesNuevosPorMes {
+  mes: string;
+  año: number;
+  total: number;
+}
+
+export interface ReporteClientesResponse {
+  top_clientes: TopClienteReporte[];
+  clientes_inactivos: ClienteInactivo[];
+  top_mascotas: TopMascotaReporte[];
+  distribucion_por_especie: DistribucionEspecie[];
+  clientes_nuevos_por_mes: ClientesNuevosPorMes[];
+  export_data: any;
 }

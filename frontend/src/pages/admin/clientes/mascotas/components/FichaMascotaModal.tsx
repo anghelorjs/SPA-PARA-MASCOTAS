@@ -54,6 +54,18 @@ const normalizeList = (value: unknown): string[] => {
   return [];
 };
 
+const getRangoNombre = (mascota: FichaMascotaAdmin['mascota']) =>
+  mascota.rangoPeso?.nombre || mascota.rango_nombre || 'No asignado';
+
+const getFechaNacimiento = (mascota: FichaMascotaAdmin['mascota']) =>
+  mascota.fechaNacimiento || mascota.fecha_nacimiento;
+
+const formatDate = (value?: string | null) => {
+  if (!value) return 'No registrada';
+  const date = new Date(value);
+  return Number.isNaN(date.getTime()) ? value : date.toLocaleDateString('es-ES');
+};
+
 // ✅ Componente Lightbox interno
 const Lightbox = ({ 
   fotos, 
@@ -269,7 +281,7 @@ export const FichaMascotaModal = ({ isOpen, mascotaId, mascotaNombre, onClose }:
                       <TagIcon className="h-4 w-4 text-purple-500" />
                       <span className="text-xs text-gray-500">Rango asignado</span>
                     </div>
-                    <p className="text-sm font-medium text-gray-800">{mascota.rangoPeso?.nombre || 'No asignado'}</p>
+                    <p className="text-sm font-medium text-gray-800">{getRangoNombre(mascota)}</p>
                   </div>
                   <div className="bg-gray-50 rounded-lg p-3">
                     <div className="flex items-center gap-2 mb-1">
@@ -277,7 +289,7 @@ export const FichaMascotaModal = ({ isOpen, mascotaId, mascotaNombre, onClose }:
                       <span className="text-xs text-gray-500">Fecha nacimiento</span>
                     </div>
                     <p className="text-sm font-medium text-gray-800">
-                      {mascota.fecha_nacimiento ? new Date(mascota.fecha_nacimiento).toLocaleDateString('es-ES') : 'No registrada'}
+                      {formatDate(getFechaNacimiento(mascota))}
                     </p>
                   </div>
                   <div className="bg-gray-50 rounded-lg p-3">

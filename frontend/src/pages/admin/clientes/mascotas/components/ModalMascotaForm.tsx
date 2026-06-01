@@ -6,10 +6,7 @@ import {
   HeartIcon, 
   ScaleIcon, 
   CakeIcon, 
-  FaceSmileIcon,
-  ChatBubbleLeftRightIcon,
-  DevicePhoneMobileIcon,
-  EnvelopeIcon
+  FaceSmileIcon
 } from '@heroicons/react/24/outline';
 import type { MascotaAdmin, CreateMascotaAdminData } from '../../../../../services/types/admin';
 import { adminClientesService } from '../../clientes/services/admin.clientes.service';
@@ -34,13 +31,6 @@ const TAMANIOS = [
   { value: 'Mediano', label: 'Mediano' },
   { value: 'Grande', label: 'Grande' },
   { value: 'Gigante', label: 'Gigante' },
-];
-
-const CANALES = [
-  { value: 'whatsapp', label: 'WhatsApp', icon: <ChatBubbleLeftRightIcon className="h-4 w-4" /> },
-  { value: 'telegram', label: 'Telegram', icon: <DevicePhoneMobileIcon className="h-4 w-4" /> },
-  { value: 'email', label: 'Email', icon: <EnvelopeIcon className="h-4 w-4" /> },
-  { value: 'sms', label: 'SMS', icon: <DevicePhoneMobileIcon className="h-4 w-4" /> },
 ];
 
 const initialForm: CreateMascotaAdminData = {
@@ -116,7 +106,7 @@ export const ModalMascotaForm = ({ isOpen, mascota, isLoading, onClose, onSave }
           raza: mascota.raza || '',
           tamanio: mascota.tamanio || '',
           pesoKg: mascota.pesoKg,
-          fechaNacimiento: mascota.fecha_nacimiento || '',
+          fechaNacimiento: mascota.fechaNacimiento || mascota.fecha_nacimiento || '',
           temperamento: mascota.temperamento || '',
           alergias: alergiasArray,
           restricciones: restriccionesArray,
@@ -148,11 +138,12 @@ export const ModalMascotaForm = ({ isOpen, mascota, isLoading, onClose, onSave }
 
   const validate = () => {
     const newErrors: Record<string, string> = {};
+    const pesoKg = Number(formData.pesoKg ?? 0);
     if (!formData.idCliente) newErrors.idCliente = 'Seleccione un dueño';
     if (!formData.nombre.trim()) newErrors.nombre = 'El nombre es requerido';
     if (!formData.especie) newErrors.especie = 'La especie es requerida';
-    if (!formData.pesoKg || formData.pesoKg <= 0) newErrors.pesoKg = 'El peso debe ser mayor a 0';
-    if (formData.pesoKg > 100) newErrors.pesoKg = 'El peso no puede superar los 100 kg';
+    if (!pesoKg || pesoKg <= 0) newErrors.pesoKg = 'El peso debe ser mayor a 0';
+    if (pesoKg > 100) newErrors.pesoKg = 'El peso no puede superar los 100 kg';
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };

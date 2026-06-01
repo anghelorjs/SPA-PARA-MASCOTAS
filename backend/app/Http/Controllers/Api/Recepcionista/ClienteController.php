@@ -99,6 +99,7 @@ class ClienteController extends ApiController
             'email' => 'required|email|unique:users,email',
             'telefono' => 'nullable|string|max:20',
             'direccion' => 'nullable|string',
+            'preferencias' => 'nullable|array',
             'canalContacto' => 'nullable|in:whatsapp,telegram,email,sms'
         ]);
         
@@ -118,7 +119,7 @@ class ClienteController extends ApiController
             $cliente = Cliente::create([
                 'idUsuario' => $user->idUsuario,
                 'direccion' => $request->direccion,
-                'preferencias' => $request->preferencias ? json_encode($request->preferencias) : null,
+                'preferencias' => $request->preferencias,
                 'canalContacto' => $request->canalContacto ?? 'whatsapp'
             ]);
             
@@ -165,7 +166,7 @@ class ClienteController extends ApiController
             
             // Actualizar cliente
             if ($request->has('direccion')) $cliente->direccion = $request->direccion;
-            if ($request->has('preferencias')) $cliente->preferencias = json_encode($request->preferencias);
+            if ($request->has('preferencias')) $cliente->preferencias = $request->preferencias;
             if ($request->has('canalContacto')) $cliente->canalContacto = $request->canalContacto;
             $cliente->save();
             
@@ -269,6 +270,7 @@ class ClienteController extends ApiController
             'fechaNacimiento' => 'nullable|date',
             'temperamento' => 'nullable|string',
             'alergias' => 'nullable|array',
+            'restricciones' => 'nullable|array',
             'vacunas' => 'nullable|array'
         ]);
         
@@ -294,6 +296,7 @@ class ClienteController extends ApiController
                 'fechaNacimiento' => $request->fechaNacimiento,
                 'temperamento' => $request->temperamento,
                 'alergias' => $request->alergias ? json_encode($request->alergias) : null,
+                'restricciones' => $request->restricciones ? json_encode($request->restricciones) : null,
                 'vacunas' => $request->vacunas ? json_encode($request->vacunas) : null
             ]);
             
@@ -326,6 +329,7 @@ class ClienteController extends ApiController
             'fechaNacimiento' => 'nullable|date',
             'temperamento' => 'nullable|string',
             'alergias' => 'nullable|array',
+            'restricciones' => 'nullable|array',
             'vacunas' => 'nullable|array'
         ]);
         
@@ -341,7 +345,7 @@ class ClienteController extends ApiController
             }
             
             foreach ($request->all() as $key => $value) {
-                if (in_array($key, ['alergias', 'vacunas']) && $value) {
+                if (in_array($key, ['alergias', 'restricciones', 'vacunas']) && $value) {
                     $mascota->$key = json_encode($value);
                 } elseif ($key !== 'idCliente') {
                     $mascota->$key = $value;

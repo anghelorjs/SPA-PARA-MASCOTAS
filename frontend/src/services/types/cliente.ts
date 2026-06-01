@@ -305,3 +305,90 @@ export interface PedidoResponse {
   mensaje: string;
   enlace: string;
 }
+
+// ==================== MI HISTORIAL ====================
+
+export interface ServicioHistorial {
+  id: number;
+  fecha: string;
+  mascota: string;
+  mascota_id: number;
+  servicio: string;
+  groomer: string;
+  observaciones: string | null;
+  recomendaciones: string | null;
+  tiene_fotos: boolean;
+}
+
+export interface MascotaFiltro {
+  id: number;
+  nombre: string;
+}
+
+export interface ServiciosResponse {
+  servicios: {
+    current_page: number;
+    data: ServicioHistorial[];
+    first_page_url: string;
+    from: number;
+    last_page: number;
+    last_page_url: string;
+    next_page_url: string | null;
+    path: string;
+    per_page: number;
+    prev_page_url: string | null;
+    to: number;
+    total: number;
+  };
+  mascotas: MascotaFiltro[];
+}
+
+export interface FotoServicio {
+  id: number;
+  url: string;
+  tipo: 'antes' | 'despues';
+  fecha: string;
+}
+
+export interface DetalleServicioResponse {
+  id: number;
+  fecha: string;
+  mascota: string;
+  servicio: string;
+  groomer: string;
+  observaciones: string | null;
+  recomendaciones: string | null;
+  fotos: {
+    antes: FotoServicio[];
+    despues: FotoServicio[];
+  };
+}
+
+// ==================== COMPRAS HISTORIAL ====================
+
+export interface ItemCompra {
+  producto: string;
+  variante: string;
+  cantidad: number;
+  precio: number;
+  subtotal: number;
+}
+
+export interface CompraHistorial {
+  tipo: 'venta_local' | 'pedido_whatsapp' | 'pedido_telegram';
+  id: number;
+  fecha: string;
+  total: number;
+  estado: string;
+  estado_texto?: string;
+  estado_color: string;
+  items: ItemCompra[];
+  medio_pago?: string;
+  canal?: string;
+  mensaje?: string;
+}
+
+export interface CancelarPedidoResponse {
+  success: boolean;
+  message: string;
+}

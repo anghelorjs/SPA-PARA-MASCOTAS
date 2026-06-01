@@ -241,4 +241,31 @@ class HistorialController extends ApiController
         
         return $colores[$estado] ?? '#6b7280';
     }
+
+    /**
+     * Cancelar pedido (solo si está pendiente)
+     */
+    public function cancelarPedido($id)
+    {
+        $user = Auth::user();
+        $cliente = $user->cliente;
+        
+        if (!$cliente) {
+            return $this->errorResponse('Cliente no encontrado', 404);
+        }
+        
+        $pedido = PedidoWhatsapp::where('idCliente', $cliente->idCliente)
+            ->where('idPedido', $id)
+            ->where('estado', 'pendiente')
+            ->first();
+        
+        if (!$pedido) {
+            return $this->errorResponse('Pedido no encontrado o no se puede cancelar', 404);
+        }
+        
+        $pedido->estado = 'cancelado';
+        $pedido->save();
+        
+        return $this->successResponse(null, 'Pedido cancelado correctamente');
+    }
 }

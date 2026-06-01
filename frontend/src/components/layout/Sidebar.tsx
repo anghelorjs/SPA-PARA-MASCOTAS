@@ -243,13 +243,14 @@ const recepcionistaMenu: MenuItem[] = [
   { id: "rec-dashboard", label: "Dashboard", icon: <FiHome />, to: "/recepcionista/dashboard" },
   { id: "rec-agenda", label: "Agenda", icon: <FiCalendar />, to: "/recepcionista/agenda" },
   { id: "rec-pedidos", label: "Pedidos", icon: <FiShoppingBag />, to: "/recepcionista/pedidos" },
-  {
-    id: "rec-clientes", label: "Clientes", icon: <FiUsers />,
-    children: [
-      { label: "Clientes", to: "/recepcionista/clientes", icon: <FiUsers size={13} /> },
-      { label: "Mascotas", to: "/recepcionista/mascotas", icon: <FiHeart size={13} /> },
-    ]
-  },
+  { id: "rec-clientes", label: "Clientes", icon: <FiUsers />, to: "/recepcionista/clientes" },
+  // {
+  //   id: "rec-clientes", label: "Clientes", icon: <FiUsers />,
+  //   children: [
+  //     { label: "Clientes", to: "/recepcionista/clientes", icon: <FiUsers size={13} /> },
+  //     { label: "Mascotas", to: "/recepcionista/mascotas", icon: <FiHeart size={13} /> },
+  //   ]
+  // },
   { id: "rec-ventas", label: "Ventas", icon: <FiDollarSign />, to: "/recepcionista/ventas" },
   { id: "rec-notificaciones", label: "Notificaciones", icon: <FiBell />, to: "/recepcionista/notificaciones" },
   { id: "rec-perfil", label: "Perfil", icon: <FiUser />, to: "/recepcionista/perfil" },  // ✅ AGREGADO

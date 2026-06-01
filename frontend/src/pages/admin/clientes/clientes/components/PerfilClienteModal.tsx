@@ -10,7 +10,9 @@ import {
   HeartIcon, 
   CalendarIcon,
   CurrencyDollarIcon,
-  ScissorsIcon
+  ScissorsIcon,
+  TagIcon,
+  CakeIcon
 } from '@heroicons/react/24/outline';
 import { adminClientesService } from '../services/admin.clientes.service';
 import { FichaMascotaModal } from '../../mascotas/components/FichaMascotaModal';
@@ -33,6 +35,14 @@ const toNumber = (value: any): number => {
     return isNaN(parsed) ? 0 : parsed;
   }
   return 0;
+};
+
+const getRangoNombre = (mascota: MascotaAdmin) => mascota.rangoPeso?.nombre || mascota.rango_nombre || 'No asignado';
+const getFechaNacimiento = (mascota: MascotaAdmin) => mascota.fechaNacimiento || mascota.fecha_nacimiento;
+const formatDate = (value?: string | null) => {
+  if (!value) return 'No registrada';
+  const date = new Date(value);
+  return Number.isNaN(date.getTime()) ? value : date.toLocaleDateString('es-ES');
 };
 
 export const PerfilClienteModal = ({ isOpen, clienteId, clienteNombre, onClose, onVerMascota }: PerfilClienteModalProps) => {
@@ -169,6 +179,16 @@ export const PerfilClienteModal = ({ isOpen, clienteId, clienteNombre, onClose, 
                               {mascota.especie} • {mascota.raza || 'Raza no especificada'}
                             </p>
                             <p className="text-xs text-gray-400 mt-1">Peso: {mascota.pesoKg} kg</p>
+                            <div className="flex flex-wrap gap-2 mt-2 text-xs text-gray-500">
+                              <span className="inline-flex items-center gap-1">
+                                <TagIcon className="h-3 w-3" />
+                                {getRangoNombre(mascota)}
+                              </span>
+                              <span className="inline-flex items-center gap-1">
+                                <CakeIcon className="h-3 w-3" />
+                                {formatDate(getFechaNacimiento(mascota))}
+                              </span>
+                            </div>
                           </div>
                           <button
                             onClick={() => handleVerMascota(mascota)}

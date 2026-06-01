@@ -29,6 +29,8 @@ import {
 } from '@heroicons/react/24/outline';
 import { useAuth } from "../../hooks/useAuth";
 import { clientePerfilService } from "../../pages/cliente/perfil/services/cliente.perfil.service";
+import { adminPedidosService } from "../../pages/admin/pedidos/services/admin.pedidos.service";
+import { recepcionistaPedidosService } from "../../pages/recepcionista/pedidos/services/recepcionista.pedidos.service";
 
 interface NavbarProps { sidebarCollapsed: boolean; }
 
@@ -84,11 +86,24 @@ export default function Navbar({ sidebarCollapsed }: NavbarProps) {
   const [notifOpen, setNotifOpen] = useState(false);
   const [notificaciones, setNotificaciones] = useState<any[]>([]);
   const [notificacionesNoLeidas, setNotificacionesNoLeidas] = useState(0);
+  const [pedidosPendientes, setPedidosPendientes] = useState(0);
   const dropdownRef = useRef<HTMLDivElement>(null);
   const notifRef = useRef<HTMLDivElement>(null);
 
   // Cargar notificaciones reales del cliente
   const loadNotificaciones = async () => {
+    if (user?.rol === 'administrador' || user?.rol === 'recepcionista') {
+      try {
+        const resumen = user.rol === 'administrador'
+          ? await adminPedidosService.resumen()
+          : await recepcionistaPedidosService.resumen();
+        setPedidosPendientes(resumen.pendiente);
+        setNotificacionesNoLeidas(resumen.pendiente);
+      } catch (error) {
+        console.error('Error loading pedidos pendientes:', error);
+      }
+      return;
+    }
     if (user?.rol !== 'cliente') return;
     try {
       const perfil = await clientePerfilService.getPerfil();
@@ -127,6 +142,7 @@ export default function Navbar({ sidebarCollapsed }: NavbarProps) {
   const initials = [user?.nombre, user?.apellido].filter(Boolean).map(s => s![0].toUpperCase()).join("") || "U";
   const perfilPath = getPerfilPath(role);
   const isCliente = role === 'cliente';
+  const isOperador = role === 'administrador' || role === 'recepcionista';
 
   return (
     <header
@@ -177,9 +193,45 @@ export default function Navbar({ sidebarCollapsed }: NavbarProps) {
                     Ver todas
                   </button>
                 )}
+                {isOperador && (
+                  <button
+                    onClick={() => {
+                      setNotifOpen(false);
+                      navigate(role === 'administrador' ? '/admin/pedidos' : '/recepcionista/pedidos');
+                    }}
+                    className="text-xs text-blue-400 hover:text-blue-300"
+                  >
+                    Ver pedidos
+                  </button>
+                )}
               </div>
               <div className="max-h-80 overflow-y-auto">
-                {isCliente && notificaciones.length > 0 ? (
+                {isOperador ? (
+                  <div
+                    className="px-4 py-3 border-b border-white/10 cursor-pointer transition-all duration-150 hover:bg-white/10"
+                    onClick={() => {
+                      setNotifOpen(false);
+                      navigate(role === 'administrador' ? '/admin/pedidos' : '/recepcionista/pedidos');
+                    }}
+                  >
+                    <div className="flex gap-3">
+                      <div className="flex-shrink-0 text-amber-400">
+                        <FiPackage className="h-5 w-5" />
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <p className="text-white text-xs font-medium m-0">
+                          {pedidosPendientes > 0
+                            ? `${pedidosPendientes} pedido(s) pendiente(s) requieren confirmacion`
+                            : 'No hay pedidos pendientes'}
+                        </p>
+                        <p className="text-white/40 text-[10px] mt-1">Panel de pedidos</p>
+                      </div>
+                      {pedidosPendientes > 0 && (
+                        <div className="w-2 h-2 bg-amber-400 rounded-full mt-1 flex-shrink-0" />
+                      )}
+                    </div>
+                  </div>
+                ) : isCliente && notificaciones.length > 0 ? (
                   notificaciones.map((n) => {
                     const { icon, color } = getNotifIcon(n.tipo);
                     return (

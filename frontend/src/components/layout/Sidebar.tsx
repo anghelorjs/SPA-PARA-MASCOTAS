@@ -207,6 +207,7 @@ function CollapsedParentItem({ item }: { item: MenuItem }) {
 const administradorMenu: MenuItem[] = [
   { id: "admin-dashboard", label: "Dashboard", icon: <FiHome />, to: "/admin/dashboard" },
   { id: "admin-agenda", label: "Agenda", icon: <FiCalendar />, to: "/admin/agenda" },
+  { id: "admin-pedidos", label: "Pedidos", icon: <FiShoppingBag />, to: "/admin/pedidos" },
   { id: "admin-grooming", label: "Grooming", icon: <FiScissors />, to: "/admin/grooming" },
   {
     id: "admin-clientes", label: "Clientes", icon: <FiUsers />,
@@ -241,6 +242,7 @@ const administradorMenu: MenuItem[] = [
 const recepcionistaMenu: MenuItem[] = [
   { id: "rec-dashboard", label: "Dashboard", icon: <FiHome />, to: "/recepcionista/dashboard" },
   { id: "rec-agenda", label: "Agenda", icon: <FiCalendar />, to: "/recepcionista/agenda" },
+  { id: "rec-pedidos", label: "Pedidos", icon: <FiShoppingBag />, to: "/recepcionista/pedidos" },
   {
     id: "rec-clientes", label: "Clientes", icon: <FiUsers />,
     children: [

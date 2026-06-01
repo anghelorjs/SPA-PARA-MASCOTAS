@@ -40,6 +40,7 @@ import { UsuariosPage } from "./pages/admin/configuracion/usuarios/pages/Usuario
 import { LogsPage } from "./pages/admin/configuracion/logs/pages/LogsPage";
 const ConfiguracionNotificaciones = () => <div className="p-6"><h1 className="text-2xl font-bold">Notificaciones del Sistema</h1><p className="mt-4 text-gray-600">Historial y envío de notificaciones.</p></div>;
 import { PerfilAdmin } from "./pages/admin/perfil/pages/PerfilAdmin";
+import { PedidosAdmin } from "./pages/admin/pedidos/pages/PedidosAdmin";
 
 // ========================
 // RECEPCIONISTA
@@ -52,6 +53,7 @@ const MascotasRecepcionista = () => <div className="p-6"><h1 className="text-2xl
 import { VentasRecepcionista } from "./pages/recepcionista/ventas/pages/VentasRecepcionista";
 const NotificacionesRecepcionista = () => <div className="p-6"><h1 className="text-2xl font-bold">Notificaciones</h1><p className="mt-4 text-gray-600">Envío de notificaciones a clientes.</p></div>;
 import { PerfilRecepcionista } from "./pages/recepcionista/perfil/pages/PerfilRecepcionista";
+import { PedidosRecepcionista } from "./pages/recepcionista/pedidos/pages/PedidosRecepcionista";
 
 // ========================
 // GROOMER
@@ -125,6 +127,7 @@ const AppRoutes = () => {
         {/* ===================================== */}
         <Route path="admin/dashboard" element={<DashboardAdmin />} />
         <Route path="admin/agenda" element={<AgendaAdmin />} />
+        <Route path="admin/pedidos" element={<PedidosAdmin />} />
         <Route path="admin/grooming" element={<GroomingAdmin />} />
         <Route path="admin/clientes" element={<ClientesAdmin />} />        
         <Route path="admin/mascotas" element={<MascotasAdmin />} />  
@@ -144,6 +147,7 @@ const AppRoutes = () => {
         {/* ===================================== */}
         <Route path="recepcionista/dashboard" element={<DashboardRecepcionista />} />
         <Route path="recepcionista/agenda" element={<AgendaRecepcionista />} />
+        <Route path="recepcionista/pedidos" element={<PedidosRecepcionista />} />
         <Route path="recepcionista/clientes" element={<ClientesRecepcionista />} />
         <Route path="recepcionista/mascotas" element={<MascotasRecepcionista />} />
         <Route path="recepcionista/ventas" element={<VentasRecepcionista />} />

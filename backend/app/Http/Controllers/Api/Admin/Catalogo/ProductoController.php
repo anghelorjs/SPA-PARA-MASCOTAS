@@ -7,6 +7,7 @@ use App\Models\Producto;
 use App\Models\VarianteProducto;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Storage;
 
 class ProductoController extends ApiController
 {
@@ -39,6 +40,7 @@ class ProductoController extends ApiController
             $stockMinimo = $producto->variantes->sum('stock_minimo') ?? 5;
             $producto->stock_total = $stockTotal;
             $producto->alerta_stock = $stockTotal <= $stockMinimo;
+            $producto->imagenUrl = $this->publicUrl($producto->imagenUrl);
             return $producto;
         });
         
@@ -56,6 +58,8 @@ class ProductoController extends ApiController
             return $this->errorResponse('Producto no encontrado', 404);
         }
         
+        $producto->imagenUrl = $this->publicUrl($producto->imagenUrl);
+
         return $this->successResponse($producto, 'Producto obtenido correctamente');
     }
 
@@ -68,6 +72,8 @@ class ProductoController extends ApiController
             'idCategoria' => 'required|exists:categorias,idCategoria',
             'nombre' => 'required|string|max:100|unique:productos,nombre',
             'descripcion' => 'nullable|string',
+            'imagenUrl' => 'nullable|string|max:500',
+            'imagen' => 'nullable|image|mimes:jpeg,png,jpg|max:5120',
             'precioBase' => 'required|numeric|min:0',
             'variantes' => 'required|array|min:1',
             'variantes.*.nombreVariante' => 'required|string',
@@ -79,10 +85,16 @@ class ProductoController extends ApiController
         DB::beginTransaction();
         
         try {
+            $imagenUrl = $request->imagenUrl;
+            if ($request->hasFile('imagen')) {
+                $imagenUrl = Storage::url($request->file('imagen')->store('productos', 'public'));
+            }
+
             $producto = Producto::create([
                 'idCategoria' => $request->idCategoria,
                 'nombre' => $request->nombre,
                 'descripcion' => $request->descripcion,
+                'imagenUrl' => $imagenUrl,
                 'precioBase' => $request->precioBase,
                 'activo' => true
             ]);
@@ -99,7 +111,10 @@ class ProductoController extends ApiController
             
             DB::commit();
             
-            return $this->successResponse($producto->load('categoria', 'variantes'), 'Producto creado exitosamente', 201);
+            $producto->load('categoria', 'variantes');
+            $producto->imagenUrl = $this->publicUrl($producto->imagenUrl);
+
+            return $this->successResponse($producto, 'Producto creado exitosamente', 201);
             
         } catch (\Exception $e) {
             DB::rollBack();
@@ -122,14 +137,30 @@ class ProductoController extends ApiController
             'idCategoria' => 'sometimes|exists:categorias,idCategoria',
             'nombre' => 'sometimes|string|max:100|unique:productos,nombre,' . $id . ',idProducto',
             'descripcion' => 'nullable|string',
+            'imagenUrl' => 'nullable|string|max:500',
+            'imagen' => 'nullable|image|mimes:jpeg,png,jpg|max:5120',
             'precioBase' => 'sometimes|numeric|min:0',
             'activo' => 'sometimes|boolean'
         ]);
 
         try {
-            $producto->update($request->all());
+            $data = $request->except(['imagen', '_method']);
+
+            if ($request->hasFile('imagen')) {
+                if ($producto->imagenUrl && !preg_match('/^https?:\/\//i', $producto->imagenUrl)) {
+                    $path = str_replace('/storage/', '', $producto->imagenUrl);
+                    Storage::disk('public')->delete($path);
+                }
+
+                $data['imagenUrl'] = Storage::url($request->file('imagen')->store('productos', 'public'));
+            }
+
+            $producto->update($data);
             
-            return $this->successResponse($producto->load('categoria', 'variantes'), 'Producto actualizado correctamente');
+            $producto->load('categoria', 'variantes');
+            $producto->imagenUrl = $this->publicUrl($producto->imagenUrl);
+
+            return $this->successResponse($producto, 'Producto actualizado correctamente');
             
         } catch (\Exception $e) {
             return $this->errorResponse('Error al actualizar producto: ' . $e->getMessage(), 500);

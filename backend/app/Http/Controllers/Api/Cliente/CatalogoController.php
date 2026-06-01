@@ -9,6 +9,7 @@ use App\Models\Categoria;
 use App\Models\PedidoWhatsapp;
 use App\Models\ItemPedido;
 use App\Models\Cliente;
+use App\Models\Notificacion;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -56,7 +57,7 @@ class CatalogoController extends ApiController
                         'stock' => $variante->stock
                     ];
                 }),
-                'imagen_url' => null // Se puede agregar campo imagen en productos
+                'imagen_url' => $this->publicUrl($producto->imagenUrl)
             ];
         });
         
@@ -142,6 +143,16 @@ class CatalogoController extends ApiController
                     'precioUnitario' => $item['precio']
                 ]);
             }
+
+            Notificacion::create([
+                'idCliente' => $cliente->idCliente,
+                'idCita' => null,
+                'tipo' => 'pedido_recibido',
+                'canal' => $request->canal,
+                'mensaje' => "Recibimos tu pedido #{$pedido->idPedido}. Nuestro equipo revisara disponibilidad y te avisara cuando quede confirmado para retiro.",
+                'fechaEnvio' => now(),
+                'entregada' => false,
+            ]);
             
             DB::commit();
             

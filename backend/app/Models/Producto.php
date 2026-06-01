@@ -17,6 +17,7 @@ class Producto extends Model
         'idCategoria',
         'nombre',
         'descripcion',
+        'imagenUrl',
         'precioBase',
         'activo'
     ];

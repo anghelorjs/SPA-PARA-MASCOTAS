@@ -30,6 +30,35 @@ interface PaginatedResponse<T> {
   total: number;
 }
 
+const buildProductoFormData = (data: CreateProductoData | UpdateProductoData): FormData => {
+  const formData = new FormData();
+
+  Object.entries(data).forEach(([key, value]) => {
+    if (value === undefined || value === null || key === 'variantes') return;
+
+    if (key === 'imagen' && value instanceof File) {
+      formData.append('imagen', value);
+      return;
+    }
+
+    if (key === 'imagenUrl' && data.imagen instanceof File) return;
+
+    formData.append(key, String(value));
+  });
+
+  if ('variantes' in data && Array.isArray(data.variantes)) {
+    data.variantes.forEach((variante, index) => {
+      formData.append(`variantes[${index}][nombreVariante]`, variante.nombreVariante);
+      formData.append(`variantes[${index}][precio]`, String(variante.precio));
+      formData.append(`variantes[${index}][stock]`, String(variante.stock));
+    });
+  }
+
+  return formData;
+};
+
+const hasImagenFile = (data: CreateProductoData | UpdateProductoData): boolean => data.imagen instanceof File;
+
 export const adminProductosService = {
   /**
    * Obtener listado de productos
@@ -56,7 +85,10 @@ export const adminProductosService = {
    * Crear nuevo producto
    */
   async createProducto(data: CreateProductoData): Promise<Producto> {
-    const response = await api.post<ApiResponse<Producto>>('/admin/catalogo/productos', data);
+    const payload = hasImagenFile(data) ? buildProductoFormData(data) : data;
+    const response = await api.post<ApiResponse<Producto>>('/admin/catalogo/productos', payload, hasImagenFile(data) ? {
+      headers: { 'Content-Type': 'multipart/form-data' },
+    } : undefined);
     return response.data.data;
   },
 
@@ -64,6 +96,15 @@ export const adminProductosService = {
    * Actualizar producto
    */
   async updateProducto(id: number, data: UpdateProductoData): Promise<Producto> {
+    if (hasImagenFile(data)) {
+      const payload = buildProductoFormData(data);
+      payload.append('_method', 'PUT');
+      const response = await api.post<ApiResponse<Producto>>(`/admin/catalogo/productos/${id}`, payload, {
+        headers: { 'Content-Type': 'multipart/form-data' },
+      });
+      return response.data.data;
+    }
+
     const response = await api.put<ApiResponse<Producto>>(`/admin/catalogo/productos/${id}`, data);
     return response.data.data;
   },

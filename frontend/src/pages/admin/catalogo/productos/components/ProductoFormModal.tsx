@@ -1,7 +1,7 @@
 // src/pages/admin/catalogo/productos/components/ProductoFormModal.tsx
 import { useState, useEffect } from 'react';
 import { createPortal } from 'react-dom';
-import { XMarkIcon, PlusIcon, TrashIcon, CurrencyDollarIcon, TagIcon } from '@heroicons/react/24/outline';
+import { XMarkIcon, PlusIcon, TrashIcon, CurrencyDollarIcon, TagIcon, PhotoIcon } from '@heroicons/react/24/outline';
 import type { Producto, CreateProductoData, CreateVarianteData, Categoria } from '../../../../../services/types/admin';
 import { adminCategoriasService } from '../../categorias/services/admin.categorias.service';
 
@@ -23,12 +23,14 @@ const initialForm: CreateProductoData = {
   idCategoria: 0,
   nombre: '',
   descripcion: '',
+  imagenUrl: '',
   precioBase: 0,
   variantes: [{ ...initialVariante }],
 };
 
 export const ProductoFormModal = ({ isOpen, producto, isLoading, onClose, onSave }: ProductoFormModalProps) => {
   const [formData, setFormData] = useState<CreateProductoData>(initialForm);
+  const [imagePreview, setImagePreview] = useState('');
   const [categorias, setCategorias] = useState<Categoria[]>([]);
   const [cargandoCategorias, setCargandoCategorias] = useState(true);
   const [errors, setErrors] = useState<Record<string, string>>({});
@@ -61,6 +63,7 @@ export const ProductoFormModal = ({ isOpen, producto, isLoading, onClose, onSave
           idCategoria: producto.idCategoria,
           nombre: producto.nombre,
           descripcion: producto.descripcion || '',
+          imagenUrl: producto.imagenUrl || '',
           precioBase: producto.precioBase,
           variantes: producto.variantes?.map(v => ({
             nombreVariante: v.nombreVariante,
@@ -68,8 +71,10 @@ export const ProductoFormModal = ({ isOpen, producto, isLoading, onClose, onSave
             stock: v.stock,
           })) || [{ ...initialVariante }],
         });
+        setImagePreview(producto.imagenUrl || '');
       } else {
         setFormData(initialForm);
+        setImagePreview('');
       }
       setErrors({});
       setVarianteErrors({});
@@ -86,6 +91,14 @@ export const ProductoFormModal = ({ isOpen, producto, isLoading, onClose, onSave
     
     setFormData(prev => ({ ...prev, [name]: parsedValue }));
     if (errors[name]) setErrors(prev => ({ ...prev, [name]: '' }));
+  };
+
+  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0] || null;
+    if (!file) return;
+
+    setFormData(prev => ({ ...prev, imagen: file }));
+    setImagePreview(URL.createObjectURL(file));
   };
 
   const handleVarianteChange = (index: number, field: keyof CreateVarianteData, value: string | number) => {
@@ -264,6 +277,34 @@ export const ProductoFormModal = ({ isOpen, producto, isLoading, onClose, onSave
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
                 placeholder="Descripción del producto (opcional)"
               />
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Foto del producto
+              </label>
+              <div className="flex gap-3 items-center">
+                <div className="relative flex-1">
+                  <PhotoIcon className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+                  <input
+                    type="file"
+                    accept="image/*"
+                    onChange={handleImageChange}
+                    className="w-full pl-9 pr-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                  />
+                </div>
+                {imagePreview && (
+                  <img
+                    src={imagePreview}
+                    alt="Vista previa"
+                    className="w-12 h-12 rounded-lg object-cover border border-gray-200"
+                    onError={(event) => {
+                      event.currentTarget.style.display = 'none';
+                    }}
+                  />
+                )}
+              </div>
+              <p className="mt-1 text-xs text-gray-400">Selecciona una imagen JPG o PNG para mostrarla en el catalogo del cliente.</p>
             </div>
           </div>
 

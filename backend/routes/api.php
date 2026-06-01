@@ -68,6 +68,7 @@ use App\Http\Controllers\Api\Cliente\HistorialController as ClienteHistorialCont
 use App\Http\Controllers\Api\Cliente\PerfilController as ClientePerfilController;
 use App\Http\Controllers\Api\ActivationController;
 use App\Http\Controllers\Api\ResendCredentialsController;
+use App\Http\Controllers\Api\PedidoController;
 
 
 // ==================== RUTAS PÚBLICAS ====================
@@ -100,6 +101,13 @@ Route::middleware('auth:sanctum')->group(function () {
         // Dashboard
         Route::post('configuracion/usuarios/resend-credentials', [ResendCredentialsController::class, 'resend']);
         Route::get('dashboard', [DashboardController::class, 'index']);
+
+        // Pedidos del catalogo cliente
+        Route::get('pedidos/resumen', [PedidoController::class, 'resumen']);
+        Route::get('pedidos', [PedidoController::class, 'index']);
+        Route::get('pedidos/{id}', [PedidoController::class, 'show']);
+        Route::post('pedidos/{id}/confirmar', [PedidoController::class, 'confirmar']);
+        Route::post('pedidos/{id}/pagar', [PedidoController::class, 'pagar']);
         
         // ========== AGENDA ==========
         // Calendario de Citas
@@ -251,6 +259,13 @@ Route::middleware('auth:sanctum')->group(function () {
         // Dashboard
         Route::get('dashboard', [RecepcionistaDashboardController::class, 'index']);
         Route::get('citas/{id}/detalle', [RecepcionistaDashboardController::class, 'detalleCita']);
+
+        // Pedidos del catalogo cliente
+        Route::get('pedidos/resumen', [PedidoController::class, 'resumen']);
+        Route::get('pedidos', [PedidoController::class, 'index']);
+        Route::get('pedidos/{id}', [PedidoController::class, 'show']);
+        Route::post('pedidos/{id}/confirmar', [PedidoController::class, 'confirmar']);
+        Route::post('pedidos/{id}/pagar', [PedidoController::class, 'pagar']);
         
         // Agenda - Calendario y Citas
         Route::get('agenda/citas', [RecepcionistaAgendaController::class, 'citas']);

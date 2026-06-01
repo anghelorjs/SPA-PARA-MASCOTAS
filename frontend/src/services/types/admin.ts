@@ -166,6 +166,7 @@ export interface Producto {
   idCategoria: number;
   nombre: string;
   descripcion: string | null;
+  imagenUrl?: string | null;
   precioBase: number;
   activo: boolean;
   stock_total?: number;
@@ -189,6 +190,8 @@ export interface CreateProductoData {
   idCategoria: number;
   nombre: string;
   descripcion?: string;
+  imagenUrl?: string;
+  imagen?: File | null;
   precioBase: number;
   variantes: CreateVarianteData[];
 }
@@ -197,6 +200,8 @@ export interface UpdateProductoData {
   idCategoria?: number;
   nombre?: string;
   descripcion?: string;
+  imagenUrl?: string;
+  imagen?: File | null;
   precioBase?: number;
   activo?: boolean;
 }

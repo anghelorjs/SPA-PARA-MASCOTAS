@@ -501,7 +501,7 @@ export interface ReporteAgendaResponse {
   grafica_citas_por_servicio: CitaPorServicio[];
   ocupacion_franjas: OcupacionFranja[];
   canceladas_vs_completadas: { tipo: string; total: number }[];
-  export_data: any[];
+  export_data: Record<string, unknown>[];
 }
 
 // ==================== REPORTE INGRESOS ====================
@@ -551,7 +551,7 @@ export interface ReporteIngresosResponse {
   ingresos_por_tipo: IngresoPorTipo[];
   ingresos_por_medio_pago: IngresoPorMedioPago[];
   ticket_estimado_real: TicketEstimadoReal[];
-  export_data: any[];
+  export_data: Record<string, unknown>[];
 }
 
 // ==================== REPORTE INVENTARIO ====================
@@ -588,9 +588,19 @@ export interface MovimientoInventarioReporte {
   motivo: string;
 }
 
+export interface InsumoCritico {
+  idInsumo: number;
+  nombre: string;
+  categoria: string;
+  unidad_medida: string;
+  stock_actual: number;
+  stock_minimo: number;
+  critico: boolean;
+}
+
 export interface AlertaStockReporte {
   productos: ProductoCritico[];
-  insumos: any[];
+  insumos: InsumoCritico[];
 }
 
 export interface ReporteInventarioResponse {
@@ -599,7 +609,7 @@ export interface ReporteInventarioResponse {
   productos_mas_vendidos: ProductoVendidoReporte[];
   movimientos_recientes: MovimientoInventarioReporte[];
   alertas_stock: AlertaStockReporte;
-  export_data: any;
+  export_data: Record<string, unknown>[];
 }
 
 // ==================== REPORTE CLIENTES ====================
@@ -650,5 +660,143 @@ export interface ReporteClientesResponse {
   top_mascotas: TopMascotaReporte[];
   distribucion_por_especie: DistribucionEspecie[];
   clientes_nuevos_por_mes: ClientesNuevosPorMes[];
-  export_data: any;
+  export_data: Record<string, unknown>[];
+}
+
+// ==================== GROOMING ADMIN ====================
+
+export interface FichaHoyAdmin {
+  id: number;
+  groomer: string;
+  groomer_id: number;
+  mascota: string;
+  mascota_id: number;
+  servicio: string;
+  hora_apertura: string;
+  hora_cierre: string | null;
+  estado: 'abierta' | 'cerrada';
+}
+
+export interface FichaTodasAdmin {
+  id: number;
+  fecha_apertura: string;
+  fecha_cierre: string | null;
+  groomer: string;
+  mascota: string;
+  servicio: string;
+  estado: 'abierta' | 'cerrada';
+}
+
+export interface ChecklistItemAdmin {
+  nombre: string;
+  completado: boolean;
+  observacion: string | null;
+}
+
+export interface InsumoFichaAdmin {
+  id: number;
+  nombre: string;
+  unidad_medida: string;
+  cantidad_usada: number;
+}
+
+export interface DetalleFichaAdmin {
+  ficha: {
+    id: number;
+    estado: 'abierta' | 'cerrada';
+    fecha_apertura: string;
+    fecha_cierre: string | null;
+    progreso_checklist: number;
+  };
+  cita: {
+    id: number;
+    fecha: string;
+    hora_inicio: string;
+    hora_fin: string;
+  };
+  mascota: {
+    id: number;
+    nombre: string;
+    especie: string;
+    raza: string;
+    peso_kg: number;
+    rango_nombre: string | null;
+    temperamento: string | null;
+    alergias: string | null;
+    restricciones: string | null;
+  };
+  servicio: {
+    id: number;
+    nombre: string;
+    duracion: number;
+    precio: number;
+  };
+  groomer: {
+    id: number;
+    nombre: string;
+  };
+  estado_ingreso: {
+    estadoIngreso: string | null;
+    nudos: boolean;
+    tienePulgas: boolean;
+    tieneHeridas: boolean;
+  };
+  checklist: ChecklistItemAdmin[];
+  insumos: InsumoFichaAdmin[];
+  observaciones: {
+    observaciones: string | null;
+    recomendaciones: string | null;
+  };
+  fotos: {
+    antes: FotoAdmin[];
+    despues: FotoAdmin[];
+  };
+}
+
+// ==================== GALERÍA ADMIN ====================
+
+export interface FotoAdmin {
+  id: number;
+  url: string;
+  tipo: 'perfil' | 'antes' | 'despues';
+  fecha: string;
+  mascota: string;
+  mascota_id: number;
+  groomer: string | null;
+}
+
+export interface TipoFoto {
+  id: string;
+  nombre: string;
+}
+
+export interface GaleriaResponse {
+  current_page: number;
+  data: FotoAdmin[];
+  first_page_url: string;
+  from: number;
+  last_page: number;
+  last_page_url: string;
+  next_page_url: string | null;
+  path: string;
+  per_page: number;
+  prev_page_url: string | null;
+  to: number;
+  total: number;
+}
+
+export interface MascotaGaleria {
+  id: number;
+  nombre: string;
+  especie: string;
+  raza: string;
+}
+
+export interface GaleriaMascotaResponse {
+  mascota: MascotaGaleria;
+  fotos: {
+    perfil: FotoAdmin[];
+    antes: FotoAdmin[];
+    despues: FotoAdmin[];
+  };
 }

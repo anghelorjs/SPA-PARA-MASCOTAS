@@ -27,7 +27,7 @@ import { DashboardAdmin } from "./pages/admin/dashboard/pages/DashboardAdmin";
 
 // Componentes placeholder para las demás pantallas del administrador
 import { AgendaAdmin } from "./pages/admin/agenda/pages/AgendaAdmin";
-const GroomingAdmin = () => <div className="p-6"><h1 className="text-2xl font-bold">Grooming</h1><p className="mt-4 text-gray-600">Gestión de fichas de grooming y galería de fotos.</p></div>;
+import { GroomingAdmin } from "./pages/admin/grooming/pages/GroomingAdmin";
 import { ClientesAdmin } from "./pages/admin/clientes/clientes/pages/ClientesAdmin";
 import { MascotasAdmin } from "./pages/admin/clientes/mascotas/pages/MascotasAdmin";
 import { ProductosAdmin } from "./pages/admin/catalogo/productos/pages/ProductosAdmin";

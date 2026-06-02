@@ -229,7 +229,6 @@ const administradorMenu: MenuItem[] = [
   {
     id: "admin-configuracion", label: "Configuración", icon: <FiSettings />,
     children: [
-      { label: "Datos del Negocio", to: "/admin/configuracion/negocio", icon: <FiBriefcase size={13} /> },
       { label: "Usuarios", to: "/admin/configuracion/usuarios", icon: <FiUsers size={13} /> },
       { label: "Notificaciones", to: "/admin/configuracion/notificaciones", icon: <FiBell size={13} /> },
       { label: "Trazabilidad", to: "/admin/configuracion/logs", icon: <FiFileText size={13} /> }, // ← NUEVO

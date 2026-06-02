@@ -238,13 +238,13 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::get('configuracion/logs-stats', [LogController::class, 'stats']);
         
         // Notificaciones del Sistema
-        Route::get('configuracion/notificaciones', [NotificacionController::class, 'index']);
-        Route::get('configuracion/notificaciones/{id}', [NotificacionController::class, 'show']);
-        Route::post('configuracion/notificaciones/{id}/reenviar', [NotificacionController::class, 'reenviar']);
-        Route::post('configuracion/notificaciones/enviar', [NotificacionController::class, 'enviarManual']);
         Route::get('configuracion/notificaciones/clientes', [NotificacionController::class, 'clientesList']);
         Route::get('configuracion/notificaciones/citas', [NotificacionController::class, 'citasList']);
         Route::post('configuracion/notificaciones/vista-previa', [NotificacionController::class, 'vistaPrevia']);
+        Route::post('configuracion/notificaciones/enviar', [NotificacionController::class, 'enviarManual']);
+        Route::get('configuracion/notificaciones', [NotificacionController::class, 'index']);
+        Route::get('configuracion/notificaciones/{id}', [NotificacionController::class, 'show'])->whereNumber('id');
+        Route::post('configuracion/notificaciones/{id}/reenviar', [NotificacionController::class, 'reenviar'])->whereNumber('id');
         
         // ========== PERFIL DEL ADMINISTRADOR ==========
         Route::get('perfil', [PerfilController::class, 'me']);

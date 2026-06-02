@@ -1,6 +1,7 @@
 // src/pages/admin/grooming/components/FiltroGroomerFichas.tsx
 import { useState, useEffect } from 'react';
 import { UserIcon } from '@heroicons/react/24/outline';
+import api from '../../../../services/api';
 
 interface FiltroGroomerFichasProps {
   groomerId: number | undefined;
@@ -19,12 +20,11 @@ export const FiltroGroomerFichas = ({ groomerId, onGroomerChange, isLoading }: F
   useEffect(() => {
     const loadGroomers = async () => {
       try {
-        // Obtener groomers desde el servicio de agenda
-        const response = await fetch('/api/admin/agenda/disponibilidad');
-        const data = (await response.json()) as {
+        const response = await api.get<{
           success: boolean;
           data: { groomers: Groomer[] };
-        };
+        }>('/admin/agenda/disponibilidad');
+        const data = response.data;
         if (data.success) {
           setGroomers(data.data.groomers.map((g) => ({ id: g.id, nombre: g.nombre })));
         }

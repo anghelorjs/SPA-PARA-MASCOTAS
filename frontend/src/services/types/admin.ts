@@ -800,3 +800,106 @@ export interface GaleriaMascotaResponse {
     despues: FotoAdmin[];
   };
 }
+
+// ==================== NOTIFICACIONES ADMIN ====================
+
+export type TipoNotificacionAdmin = 'confirmacion' | 'recordatorio' | 'listo_para_recoger' | 'encuesta' | 'cancelacion' | 'reprogramacion';
+export type CanalNotificacionAdmin = 'whatsapp' | 'telegram' | 'email' | 'sms';
+
+export interface NotificacionAdmin {
+  id: number;
+  cliente: string;
+  cliente_id: number;
+  tipo: TipoNotificacionAdmin;
+  canal: CanalNotificacionAdmin;
+  mensaje: string;
+  fecha_envio: string | null;
+  fecha_creacion: string;
+  entregada: boolean;
+  cita_id: number | null;
+}
+
+export interface TipoNotificacionOption {
+  id: TipoNotificacionAdmin;
+  nombre: string;
+}
+
+export interface CanalNotificacionOption {
+  id: CanalNotificacionAdmin;
+  nombre: string;
+}
+
+export interface NotificacionesResponse {
+  notificaciones: {
+    current_page: number;
+    data: NotificacionAdmin[];
+    first_page_url: string;
+    from: number;
+    last_page: number;
+    last_page_url: string;
+    next_page_url: string | null;
+    path: string;
+    per_page: number;
+    prev_page_url: string | null;
+    to: number;
+    total: number;
+  };
+  tipos: TipoNotificacionOption[];
+  canales: CanalNotificacionOption[];
+}
+
+export interface DetalleNotificacionResponse {
+  idNotificacion: number;
+  idCliente: number;
+  idCita: number | null;
+  tipo: TipoNotificacionAdmin;
+  canal: CanalNotificacionAdmin;
+  mensaje: string;
+  fechaEnvio: string | null;
+  entregada: boolean;
+  created_at: string;
+  cliente: {
+    idCliente: number;
+    user: {
+      nombre: string;
+      apellido: string;
+      email: string;
+      telefono: string | null;
+    };
+  };
+  cita: {
+    idCita: number;
+    mascota: {
+      nombre: string;
+    };
+    servicio: {
+      nombre: string;
+    };
+    fechaHoraInicio: string;
+  } | null;
+}
+
+export interface ClienteNotificacionOption {
+  id: number;
+  nombre: string;
+  email: string;
+  canal_contacto: CanalNotificacionAdmin | null;
+}
+
+export interface CitaNotificacionOption {
+  id: number;
+  info: string;
+  fecha: string;
+}
+
+export interface EnviarNotificacionData {
+  idCliente: number;
+  idCita?: number | null;
+  tipo: TipoNotificacionAdmin;
+  canal: CanalNotificacionAdmin;
+  mensaje_personalizado?: string;
+}
+
+export interface VistaPreviaResponse {
+  vista_previa: string;
+}

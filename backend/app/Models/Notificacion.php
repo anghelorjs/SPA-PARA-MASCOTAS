@@ -20,12 +20,15 @@ class Notificacion extends Model
         'canal',
         'mensaje',
         'fechaEnvio',
-        'entregada'
+        'entregada',
+        'leida',
+        'errorEnvio'
     ];
 
     protected $casts = [
         'fechaEnvio' => 'datetime',
-        'entregada' => 'boolean'
+        'entregada' => 'boolean',
+        'leida' => 'boolean'
     ];
 
     // Tipos válidos de notificaciones
@@ -62,6 +65,13 @@ class Notificacion extends Model
     public function marcarComoEntregada()
     {
         $this->entregada = true;
+        $this->errorEnvio = null;
+        $this->save();
+    }
+
+    public function marcarComoLeida()
+    {
+        $this->leida = true;
         $this->save();
     }
 }
